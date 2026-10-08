@@ -1,0 +1,182 @@
+<div class="min-h-screen bg-zinc-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto mb-6">
+    <h1 class="text-2xl font-bold text-zinc-900">WhatsApp Inbox</h1>
+    <p class="text-sm text-zinc-500">Every number that has messaged Neo, and the full transcript</p>
+  </div>
+
+  @if (stats) {
+    <div class="max-w-7xl mx-auto mb-5 flex flex-wrap gap-6 text-sm text-zinc-500">
+      <span><strong class="text-zinc-900">{{ stats.contacts }}</strong> contacts</span>
+      <span><strong class="text-zinc-900">{{ stats.new_7d }}</strong> new (7d)</span>
+      <span><strong class="text-zinc-900">{{ stats.msgs_in }}</strong> received</span>
+      <span><strong class="text-zinc-900">{{ stats.msgs_out }}</strong> sent</span>
+      <span><strong class="text-zinc-900">{{ stats.opted_out }}</strong> opted out</span>
+      <span><strong class="text-zinc-900">{{ stats.unread || 0 }}</strong> unread</span>
+    </div>
+  }
+
+  <div class="max-w-7xl mx-auto grid gap-4 lg:grid-cols-[340px_1fr] h-[calc(100vh-220px)] min-h-[460px]">
+    <!-- ── contact list ─────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-zinc-200 shadow-sm p-3 flex flex-col overflow-hidden">
+      <div class="flex gap-2 mb-3">
+        <input class="flex-1 px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500"
+               placeholder="Search name or number" [(ngModel)]="search" (ngModelChange)="onSearchChange()" />
+        <select class="w-28 px-2 py-2 border border-zinc-200 rounded-xl text-sm bg-white outline-none focus:ring-2 focus:ring-orange-500"
+                [(ngModel)]="optedOut" (change)="page=1;loadContacts()">
+          <option value="">All</option>
+          <option value="false">Active</option>
+          <option value="true">Opted out</option>
+        </select>
+      </div>
+
+      <div class="flex-1 overflow-y-auto -mx-1 px-1">
+        <label class="block text-xs text-zinc-500 mb-2">Inbox filter
+          <select class="w-full px-2 py-2 border border-zinc-200 rounded-xl bg-white" [(ngModel)]="inboxFilter" (change)="page=1;loadContacts()">
+            <option value="">All</option><option value="HUMAN">Human</option><option value="BOT">Bot</option>
+            <option value="unread">Unread</option><option value="leads">Leads</option><option value="opted_out">Opted Out</option>
+          </select>
+        </label>
+        @if (loadingContacts) {
+          <div class="p-8 text-center text-zinc-400 text-sm">Loading…</div>
+        } @else if (!contacts.length) {
+          <div class="p-8 text-center text-zinc-400 text-sm">No conversations yet.</div>
+        } @else {
+          @for (c of contacts; track c.phone) {
+            <button type="button" (click)="openContact(c)"
+                    class="block w-full text-left px-3 py-2.5 rounded-xl transition mb-0.5"
+                    [ngClass]="selected?.phone === c.phone ? 'bg-emerald-50 ring-1 ring-emerald-200' : 'hover:bg-zinc-50'">
+              <div class="font-semibold text-zinc-900 text-sm flex items-center gap-2">
+                <span class="truncate">{{ c.profile_name || c.phone }}</span>
+                <span class="text-[10px]">{{ c.conversation_mode || 'BOT' }}</span>
+                @if (c.unread) { <span class="text-xs font-bold text-orange-600">Unread</span> }
+                @if (c.opted_out) { <span class="text-[10px] px-1.5 py-0.5 rounded bg-red-100 text-red-700">opted out</span> }
+                @if (c.lead_id) { <span class="text-[10px] px-1.5 py-0.5 rounded bg-emerald-100 text-emerald-700">lead</span> }
+              </div>
+              <div class="text-[11px] text-zinc-500 mt-0.5">{{ c.phone }} · {{ c.message_count }} msg · {{ c.last_seen | date:'dd MMM HH:mm' }}</div>
+              @if (c.last_message) { <div class="text-xs text-zinc-500 mt-1 truncate">{{ c.last_message }}</div> }
+              @if (c.assigned_agent_name) { <div class="text-xs text-zinc-500">Agent: {{ c.assigned_agent_name }}</div> }
+            </button>
+          }
+
+          <div class="flex items-center justify-between mt-3 text-xs text-zinc-500">
+            <button class="px-3 py-1.5 rounded-lg border border-zinc-200 disabled:opacity-40"
+                    [disabled]="page<=1" (click)="gotoPage(page-1)">Prev</button>
+            <span>{{ pagination.page }} / {{ pagination.pages }}</span>
+            <button class="px-3 py-1.5 rounded-lg border border-zinc-200 disabled:opacity-40"
+                    [disabled]="page>=pagination.pages" (click)="gotoPage(page+1)">Next</button>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ── transcript ──────────────────────────────── -->
+    <div class="bg-white rounded-2xl border border-zinc-200 shadow-sm flex flex-col overflow-hidden">
+      @if (!selected) {
+        <div class="flex-1 flex items-center justify-center text-zinc-400 text-sm">Pick a conversation on the left.</div>
+      } @else {
+        <div class="flex items-center gap-2 px-4 py-3 border-b border-zinc-200 flex-wrap">
+          <div class="flex-1 min-w-0">
+            <div class="font-semibold text-zinc-900">{{ selected.profile_name || selected.phone }}</div>
+            <div class="text-[11px] text-zinc-500">
+              {{ selected.phone }}
+              @if (selected.last_intent) { · intent: {{ selected.last_intent }} }
+              @if (selected.last_state) { · state: {{ selected.last_state }} }
+            </div>
+          </div>
+          @if (selected.lead_id) {
+            <a class="px-3 py-1.5 rounded-lg border border-zinc-200 text-xs hover:bg-zinc-50"
+               [routerLink]="['/crm/leads']" [queryParams]="{ id: selected.lead_id }">View lead</a>
+          }
+          <button class="px-3 py-1.5 rounded-lg border border-zinc-200 text-xs hover:bg-zinc-50" (click)="exportConv('csv')">CSV</button>
+          <button class="px-3 py-1.5 rounded-lg border border-zinc-200 text-xs hover:bg-zinc-50" (click)="exportConv('json')">JSON</button>
+          <button class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs" (click)="askDelete(selected)">Delete</button>
+        </div>
+
+        <div class="px-4 py-2 border-b border-zinc-200 text-xs flex flex-wrap gap-3 items-center">
+          <strong>{{ selected.conversation_mode === 'HUMAN' ? 'Human Mode' : 'Bot Mode' }}</strong>
+          @if (selected.assigned_agent_name) { <span>Agent: {{ selected.assigned_agent_name }}</span> }
+          @if (selected.unread) { <span>Unread</span> }
+          @if (selected.opted_out) { <span class="text-red-700">Opted out</span> }
+          <span [class.text-emerald-700]="selected.window_active" [class.text-orange-700]="!selected.window_active">
+            {{ selected.window_active ? 'Customer-service window active' : 'Customer-service window expired — template may be required' }}
+          </span>
+          <button class="px-3 py-1.5 rounded-lg border border-zinc-200 disabled:opacity-40" [disabled]="actionBusy || loadingConv"
+                  (click)="control(selected.conversation_mode === 'HUMAN' ? 'release' : 'takeover')">
+            {{ selected.conversation_mode === 'HUMAN' ? 'Return to Bot' : 'Take Over' }}
+          </button>
+          <button class="px-3 py-1.5 rounded-lg border border-zinc-200" [disabled]="loadingConv || actionBusy" (click)="loadConversation(false,true);loadContacts()">Refresh</button>
+        </div>
+        <div class="flex-1 overflow-y-auto p-4 flex flex-col gap-1.5">
+          @if (hasMore) {
+            <button class="self-center mb-2 px-3 py-1.5 rounded-lg border border-zinc-200 text-xs hover:bg-zinc-50 disabled:opacity-40"
+                    [disabled]="loadingConv" (click)="loadConversation(true)">
+              {{ loadingConv ? 'Loading…' : 'Load earlier' }}
+            </button>
+          }
+          @for (m of messages; track m.id; let i = $index) {
+            @if (isNewDay(i)) {
+              <div class="self-center text-[11px] text-zinc-500 bg-zinc-100 px-2.5 py-0.5 rounded-full my-2">
+                {{ m.created_at | date:'EEEE, dd MMM yyyy' }}
+              </div>
+            }
+            <div class="max-w-[78%] px-3 py-2 rounded-xl text-sm leading-snug whitespace-pre-wrap break-words"
+                 [ngClass]="m.error
+                   ? 'self-end bg-red-100 text-red-800 rounded-br-sm'
+                   : (m.direction === 'in'
+                       ? 'self-start bg-zinc-100 text-zinc-800 rounded-bl-sm'
+                       : 'self-end bg-emerald-500 text-emerald-950 rounded-br-sm')">
+              <div class="text-[11px] font-semibold mb-1">{{ m.direction === 'in' ? (m.profile_name || 'Customer') : (m.sender_type === 'agent' ? (m.agent_name || 'Agent') + ' · Agent' : 'Neo') }}</div>
+              {{ m.body }}
+              <div class="text-[10px] opacity-60 mt-1 text-right">
+                {{ m.msg_type }} · {{ m.created_at | date:'HH:mm' }}@if (m.error) { · failed }
+              </div>
+            </div>
+          }
+          @if (loadingConv && !messages.length) {
+            <div class="flex-1 flex items-center justify-center text-zinc-400 text-sm">Loading…</div>
+          }
+          @if (!loadingConv && !messages.length) {
+            <div class="flex-1 flex items-center justify-center text-zinc-400 text-sm">No messages.</div>
+          }
+        </div>
+        <div class="p-3 border-t border-zinc-200">
+          @if (actionError) { <p role="alert" class="text-sm text-red-700 mb-2">{{ actionError }}</p> }
+          @if (sendBlockedReason) { <p class="text-xs text-zinc-500 mb-2">{{ sendBlockedReason }}</p> }
+          <label class="sr-only" for="agent-message">Agent message</label>
+          <textarea id="agent-message" class="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm disabled:opacity-50"
+                    rows="2" maxlength="4096" placeholder="Type your message…" [(ngModel)]="draft" [disabled]="!!sendBlockedReason || actionBusy"></textarea>
+          <button class="mt-2 px-4 py-2 rounded-lg bg-emerald-600 text-white text-sm disabled:opacity-40"
+                  [disabled]="!!sendBlockedReason || actionBusy || !draft.trim() || loadingConv" (click)="control('messages')">
+            {{ actionBusy ? 'Working…' : 'Send' }}
+          </button>
+        </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- ── delete confirm ─────────────────────────────── -->
+@if (deleteFor) {
+  <div class="fixed inset-0 bg-black/40 flex items-center justify-center z-[60]" (click)="deleteFor = null">
+    <div class="bg-white rounded-2xl p-6 w-[min(440px,92vw)]" (click)="$event.stopPropagation()">
+      <h3 class="text-lg font-bold text-zinc-900 mb-1">Delete conversation</h3>
+      <p class="text-sm text-zinc-500 mb-4">
+        Permanently removes all messages for <strong>{{ deleteFor.profile_name || deleteFor.phone }}</strong>
+        ({{ deleteFor.phone }}). This is logged in the audit trail.
+      </p>
+      <label class="block text-xs font-semibold text-zinc-600 mb-1">Reason</label>
+      <input class="w-full px-3 py-2 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 mb-3"
+             [(ngModel)]="deleteReason" placeholder="e.g. data-subject deletion request" />
+      <label class="flex gap-2 items-center text-sm text-zinc-500 mb-4">
+        <input type="checkbox" [(ngModel)]="deleteAlsoContact" /> also remove the contact record
+      </label>
+      <div class="flex gap-2 justify-end">
+        <button class="px-3 py-1.5 rounded-lg border border-zinc-200 text-sm" (click)="deleteFor = null">Cancel</button>
+        <button class="px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-sm disabled:opacity-40"
+                [disabled]="deleting || !deleteReason" (click)="confirmDelete()">
+          {{ deleting ? 'Deleting…' : 'Delete' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

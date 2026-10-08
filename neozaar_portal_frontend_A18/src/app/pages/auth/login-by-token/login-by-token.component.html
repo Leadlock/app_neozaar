@@ -1,0 +1,17 @@
+<section class="flex justify-center items-center h-screen w-screen">
+
+    @if (isReqSend && !isFaled) {
+        <div class="flex flex-col gap-3 items-center">
+            <span class="loading loading-dots loading-md"></span>
+            <p class="font-semibold text-sm">Please wait</p>
+        </div>
+    }@else {   
+        <div class="flex flex-col gap-3 items-center">
+            <p>Failed To Login</p>
+            <p class="text-red-500 text-sm font-semibold">{{message}}</p>
+            <button class="btn btn-ghost " (click)="goToLogin()">Login again</button>
+        </div>
+    }
+
+
+</section>

@@ -1,0 +1,65 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="NoctuleWorkspaceSettings">
+    <fileSettings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/ios/App/CapApp-SPM/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/ios/App/CapApp-SPM/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/app/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/app/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/browser/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/browser/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/haptics/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/haptics/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/keyboard/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/keyboard/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/local-notifications/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/local-notifications/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/network/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/network/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/push-notifications/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/push-notifications/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/share/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/share/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/splash-screen/Package.swift">
+        <projectSettings projectType="noctule.spm">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capacitor/splash-screen/Package.swift</filePath>
+        </projectSettings>
+      </settings>
+      <settings filePath="$PROJECT_DIR$/Neozaareact/node_modules/@capgo/capacitor-native-biometric/ios/Plugin.xcworkspace/contents.xcworkspacedata">
+        <projectSettings projectType="noctule.xcode">
+          <filePath>$PROJECT_DIR$/Neozaareact/node_modules/@capgo/capacitor-native-biometric/ios/Plugin.xcworkspace/contents.xcworkspacedata</filePath>
+        </projectSettings>
+      </settings>
+    </fileSettings>
+  </component>
+  <component name="SwiftToolchain">
+    <option name="toolchain" value="xcode-/Applications/Xcode.app/Contents/Developer/Toolchains/XcodeDefault.xctoolchain/usr/bin/swift" />
+  </component>
+</project>

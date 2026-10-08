@@ -1,0 +1,169 @@
+<div>
+  <h1 class="text-2xl font-semibold">Leads Detail</h1>
+</div>
+
+<div class="bg-white p-4 lg:p-8 rounded-lg mt-5">
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+    <!-- LEFT PRODUCT CARD -->
+    <div class="flex items-center justify-center p-5 border-dashed md:border-r-2 border-gray-500">
+      <div class="w-full max-w-sm text-center">
+
+        <div class="w-[120px] h-[120px] m-auto">
+          <img
+            [src]="leaddata?.action_detail?.product_logo"
+            class="w-full h-full object-contain"
+            alt="logo"
+          >
+        </div>
+
+        <h2 class="font-semibold text-xl mt-2">
+          {{ leaddata?.action_detail?.name }}
+        </h2>
+
+     <p class="text-gray-500"
+   [innerHTML]="leaddata?.action_detail?.short_description">
+</p>
+@if (leaddata?.action_type === 'product') {
+
+  <a [routerLink]="['/products/view', leaddata?.action_detail?.id]"
+     class="block mt-2 underline text-blue-400">
+     View Products
+  </a>
+
+}
+@else if (leaddata?.action_type === 'service') {
+
+  <a [routerLink]="['/service/view/', leaddata?.action_detail?.id]"
+     class="block mt-2 underline text-blue-400">
+     View Services
+  </a>
+
+}
+@else {
+
+  <a [routerLink]="['/solution/view/', leaddata?.action_detail?.id]"
+     class="block mt-2 underline text-blue-400">
+     View Solution
+  </a>
+
+}
+
+      </div>
+    </div>
+
+    <!-- USER INFO -->
+    <div class="pl-0 md:pl-5">
+      <h3 class="underline text-base capitalize">User Information</h3>
+
+      <h4 class="capitalize font-semibold mt-3">
+        {{ leaddata?.user?.name || leaddata?.contact_name || 'N/A' }}
+      </h4>
+
+      <div class="mt-2 flex flex-col sm:flex-row gap-3">
+        <div class="flex items-center gap-2 border-r sm:border-r-2 pr-2">
+          <i class="ri-mail-line text-lg"></i>
+          <span>{{ leaddata?.user?.email || leaddata?.contact_email || 'N/A' }}</span>
+        </div>
+
+        @if (!leaddata?.user?.email && leaddata?.contact_phone) {
+          <div class="flex items-center gap-2 border-r sm:border-r-2 pr-2">
+            <i class="ri-phone-line text-lg"></i>
+            <span>{{ leaddata?.contact_phone }}</span>
+          </div>
+        }
+
+        <div>
+          <p class="text-gray-600 font-bold">Current Status</p>
+          <span class="capitalize">{{ leaddata?.status }}</span>
+        </div>
+      </div>
+
+      <div class="py-5 grid grid-cols-2 gap-4">
+        <div>
+          <h5 class="text-sm font-semibold text-gray-500">Action Type</h5>
+          <p class="capitalize">{{ leaddata?.action_type }}</p>
+        </div>
+
+        <div>
+          <h5 class="text-sm font-semibold text-gray-500">Lead Type</h5>
+          <p class="capitalize">{{ leaddata?.type }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- DIVIDER -->
+    <div class="col-span-1 md:col-span-2 border-t border-dashed border-gray-400 my-3"></div>
+
+    <!-- STATUS FORM -->
+    <div class="flex justify-center p-5 border-dashed md:border-r-2 border-gray-500">
+      <form [formGroup]="statusForm" (ngSubmit)="updateStatus()" class="w-full max-w-sm">
+
+        <span class="font-semibold text-sm underline">Update Status</span>
+
+        <select formControlName="status"
+                class="select select-bordered w-full mt-3 capitalize">
+          <option value="" disabled>Select Status</option>
+          <option value="contacted">contacted</option>
+          <option value="qualified">qualified</option>
+          <option value="in_progress">in_progress</option>
+          <option value="proposal_sent">proposal_sent</option>
+          <option value="negotiation">negotiation</option>
+          <option value="won">won</option>
+          <option value="lost">lost</option>
+          <option value="cancelled">cancelled</option>
+          <option value="expired">expired</option>
+        </select>
+
+        <textarea
+          formControlName="remark"
+          class="textarea textarea-bordered mt-2 w-full"
+          rows="4"
+          placeholder="Remark">
+        </textarea>
+
+        <button type="submit"
+                class="btn bg-orange-600 text-white w-full mt-4"
+                [disabled]="isReqSend || statusForm.invalid">
+
+          @if (isReqSend) {
+            <span class="loading loading-spinner loading-sm"></span>
+          } @else {
+            <span>Submit</span>
+          }
+
+        </button>
+      </form>
+    </div>
+
+    <!-- COMMENTS -->
+    <div class="p-4">
+      <span class="font-semibold text-sm underline">Updated Notes</span>
+
+      <div class="h-80 overflow-y-auto mt-3">
+        <ul class="grid gap-3">
+          @for (comment of leaddata?.comments; track comment.id) {
+            <li class="border rounded-lg px-3 py-2 text-sm">
+
+              <div class="flex justify-between">
+                <span>Status</span>
+                <span class="font-bold capitalize">{{ comment.status }}</span>
+              </div>
+
+              <div class="flex justify-between mt-1">
+                <span>Remark</span>
+                <span class="text-xs">
+                  {{ comment.created_at | date:'dd MMM yyyy | HH:mm' }}
+                </span>
+              </div>
+
+              <p class="mt-2">{{ comment.comments }}</p>
+
+            </li>
+          }
+        </ul>
+      </div>
+    </div>
+
+  </div>
+</div>

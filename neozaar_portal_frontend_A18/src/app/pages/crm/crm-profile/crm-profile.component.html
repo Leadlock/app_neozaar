@@ -1,0 +1,103 @@
+<div class="crm-profile-wrap">
+
+  @if (loading) {
+    <div class="crm-profile-loading">
+      <div class="crm-spinner"></div>
+      <p>Loading profile...</p>
+    </div>
+  }
+
+  @if (!loading && user) {
+    <div class="crm-profile-card">
+
+      <!-- Avatar Header -->
+      <div class="crm-profile-header">
+        <div class="crm-avatar">
+          {{ (user.name || 'U').slice(0, 2).toUpperCase() }}
+        </div>
+        <div class="crm-profile-header-info">
+          <h2 class="crm-profile-name">{{ user.name || '—' }}</h2>
+          <div class="crm-profile-badges">
+            <span class="crm-badge crm-badge-role">{{ roleName }}</span>
+            <span class="crm-badge" [class.crm-badge-active]="user.is_active" [class.crm-badge-pending]="!user.is_active">
+              {{ user.is_active ? 'Active' : 'Pending' }}
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- View Mode -->
+      @if (!editing) {
+        <div class="crm-profile-body">
+          <div class="crm-profile-grid">
+            <div class="crm-field">
+              <span class="crm-field-label">Full Name</span>
+              <span class="crm-field-value">{{ user.name || '—' }}</span>
+            </div>
+            <div class="crm-field">
+              <span class="crm-field-label">Email</span>
+              <span class="crm-field-value crm-field-email">{{ user.email || '—' }}</span>
+            </div>
+            <div class="crm-field">
+              <span class="crm-field-label">Mobile</span>
+              <span class="crm-field-value">{{ user.mobile || '—' }}</span>
+            </div>
+            <div class="crm-field">
+              <span class="crm-field-label">Designation</span>
+              <span class="crm-field-value">{{ user.designation || '—' }}</span>
+            </div>
+            <div class="crm-field">
+              <span class="crm-field-label">Role</span>
+              <span class="crm-field-value">{{ roleName }}</span>
+            </div>
+            <div class="crm-field">
+              <span class="crm-field-label">Member Since</span>
+              <span class="crm-field-value">{{ user.created_at | date:'dd MMM yyyy' }}</span>
+            </div>
+          </div>
+
+          <div class="crm-profile-actions">
+            <button (click)="startEditing()" class="crm-btn-primary">Edit Profile</button>
+          </div>
+        </div>
+      }
+
+      <!-- Edit Mode -->
+      @if (editing) {
+        <div class="crm-profile-body">
+          <div class="crm-profile-grid">
+            <div class="crm-field">
+              <label class="crm-field-label">Full Name</label>
+              <input type="text" [(ngModel)]="editForm.name" class="crm-input" />
+            </div>
+            <div class="crm-field">
+              <label class="crm-field-label">Email</label>
+              <input type="email" [value]="user.email" disabled class="crm-input crm-input-disabled" />
+            </div>
+            <div class="crm-field">
+              <label class="crm-field-label">Mobile</label>
+              <input type="text" [(ngModel)]="editForm.mobile" class="crm-input" />
+            </div>
+            <div class="crm-field">
+              <label class="crm-field-label">Designation</label>
+              <input type="text" [(ngModel)]="editForm.designation" class="crm-input" />
+            </div>
+          </div>
+
+          <div class="crm-profile-actions">
+            <button (click)="saveProfile()" class="crm-btn-primary">Save Changes</button>
+            <button (click)="cancelEditing()" class="crm-btn-secondary">Cancel</button>
+          </div>
+        </div>
+      }
+
+    </div>
+  }
+
+  @if (!loading && !user) {
+    <div class="crm-profile-loading">
+      <p>Could not load profile.</p>
+    </div>
+  }
+
+</div>

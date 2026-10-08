@@ -1,0 +1,8 @@
+.group:hover button {
+  opacity: 1;
+}
+
+button {
+  transition: opacity 0.2s ease;
+  opacity: 0;
+}

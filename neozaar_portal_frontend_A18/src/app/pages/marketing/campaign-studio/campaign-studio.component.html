@@ -1,0 +1,150 @@
+<div class="studio-shell">
+  @if (!editing) {
+    <header class="page-head">
+      <div><p class="eyebrow">MARKETING</p><h1>Campaign Studio</h1><p>Create flexible email campaigns with text, images, buttons, layout blocks, or your own HTML.</p></div>
+      <button class="primary" (click)="newCampaign()"><i class="ri-add-line"></i> Create campaign</button>
+    </header>
+    <section class="campaign-list">
+      @if (isLoading) { <div class="empty">Loading campaigns…</div> }
+      @else if (!campaigns.length) { <div class="empty"><i class="ri-layout-4-line"></i><h2>No Studio campaigns yet</h2><p>Start with the visual builder or paste a complete HTML email.</p><button class="primary" (click)="newCampaign()">Create your first campaign</button></div> }
+      @else {
+        <div class="list-head"><span>Campaign</span><span>Editor</span><span>Status</span><span>Updated</span><span></span></div>
+        @for (campaign of campaigns; track campaign.id) {
+          <div class="list-row">
+            <div><strong>{{campaign.title}}</strong><small>{{campaign.subject || 'No subject'}}</small></div>
+            <span class="muted">{{campaign.email_template_id ? templateName(campaign.email_template_id) : (campaign.html_content ? 'Campaign HTML' : 'Campaign visual content')}}</span>
+            <span><b class="status" [class.pushed]="campaign.status === 'pushed'">{{campaign.status || 'draft'}}</b></span>
+            <span class="muted">{{campaign.updated_at | date:'MMM d, y, h:mm a'}}</span>
+            <div class="row-actions"><button (click)="edit(campaign)" title="Edit"><i class="ri-pencil-line"></i></button><button class="danger" (click)="delete(campaign)" title="Delete"><i class="ri-delete-bin-line"></i></button></div>
+          </div>
+        }
+      }
+    </section>
+  } @else {
+    <header class="editor-head">
+      <button class="back" (click)="back()"><i class="ri-arrow-left-line"></i></button>
+      <div><p class="eyebrow">CAMPAIGN STUDIO</p><h1>{{campaignId ? 'Edit campaign' : 'New campaign'}}</h1></div>
+      <div class="top-actions"><button class="secondary" (click)="openPreviewModal()" [disabled]="isPreviewing"><i class="ri-eye-line"></i> {{isPreviewing ? 'Rendering…' : 'Preview'}}</button><button class="secondary" (click)="openTestEmailModal()" [disabled]="isSendingTestEmail"><i class="ri-mail-send-line"></i> {{isSendingTestEmail ? 'Sending…' : 'Send test email'}}</button><button class="primary" (click)="save()" [disabled]="isSaving"><i class="ri-save-line"></i> {{isSaving ? 'Saving…' : 'Save campaign'}}</button></div>
+    </header>
+
+    <div class="editor-grid">
+      <aside class="settings">
+        <h2>Campaign details</h2>
+        <label>Campaign name<input [(ngModel)]="title" placeholder="October product update"></label>
+        <label>Email subject<input [(ngModel)]="subject" placeholder="A subject people will open"></label>
+        <label>Preheader<textarea [(ngModel)]="preheader" rows="2" placeholder="Short inbox preview text"></textarea></label>
+        <h2>Audience</h2>
+        @if (!audienceOpen) {
+          <button class="audience-add" (click)="openAudience()"><i class="ri-group-line"></i><span><b>Add audience / segment</b><small>Choose who this campaign is for</small></span><i class="ri-add-line"></i></button>
+        } @else {
+          <div class="audience-panel">
+            <label>Audience segment
+              <select [(ngModel)]="selectedSegmentId">
+                <option [ngValue]="null" disabled>Select a segment…</option>
+                @for (segment of segments; track segment.id) { <option [ngValue]="segment.id">{{segment.name}} ({{segment.member_count || 0}} contacts)</option> }
+              </select>
+            </label>
+            @if (selectedSegment) { <div class="audience-meta"><i class="ri-user-line"></i><span><b>{{selectedSegment.member_count || 0}}</b> current members</span></div> }
+            @if (!segments.length) { <p class="audience-empty">No segments are available. Create and refresh a segment under Marketing → Segments first.</p> }
+            <button class="audience-remove" (click)="removeAudience()"><i class="ri-close-line"></i> Remove audience</button>
+          </div>
+        }
+        <h2>Content</h2>
+        <div class="source-choice">
+          <button [class.active]="contentSource === 'template'" [disabled]="!templates.length" (click)="setContentSource('template')"><i class="ri-layout-2-line"></i><span><b>Select existing template</b><small>Reuse approved content</small></span></button>
+          <button [class.active]="contentSource === 'custom'" (click)="setContentSource('custom')"><i class="ri-edit-box-line"></i><span><b>Campaign-specific content</b><small>Create only when required</small></span></button>
+        </div>
+        @if (contentSource === 'template') {
+          <label class="template-select">Existing template
+            <select [(ngModel)]="selectedTemplateId" (ngModelChange)="applySelectedTemplate()">
+              <option [ngValue]="null" disabled>Select a published template…</option>
+              @for (template of templates; track template.id) { <option [ngValue]="template.id">{{template.name}} · v{{template.current_version}}</option> }
+            </select>
+          </label>
+          <button class="ai-recommend" (click)="recommendTemplates()" [disabled]="isRecommendingTemplates || !templates.length"><i [class]="isRecommendingTemplates ? 'ri-loader-4-line spin' : 'ri-sparkling-2-line'"></i><span><b>{{isRecommendingTemplates ? 'Finding the best matches…' : 'Recommend with AI'}}</b><small>Match approved templates to this campaign</small></span></button>
+          @if (templateRecommendations.length) {
+            <div class="ai-results">
+              <div class="ai-results-title"><span><i class="ri-sparkling-2-line"></i> AI recommendations</span><small>Review before use</small></div>
+              @for (recommendation of templateRecommendations; track recommendation.templateId; let rank = $index) {
+                @if (recommendationTemplate(recommendation); as template) {
+                  <button class="ai-result" [class.selected]="selectedTemplateId === recommendation.templateId" (click)="useRecommendedTemplate(recommendation)">
+                    <span class="ai-rank">{{rank + 1}}</span>
+                    <span class="ai-result-copy"><b>{{template.name}}</b><small>{{recommendation.reason}}</small><em>{{recommendationConfidence(recommendation)}}% match</em></span>
+                    <i [class]="selectedTemplateId === recommendation.templateId ? 'ri-checkbox-circle-fill' : 'ri-arrow-right-s-line'"></i>
+                  </button>
+                }
+              }
+              <p class="ai-disclaimer"><i class="ri-information-line"></i> AI suggestions may be inaccurate. Confirm the template and preview before sending.</p>
+            </div>
+          }
+          @if (!templates.length) { <div class="code-note"><i class="ri-information-line"></i> No published templates are available. Publish one under Marketing Emails, or use campaign-specific content.</div> }
+        } @else {
+          <h2>Editor</h2>
+          <div class="mode"><button [class.active]="editorMode === 'visual'" (click)="setEditorMode('visual')"><i class="ri-layout-grid-line"></i> Visual</button><button [class.active]="editorMode === 'html'" (click)="setEditorMode('html')"><i class="ri-code-s-slash-line"></i> Full HTML</button></div>
+          @if (editorMode === 'visual') {
+            <p class="hint">Add content</p>
+            <div class="palette">@for (choice of blockChoices; track choice[0]) { <button (click)="addBlock(choice[0])"><i [class]="choice[1]"></i><span>{{choice[2]}}</span></button> }</div>
+          } @else { <div class="code-note"><i class="ri-information-line"></i> Scripts, forms, iframes, and unsafe attributes are removed for email safety.</div> }
+        }
+      </aside>
+
+      <main class="canvas">
+        @if (contentSource === 'template') {
+          @if (selectedTemplate) {
+            <div class="template-summary"><i class="ri-checkbox-circle-line"></i><div><b>{{selectedTemplate.name}}</b><span>Published template · v{{selectedTemplate.current_version}}</span><p>The campaign uses this template directly. Switch to campaign-specific content only when this campaign needs a unique layout or message.</p></div></div>
+          } @else {
+            <div class="canvas-empty"><i class="ri-layout-2-line"></i><h2>Select an existing template</h2><p>Choose a published template from the left to reuse approved content.</p></div>
+          }
+        } @else if (editorMode === 'html') {
+          <div class="code-editor"><div class="code-bar"><span>HTML EMAIL SOURCE</span><span>{{htmlContent.length}} characters</span></div><textarea [(ngModel)]="htmlContent" (ngModelChange)="updateLivePreview()" spellcheck="false" placeholder="<!doctype html>&#10;<html>…</html>"></textarea></div>
+        } @else if (!blocks.length) {
+          <div class="canvas-empty"><i class="ri-drag-drop-line"></i><h2>Build your email</h2><p>Choose a content block from the left. Drag blocks to reorder them.</p></div>
+        } @else {
+          <div class="email-frame" cdkDropList (cdkDropListDropped)="drop($event)">
+            @for (block of blocks; track trackBlock($index, block); let i = $index) {
+              <article class="content-block" cdkDrag>
+                <div class="block-tools"><span cdkDragHandle><i class="ri-drag-move-2-line"></i></span><b>{{block.type}}</b><span class="grow"></span><button (click)="duplicate(i)" title="Duplicate"><i class="ri-file-copy-line"></i></button><button (click)="remove(i)" title="Remove"><i class="ri-delete-bin-line"></i></button></div>
+                @if (block.type === 'heading') { <input class="heading-input" [(ngModel)]="block.content" (ngModelChange)="updateLivePreview()"><div class="alignment"><button *ngFor="let a of ['left','center','right']" (click)="block.align=$any(a);updateLivePreview()" [class.active]="block.align===a"><i [class]="'ri-align-'+a"></i></button></div> }
+                @if (block.type === 'text') { <textarea rows="5" [(ngModel)]="block.content" (ngModelChange)="updateLivePreview()"></textarea><small>Basic HTML formatting is supported.</small> }
+                @if (block.type === 'image') { <div class="image-edit"><div class="image-preview">@if(block.url){<img [src]="block.url">}@else{<i class="ri-image-add-line"></i>}</div><div><label class="upload">{{block.uploading ? 'Uploading…' : 'Upload image'}}<input type="file" accept="image/*" (change)="upload(block,$event)"></label><input [(ngModel)]="block.link" placeholder="Click-through URL (optional)"><input [(ngModel)]="block.alt" placeholder="Alternative text"></div></div> }
+                @if (block.type === 'button') { <div class="two-col"><label>Button label<input [(ngModel)]="block.label" (ngModelChange)="updateLivePreview()"></label><label>Destination URL<input [(ngModel)]="block.url" (ngModelChange)="updateLivePreview()"></label><label>Colour<input type="color" [(ngModel)]="block.background" (ngModelChange)="updateLivePreview()"></label></div> }
+                @if (block.type === 'divider') { <hr> }
+                @if (block.type === 'spacer') { <label>Height (px)<input type="number" min="8" max="100" [(ngModel)]="block.height" (ngModelChange)="updateLivePreview()"></label><div class="spacer-preview" [style.height.px]="block.height"></div> }
+                @if (block.type === 'html') { <textarea class="mono" rows="12" [(ngModel)]="block.content" (ngModelChange)="updateLivePreview()"></textarea><small>For a complete email document, use the <b>Full HTML</b> editor on the left.</small> }
+              </article>
+            }
+          </div>
+        }
+      </main>
+
+      <aside class="preview-pane">
+        <div class="preview-title"><div><b>Live preview</b><small>{{campaignId ? 'Refresh after saving for final server output' : 'Updates while you edit'}}</small></div><button (click)="previewCampaign()"><i class="ri-refresh-line"></i></button></div>
+        @if (preview) { <iframe sandbox="allow-popups" [srcdoc]="preview"></iframe> } @else { <div class="preview-empty"><i class="ri-mail-open-line"></i><p>Add content to preview your email here.</p></div> }
+      </aside>
+    </div>
+
+    @if (isPreviewModalOpen) {
+      <div class="fixed inset-0 z-[1000] bg-slate-950/75 p-7 flex items-center justify-center" (click)="closePreviewModal()">
+        <section class="w-[min(1120px,96vw)] h-[min(900px,92vh)] bg-slate-100 rounded-2xl overflow-hidden shadow-2xl flex flex-col" (click)="$event.stopPropagation()">
+          <header class="flex items-center justify-between px-5 py-4 bg-white border-b"><div><p class="eyebrow">EMAIL PREVIEW</p><h2 class="text-lg font-bold m-0">{{subject || title || 'Untitled campaign'}}</h2></div><button class="w-10 h-10 border-0 rounded-lg bg-slate-100 text-xl" (click)="closePreviewModal()" title="Close preview"><i class="ri-close-line"></i></button></header>
+          <div class="flex-1 p-5 min-h-0"><iframe class="w-full h-full border-0 rounded-xl bg-white shadow" sandbox="allow-popups" [srcdoc]="preview"></iframe></div>
+        </section>
+      </div>
+    }
+
+    @if (isTestEmailModalOpen) {
+      <div class="fixed inset-0 z-[1000] bg-slate-950/75 p-4 flex items-center justify-center" (click)="closeTestEmailModal()">
+        <section class="w-full max-w-lg bg-white rounded-2xl overflow-hidden shadow-2xl" (click)="$event.stopPropagation()">
+          <header class="flex items-center justify-between px-5 py-4 border-b"><div><p class="eyebrow">CAMPAIGN TEST</p><h2 class="text-lg font-bold m-0">Send test email</h2></div><button class="w-10 h-10 border-0 rounded-lg bg-slate-100 text-xl" (click)="closeTestEmailModal()" [disabled]="isSendingTestEmail"><i class="ri-close-line"></i></button></header>
+          <div class="p-5 space-y-4">
+            <p class="text-sm text-slate-500 bg-amber-50 border border-amber-100 rounded-lg p-3"><i class="ri-information-line"></i> This sends the latest <b>saved</b> campaign content. Save any recent changes before testing.</p>
+            <label class="block text-sm font-medium text-slate-700">Subject <span class="text-red-500">*</span><input class="block w-full border rounded-lg p-2.5 mt-1" [(ngModel)]="testEmailSubject" placeholder="Email subject"></label>
+            <label class="block text-sm font-medium text-slate-700">Test recipients <span class="text-red-500">*</span><textarea class="block w-full border rounded-lg p-2.5 mt-1" rows="4" [(ngModel)]="testEmailRecipients" placeholder="name@company.com"></textarea></label>
+            <p class="text-xs text-slate-400">Enter one address per line or separate addresses with commas. Maximum 25 recipients.</p>
+          </div>
+          <footer class="flex justify-end gap-2 px-5 py-4 border-t bg-slate-50"><button class="secondary" (click)="closeTestEmailModal()" [disabled]="isSendingTestEmail">Cancel</button><button class="primary" (click)="sendTestEmail()" [disabled]="isSendingTestEmail || !testEmailSubject.trim() || !testEmailRecipients.trim()"><i class="ri-mail-send-line"></i> {{isSendingTestEmail ? 'Sending…' : 'Send test'}}</button></footer>
+        </section>
+      </div>
+    }
+  }
+</div>

@@ -1,0 +1,2 @@
+const fs=require('fs'),path=require('path'),pool=require('../config/database');
+(async()=>{try{for(const name of ['050_marketing_journeys_attribution.sql','051_marketing_channels_handoff.sql','052_marketing_admin.sql'])await pool.query(fs.readFileSync(path.join(__dirname,name),'utf8'));console.log('Marketing migrations 050-052 complete');}catch(e){console.error(e);process.exitCode=1;}finally{await pool.end();}})();

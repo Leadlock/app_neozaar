@@ -1,0 +1,64 @@
+
+<form [formGroup]="productForm" (ngSubmit)="submit()" class="p-2 min-h-screen max-w-8xl mx-auto">
+
+ 
+ @for (field of selectedFields; track $index) {
+
+
+<div  class="mb-6">
+  <p class="font-semibold mb-2 capitalize">{{ field.slug }}</p>
+
+  <!-- Selected Tags -->
+  <div class="flex flex-wrap gap-2 mb-2">
+    @for (tag of productForm.get('taxonomy_data')?.get(field.slug)?.value; track $index) {
+      <button type="button"
+        class="btn btn-xs font-semibold bg-orange-500 text-white hover:text-black"
+        (click)="removeTag(field.slug, tag)">
+        {{ tag }} &times;
+      </button>
+    }
+  </div>
+
+  <!-- Search Box -->
+ <!-- Search Box with + Add Button -->
+<div class="flex items-center border rounded-md px-3 py-2 w-full sm:w-80 md:w-96 bg-white mb-2">
+  <i class="ri-search-line mr-2"></i>
+  <input type="text" placeholder="Search"
+    [formControl]="searchControls[field.slug]"
+    class="w-full outline-none text-sm" />
+
+  <!-- Add (+) Button -->
+  @if (shouldShowAddButton(field.slug)) {
+    <button type="button"
+      class="ml-2 text-green-600 hover:text-green-800 font-bold text-lg"
+      (click)="addNewOption(field.slug)">
+      +
+    </button>
+  }
+</div>
+
+
+  <!-- Filtered Options -->
+  @if (filteredOptions[field.slug]) {
+    <div class="flex flex-wrap gap-2">
+      @for (opt of filteredOptions[field.slug]; track $index) {
+        <span (click)="toggleChip(field.slug, opt)" class="cursor-pointer px-2 py-1 text-sm rounded-md"
+          [class.bg-black]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+          [class.text-white]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+          [class.bg-gray-200]="!productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)">
+          {{ opt }}
+        </span>
+      }
+    </div>
+  }
+</div>
+}
+
+ <button type="submit" class="btn btn-primary " 
+   >
+    
+          
+             Submit 
+       
+          </button>
+</form>

@@ -1,0 +1,60 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">ISV Approved</h1>
+      <p class="crm-subtitle">Approved Independent Software Vendors</p>
+    </div>
+  </div>
+
+  <div class="neo-table-wrap">
+    <table class="neo-table">
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>Name</th>
+          <th>Designation</th>
+          <th>Email</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of isvlist; track $index) {
+          <tr>
+            <td style="color:var(--crm-text-secondary);font-size:0.8rem">{{ $index + 1 }}</td>
+            <td style="font-weight:600;color:var(--crm-text)">{{ i?.name }}</td>
+            <td style="color:var(--crm-text-secondary)">{{ i?.designation || '—' }}</td>
+            <td style="color:var(--crm-text-secondary);font-size:0.825rem">{{ i?.email }}</td>
+            <td>
+              <div style="display:flex;gap:0.4rem;align-items:center">
+                <a [routerLink]="['/crm/display-isv', i?.id]" class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a>
+                <button (click)="openLeadModal(i)" class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem" title="Commission">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        }
+        @if (!isvlist?.length) {
+          <tr><td colspan="5" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">No approved ISVs found</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pagination) {
+    <div class="pagination">
+      <button class="neo-btn" (click)="prevPage()" [disabled]="!pagination.prev_page" style="padding:0.5rem 1rem;font-size:0.8rem">← Prev</button>
+      @for (p of visiblePages; track p) {
+        <button (click)="goToPage(p)" class="neo-btn"
+          [style.background]="currentPage === p ? 'var(--crm-primary)' : ''"
+          [style.color]="currentPage === p ? '#fff' : ''"
+          style="padding:0.5rem 0.85rem;font-size:0.8rem;min-width:36px">
+          {{ p }}
+        </button>
+      }
+      <button class="neo-btn" (click)="nextPage()" [disabled]="!pagination.next_page" style="padding:0.5rem 1rem;font-size:0.8rem">Next →</button>
+    </div>
+  }
+</div>

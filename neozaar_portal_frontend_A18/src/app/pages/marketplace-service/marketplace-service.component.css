@@ -1,0 +1,11 @@
+:host {
+  display: block;
+}
+
+.card {
+  @apply border border-base-200;
+}
+
+select[multiple] {
+  @apply overflow-auto;
+}

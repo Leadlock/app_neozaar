@@ -1,0 +1,29 @@
+   ▲ Next.js 15.5.12
+   - Local:        http://127.0.0.1:3001
+   - Network:      http://127.0.0.1:3001
+   - Environments: .env.local, .env.development
+
+ ✓ Starting...
+> [PWA] PWA support is disabled
+> [PWA] PWA support is disabled
+ ✓ Ready in 13s
+ ○ Compiling /auth/login ...
+ ✓ Compiled /auth/login in 19s (808 modules)
+ ✓ Compiled in 2.5s (340 modules)
+ GET /auth/login?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 21627ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 639ms (792 modules)
+ POST /api/marketing/events 404 in 1299ms
+ ○ Compiling /auth/portal-handoff ...
+ ✓ Compiled /auth/portal-handoff in 864ms (794 modules)
+ GET /auth/portal-handoff?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 1590ms
+ GET /auth/login?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 526ms
+ ✓ Compiled /_not-found in 483ms (799 modules)
+ POST /api/marketing/events 404 in 925ms
+ GET /auth/portal-handoff?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 915ms
+ GET /auth/portal-handoff?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 195ms
+ GET /auth/login?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 455ms
+ POST /api/marketing/events 404 in 81ms
+ GET /auth/login?returnUrl=%2Fmarketing%2Fcampaign-studio 200 in 201ms
+ POST /api/marketing/events 404 in 187ms
+[?25h

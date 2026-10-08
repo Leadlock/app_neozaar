@@ -1,0 +1,182 @@
+<section class="p-6">
+
+  <div class="flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl font-semibold">Bundles</h1>
+    </div>
+    <div class="flex items-center gap-3">
+
+
+
+        <!-- <a type="button"> anurag</a> -->
+
+      <!-- <div class="dropdown dropdown-end"> -->
+<a routerLink="create"  class=" font-semibold text-sm" role="button" class="btn btn-sm bg-white m-1"><i class="ri-add-line"></i>Create<i class="ri-stack-line"></i></a>      <!-- </div> -->
+
+    </div>
+  </div>
+
+  <!-- serach Parameter form -->
+  <form action="">
+    <div class="flex flex-wrap justify-between items-center mt-5 gap-3">
+      <div class="flex flex-wrap items-center gap-3">
+
+        <!-- <button class="btn btn-sm btn-primary btn-square"><i class="ri-filter-3-line"></i></button> -->
+<div>
+
+  <label for="" class="text-sm block mb-1"> Cloud Platform</label>
+          <select
+    class="select select-sm select-bordered w-32 text-xs font-semibold"
+    [(ngModel)]="cloud_provider"
+    [ngModelOptions]="{standalone: true}"
+    (change)="getData()"
+  >
+    <!-- <option selected >Cloud Platformh</option> -->
+    <option *ngFor="let aws of aws" [value]="aws.name">
+      {{ aws.name}}
+    </option>
+  </select>
+</div>
+     <!-- <select
+  class="select select-sm select-bordered w-32 text-xs font-semibold"
+  [(ngModel)]="azure_services"
+  [ngModelOptions]="{standalone: true}"
+  (change)="getData()"
+>
+  <option selected >Select azure Service</option>
+  <option *ngFor="let azure of azure" [value]="azure">
+    {{ azure }}
+  </option>
+</select> -->
+     <!-- <select
+  class="select select-sm select-bordered w-32 text-xs font-semibold"
+  [(ngModel)]="category"
+  [ngModelOptions]="{standalone: true}"
+  (change)="getData()"
+>
+  <option selected >Select Category</option>
+  <option *ngFor="let cat of cat" [value]="cat.name">
+    {{ cat.name }}
+  </option>
+</select> -->
+      </div>
+
+      <label class="input input-sm input-bordered flex items-center gap-2">
+  <i class="ri-search-line"></i>
+  <input
+    type="text"
+    class="grow"
+    placeholder="Search"
+    [(ngModel)]="searchTerm"
+    [ngModelOptions]="{standalone: true}"
+    (ngModelChange)="getData()"
+  />
+</label>
+
+      </div>
+
+  </form>
+  <!-- serach Parameter form -->
+
+  <div class="p-5 bg-white rounded-lg mt-5 border max-w-screen-xl">
+
+    <div class="overflow-x-auto">
+      <table class="table table-auto w-full">
+        <!-- head -->
+        <thead>
+          <tr class="uppercase">
+            <!-- <th class="w-14"><input type="checkbox" class="checkbox checkbox-sm" /></th> -->
+            <th class="w-5"> Sr no</th>
+            <th> Name</th>
+            <th>bundle pricing model</th>
+            <th>bundle type</th>
+            <th>supported regions</th>
+           
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <!-- row 1 -->
+          @for(i of productList; track $index) {
+          <tr >
+          <td class="w-10">
+        
+            {{ ($index + 1) + (currentPage - 1) * limit }}
+          </td>
+            <td class="flex gap-2 ">
+              <img [src]="i.bundle_logo" alt="" class="w-10 h-10 rounded-sm object-cover" />
+              <p class="flex flex-col">
+                <span>{{i?.name}}</span>
+                <span>  {{ i?.description?.length > 15 ? (i.description | slice:0:15) + '...' : i.description }}
+</span>
+              </p>
+            </td>
+
+            <td class=""> {{i?.bundle_pricing_model}}</td>
+            <td class=""> {{i?.bundle_type}}</td>
+            <td class=""> {{i?.supported_regions}}</td>
+          
+            <!-- <td>{{i?.status ?? '-'}}</td>
+            <td>{{i?.active ?? 'true' }}</td> -->
+            <td>
+              <div class="flex gap-2 ">
+                <a [routerLink]="['view', i?.id]" class="btn btn-sm flex items-center btn-light"><i
+                    class="ri-eye-line"></i></a>
+                <a [routerLink]="['edit',i?.id ]" class="btn btn-sm flex items-center btn-light"><i class="ri-pencil-line"></i></a>
+                <button *ngIf="!i?.is_approved" class="btn btn-sm flex items-center btn-success text-white" (click)="approveBundle(i.id)" title="Approve Bundle"><i class="ri-checkbox-circle-line"></i></button>
+                <button class="btn btn-sm flex items-center btn-light"   (click)="deleteBundle(i.id)" ><i class="ri-delete-bin-line"></i></button>
+              </div>
+            </td>
+          </tr>
+          }
+        </tbody>
+      </table>
+      <div class="flex justify-end items-center gap-2 mt-4">
+<div class="flex items-center justify-center space-x-2 mt-4" *ngIf="pagination">
+<!-- Prev -->
+<button 
+(click)="prevPage()" 
+[disabled]="currentPage === 1"
+class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+Prev
+</button>
+
+<!-- Pages -->
+@for(i of visiblePages; track $index) {
+<button
+(click)="goToPage(i)"
+[ngClass]="{
+  'bg-blue-600 text-white border-blue-600': currentPage === i,
+  'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': currentPage !== i
+}"
+class="px-3 py-1 rounded-lg border"
+>
+{{ i }}
+</button>
+}
+
+<!-- Next -->
+<button 
+(click)="nextPage()" 
+[disabled]="currentPage === totalPages"
+class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed"
+>
+Next
+</button>
+</div>
+</div>
+  
+
+    </div>
+
+
+
+  </div>
+
+
+
+
+
+
+</section>

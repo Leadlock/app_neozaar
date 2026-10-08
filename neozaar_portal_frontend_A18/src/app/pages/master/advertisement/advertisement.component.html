@@ -1,0 +1,280 @@
+<div class="min-h-screen bg-zinc-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900">Advertisements</h1>
+      <p class="text-sm text-zinc-500">Manage banner content and featured status</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search ads..."
+               class="pl-9 pr-4 py-2.5 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-300 w-52 bg-white transition">
+      </div>
+      <button (click)="openCreate()"
+              class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg active:scale-95">
+        + New Advertisement
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 text-xs uppercase font-bold">
+          <tr>
+            <th class="px-6 py-4">Sr. No.</th>
+            <th class="px-6 py-4">Desktop Banner</th>
+            <th class="px-6 py-4">Mobile Banner</th>
+            <th class="px-6 py-4">Title</th>
+            <th class="px-6 py-4">Featured</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          <tr *ngFor="let ad of filteredAds; let i = index" class="hover:bg-zinc-50/50 transition">
+            <!-- Serial Number -->
+            <td class="px-6 py-4 text-sm font-medium text-zinc-500">
+              {{ ((paginationData.page - 1) * paginationData.limit) + i + 1 }}
+            </td>
+
+            <!-- Desktop Banner Preview — 1280×220 ratio -->
+            <td class="px-6 py-4">
+              <div class="w-48 aspect-[1280/220] rounded-lg bg-zinc-100 border overflow-hidden">
+                <img [src]="ad.image" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/192x33?text=No+Image'">
+              </div>
+            </td>
+
+            <!-- Mobile Banner Preview — 640×400 ratio -->
+            <td class="px-6 py-4">
+              <div class="w-24 aspect-[640/400] rounded-lg bg-zinc-100 border overflow-hidden">
+                <img [src]="ad.mobile_banner" class="w-full h-full object-cover" onerror="this.src='https://via.placeholder.com/96x60?text=No+Image'">
+              </div>
+            </td>
+
+            <!-- Title -->
+            <td class="px-6 py-4">
+              <div class="font-bold text-zinc-900 leading-tight">{{ ad.title }}</div>
+            </td>
+
+            <!-- Featured Toggle -->
+            <td class="px-6 py-4">
+              <label class="relative inline-flex items-center cursor-pointer">
+                <input type="checkbox" [checked]="ad.is_feature" (change)="toggleFeature(ad)" class="sr-only peer">
+                <div class="w-11 h-6 bg-zinc-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-orange-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+              </label>
+            </td>
+
+            <!-- Action Buttons -->
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button (click)="openEdit(ad)" class="p-2 text-zinc-400 hover:text-blue-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button (click)="deleteAd(ad.id)" class="p-2 text-zinc-400 hover:text-red-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="paginationData && paginationData.total_pages > 0" 
+         class="bg-zinc-50 px-6 py-4 border-t border-zinc-200 flex items-center justify-between">
+      <div class="text-sm text-zinc-500">
+        Showing page <span class="font-bold text-zinc-900">{{ paginationData.page }}</span> of 
+        <span class="font-bold text-zinc-900">{{ paginationData.total_pages }}</span> 
+        (<span class="italic">{{ paginationData.total }} total items</span>)
+      </div>
+      <div class="flex items-center gap-2">
+        <button [disabled]="!paginationData.has_prev" 
+                (click)="goToPage(paginationData.page - 1)" 
+                class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+        </button>
+        <div class="flex gap-1">
+          <button *ngFor="let p of paginationData.pages"
+                  (click)="goToPage(p)"
+                  [ngClass]="{
+                    'bg-orange-600 text-white border-orange-600 shadow-md': p === paginationData.page,
+                    'bg-white text-zinc-700 border-zinc-300 hover:border-orange-500 hover:text-orange-600': p !== paginationData.page
+                  }"
+                  class="w-9 h-9 flex items-center justify-center text-sm font-bold border rounded-lg transition-all duration-200">
+            {{ p }}
+          </button>
+        </div>
+        <button [disabled]="!paginationData.has_next" 
+                (click)="goToPage(paginationData.page + 1)" 
+                class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40 disabled:cursor-not-allowed transition">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Advertisement Form Side Drawer -->
+    <div *ngIf="showForm" class="fixed inset-0 z-50 flex justify-end">
+      <div class="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" (click)="showForm = false"></div>
+      <div class="relative w-full max-w-md bg-white h-full shadow-2xl p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
+        <div class="flex justify-between items-center mb-8">
+          <h2 class="text-xl font-bold text-zinc-800">{{ isEditMode ? 'Edit' : 'Create' }} Advertisement</h2>
+          <button (click)="showForm = false" class="text-zinc-400 hover:text-zinc-900 text-2xl">&times;</button>
+        </div>
+        <div class="space-y-6">
+
+          <!-- Desktop Banner Image upload -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold uppercase text-zinc-400">Desktop Banner Image</label>
+              <span class="text-[10px] font-mono bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-full border border-zinc-200">1280 × 220 px</span>
+            </div>
+            <label class="flex flex-col items-center justify-center w-full aspect-[1280/220] border-2 border-dashed border-zinc-200 rounded-2xl cursor-pointer bg-zinc-50 hover:bg-zinc-100 overflow-hidden relative group">
+              <img *ngIf="imagePreview" [src]="imagePreview" class="absolute inset-0 w-full h-full object-cover">
+              <div *ngIf="!imagePreview" class="text-center p-2">
+                <svg class="mx-auto w-5 h-5 text-zinc-300 mb-1 group-hover:text-orange-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
+                <p class="text-xs text-zinc-400">Click to upload desktop banner</p>
+              </div>
+              <div *ngIf="imagePreview" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg class="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p class="text-xs text-white font-medium">Click to change image</p>
+              </div>
+              <input type="file" class="hidden" (change)="onFileSelected($event)" accept="image/*">
+            </label>
+          </div>
+
+          <!-- Mobile Banner Image upload -->
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <label class="block text-xs font-bold uppercase text-zinc-400">Mobile Banner Image</label>
+              <span class="text-[10px] font-mono bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-full border border-zinc-200">640 × 400 px</span>
+            </div>
+            <label class="flex flex-col items-center justify-center w-full aspect-[640/400] border-2 border-dashed border-zinc-200 rounded-2xl cursor-pointer bg-zinc-50 hover:bg-zinc-100 overflow-hidden relative group">
+              <img *ngIf="mobileImagePreview" [src]="mobileImagePreview" class="absolute inset-0 w-full h-full object-cover">
+              <div *ngIf="!mobileImagePreview" class="text-center p-4">
+                <svg class="mx-auto w-8 h-8 text-zinc-300 mb-2 group-hover:text-orange-500 transition" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" stroke-width="2"/></svg>
+                <p class="text-xs text-zinc-400">Click to upload mobile banner</p>
+              </div>
+              <div *ngIf="mobileImagePreview" class="absolute inset-0 z-10 flex flex-col items-center justify-center bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity">
+                <svg class="w-6 h-6 text-white mb-1" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                <p class="text-xs text-white font-medium">Click to change image</p>
+              </div>
+              <input type="file" class="hidden" (change)="onMobileFileSelected($event)" accept="image/*">
+            </label>
+          </div>
+
+          <!-- Title (internal identifier) -->
+          <div>
+            <label class="block text-sm font-bold text-zinc-700 mb-1">Title <span class="text-zinc-400 font-normal text-xs">(internal label)</span></label>
+            <input [(ngModel)]="adForm.title" type="text" placeholder="e.g. Summer Campaign" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+          </div>
+
+          <!-- Featured -->
+          <div>
+            <label class="block text-sm font-bold text-zinc-700 mb-1">Featured</label>
+            <select [(ngModel)]="adForm.is_feature" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+              <option [ngValue]="true">Yes</option>
+              <option [ngValue]="false">No</option>
+            </select>
+          </div>
+
+          <!-- Link -->
+          <div>
+            <label class="block text-sm font-bold text-zinc-700 mb-1">Target Link (URL)</label>
+            <input [(ngModel)]="adForm.link" type="text" placeholder="https://..." class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+          </div>
+
+          <!-- Page Type & Ads Position -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-zinc-700 mb-1">Page Type</label>
+              <select [(ngModel)]="adForm.page_type" (change)="onPageTypeChange()" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+                <option value="">Select</option>
+                <option value="product">Product</option>
+                <option value="homepage">Home</option>
+              </select>
+            </div>
+            <div *ngIf="adForm.page_type === 'product'">
+              <label class="block text-sm font-bold text-zinc-700 mb-1">Ads Position</label>
+              <select [(ngModel)]="adForm.ads_position" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+                <option value="">Select</option>
+                <option value="left">Left</option>
+                <option value="right">Right</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Category Dropdown -->
+          <div *ngIf="adForm.page_type === 'product'">
+            <label class="block text-sm font-bold text-zinc-700 mb-1">Category</label>
+            <select [(ngModel)]="adForm.category_name" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+              <option [ngValue]="null">-- Select Category --</option>
+              <option *ngFor="let category of categories" [ngValue]="category.name">{{ category.name }}</option>
+            </select>
+          </div>
+
+          <!-- Date Range Fields -->
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <label class="block text-sm font-bold text-zinc-700 mb-1">From Date</label>
+              <input type="date" [(ngModel)]="adForm.from_date" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+            </div>
+            <div>
+              <label class="block text-sm font-bold text-zinc-700 mb-1">To Date</label>
+              <input type="date" [(ngModel)]="adForm.to_date" class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+            </div>
+          </div>
+
+          <!-- Product Selection -->
+          <div *ngIf="adForm.page_type === 'product'">
+            <label class="block text-sm font-bold text-zinc-700 my-1">Select Product</label>
+            <div class="flex gap-2">
+              <input type="text" readonly [value]="selectedProductName || 'No product selected'" class="flex-1 border border-zinc-200 rounded-xl p-3 bg-zinc-50 text-zinc-600">
+              <button type="button" (click)="openProductModal()" class="bg-zinc-800 text-white px-4 rounded-xl hover:bg-zinc-900 transition">
+                Browse
+              </button>
+            </div>
+          </div>
+
+          <div class="flex gap-3 pt-6">
+            <button (click)="saveAd()" 
+                    class="flex-1 bg-orange-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-700 active:scale-95 transition">
+              {{ isEditMode ? 'Update' : 'Save' }}
+            </button>
+            <button (click)="showForm = false" 
+                    class="flex-1 bg-zinc-100 text-zinc-600 py-3.5 rounded-xl font-bold hover:bg-zinc-200 transition">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Product Selection Modal -->
+    <div *ngIf="showProductModal" class="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
+      <div class="bg-white rounded-2xl w-full max-w-lg shadow-2xl overflow-hidden">
+        <div class="border-b border-zinc-200 px-6 py-4 flex justify-between items-center">
+          <h3 class="text-lg font-bold text-zinc-800">Select a Product</h3>
+          <button (click)="showProductModal = false" class="text-zinc-400 hover:text-zinc-800 text-2xl">&times;</button>
+        </div>
+        <div class="p-6">
+          <input type="text" [(ngModel)]="productSearchTerm" (input)="filterProducts()" placeholder="Search by name or ID..." class="w-full border border-zinc-200 rounded-xl p-3 mb-4 outline-none focus:ring-2 focus:ring-orange-500">
+          <div class="max-h-96 overflow-y-auto space-y-2">
+            <div *ngFor="let product of filteredProducts" (click)="selectProduct(product)" class="p-3 border border-zinc-100 rounded-xl cursor-pointer hover:bg-orange-50 hover:border-orange-200 transition">
+              <div class="font-medium text-zinc-800">{{ product.name }}</div>
+              <div class="text-xs text-zinc-400">ID: {{ product.id }}</div>
+            </div>
+            <div *ngIf="filteredProducts.length === 0" class="text-center text-zinc-400 py-8">
+              No products found.
+            </div>
+          </div>
+        </div>
+        <div class="border-t border-zinc-200 px-6 py-4 flex justify-end">
+          <button (click)="showProductModal = false" class="px-4 py-2 bg-zinc-100 text-zinc-600 rounded-xl hover:bg-zinc-200">Cancel</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

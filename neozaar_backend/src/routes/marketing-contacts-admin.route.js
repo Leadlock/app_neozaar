@@ -1,0 +1,2 @@
+const router=require('express').Router(),c=require('../controllers/marketing-contacts-admin.controller'),verify=require('../middlewares/auth'),{requireMarketingManager}=require('../middlewares/marketing.middleware');
+router.use(verify,requireMarketingManager);router.get('/fields',c.listFields);router.post('/fields',c.saveField);router.post('/import',c.importContacts);router.get('/export',c.exportContacts);router.put('/:id',c.updateContact);router.get('/:id/notes',c.notes);router.post('/:id/notes',c.addNote);module.exports=router;

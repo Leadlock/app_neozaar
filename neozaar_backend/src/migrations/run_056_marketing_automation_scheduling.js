@@ -1,0 +1,2 @@
+const fs=require('fs'),path=require('path'),pool=require('../config/database');
+(async()=>{try{await pool.query(fs.readFileSync(path.join(__dirname,'056_marketing_automation_scheduling.sql'),'utf8'));console.log('Marketing migration 056 complete');}catch(e){console.error(e);process.exitCode=1;}finally{await pool.end();}})();

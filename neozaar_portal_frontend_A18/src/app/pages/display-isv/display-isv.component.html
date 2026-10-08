@@ -1,0 +1,183 @@
+<section class="p-6 bg-slate-50 min-h-screen">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">ISV Profile</h1>
+      <p class="text-sm text-gray-500 mt-0.5">{{ isvdata?.isv_detail?.company_detail?.brand_name || 'ISV Details' }}</p>
+    </div>
+    <a routerLink="/isv" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors" style="text-decoration:none">
+      ← Back to ISV List
+    </a>
+  </div>
+
+  <!-- Profile Card -->
+  <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+
+    <!-- Brand Header -->
+    <div class="flex items-center gap-4 mb-6 pb-6 border-b border-slate-100">
+      <img
+        [src]="isvdata?.isv_detail?.company_detail?.brand_logo || 'assets/default-logo.png'"
+        alt="Brand Logo"
+        class="w-16 h-16 rounded-full object-cover border border-slate-200"
+      />
+      <div>
+        <h2 class="text-xl font-bold text-gray-900 mb-1">{{ isvdata?.isv_detail?.company_detail?.brand_name }}</h2>
+        <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">ISV Partner</span>
+      </div>
+    </div>
+
+    <!-- Personal Information -->
+    <div class="mb-6">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Personal Information</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Name</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.name }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Email</p>
+          <p class="text-sm font-semibold text-slate-800 break-all">{{ isvdata?.email }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Support Desk Email</p>
+          <p class="text-sm font-semibold text-slate-800 break-all">{{ isvdata?.isv_detail?.support_desk_email }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Phone</p>
+          <p class="text-sm font-semibold text-slate-800">+{{ isvdata?.mobile?.slice(0,2) }} {{ isvdata?.mobile?.slice(2,7) }} {{ isvdata?.mobile?.slice(7,12) }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Information -->
+    <div class="mb-6">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Company Information</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Company Name</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.isv_detail?.company_detail?.company_name }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Holding Company</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.isv_detail?.company_detail?.registered_business_name }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Legal Entity Type</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.isv_detail?.company_detail?.legal_entity_type }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Headquarter Country</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.isv_detail?.company_detail?.headquater_country }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Tax ID</p>
+          <p class="text-sm font-semibold text-slate-800">{{ isvdata?.isv_detail?.company_detail?.tax_id }}</p>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Website</p>
+          <button (click)="openWebsite(isvdata?.isv_detail?.company_detail?.website_url)"
+            class="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+            Visit Website ↗
+          </button>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">SLA Link</p>
+          <button (click)="openWebsite(isvdata?.isv_detail?.sla_link)"
+            class="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors">
+            View SLA
+          </button>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">LinkedIn</p>
+          <a [href]="isvdata?.isv_detail?.company_detail?.linkedin_url" target="_blank"
+            class="mt-1 inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold bg-white border border-gray-200 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors" style="text-decoration:none">
+            LinkedIn ↗
+          </a>
+        </div>
+      </div>
+    </div>
+
+    <!-- Partner & Engagement -->
+    <div>
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-3">Partner & Engagement</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Cloud Partnership</p>
+          <div class="flex flex-wrap gap-1.5">
+            @for (partner of isvdata?.isv_detail?.cloud_partnership ?? []; track $index) {
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">{{ partner }}</span>
+            }
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Existing Marketplace Listing</p>
+          <div class="flex flex-wrap gap-1.5">
+            @for (item of isvdata?.isv_detail?.existing_marketplace_listing ?? []; track $index) {
+              <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-slate-200 text-slate-700">{{ item }}</span>
+            }
+          </div>
+        </div>
+        <div class="bg-slate-50 rounded-lg p-4 border border-slate-100">
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">Preferred Engagement</p>
+          <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-100 text-indigo-700">{{ isvdata?.isv_detail?.preferred_engagement }}</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Products Table -->
+  @if (isvdata?.productInfo?.products?.length > 0) {
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm overflow-hidden">
+      <div class="px-6 py-4 border-b border-slate-100">
+        <h3 class="text-sm font-bold text-slate-800">Products</h3>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="min-w-full divide-y divide-slate-100">
+          <thead class="bg-slate-50">
+            <tr>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Sr No</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Product</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Category</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Price Model</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Status</th>
+              <th class="px-5 py-3 text-left text-xs font-bold text-slate-400 uppercase tracking-wider">Actions</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-slate-50">
+            @for (i of isvdata.productInfo.products; track $index) {
+              <tr class="hover:bg-slate-50 transition-colors">
+                <td class="px-5 py-3 text-sm text-slate-400">{{ $index + 1 }}</td>
+                <td class="px-5 py-3">
+                  <div class="flex items-center gap-3">
+                    <img [src]="i.product_logo" alt="" class="w-9 h-9 rounded-lg object-cover border border-slate-100" />
+                    <span class="text-sm font-semibold text-slate-800">{{ i.name }}</span>
+                  </div>
+                </td>
+                <td class="px-5 py-3">
+                  <div class="flex flex-wrap gap-1">
+                    @for (cat of i.category_subcategory ?? []; track $index) {
+                      <span class="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-slate-100 text-slate-600">{{ cat }}</span>
+                    }
+                  </div>
+                </td>
+                <td class="px-5 py-3 text-sm text-slate-500">{{ i.pricing_model }}</td>
+                <td class="px-5 py-3">
+                  <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-green-100 text-green-700">{{ i.status }}</span>
+                </td>
+                <td class="px-5 py-3">
+                  <a [routerLink]="['/products/view', i?.id]"
+                    class="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors" style="text-decoration:none">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                    View
+                  </a>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+</section>

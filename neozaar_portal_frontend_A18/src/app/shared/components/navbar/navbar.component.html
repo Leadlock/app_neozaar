@@ -1,0 +1,157 @@
+<nav class="bg-white border-b w-full h-16 flex justify-between items-center px-3 lg:px-10">
+  <div class="flex items-center gap-2">
+    <!-- Mobile hamburger -->
+    <div class="drawer lg:hidden">
+      <input id="menu-sidebar" type="checkbox" class="drawer-toggle" />
+      <div class="drawer-content">
+        <label for="menu-sidebar" class="w-10 h-10 flex items-center justify-center rounded-lg bg-gray-100 hover:bg-gray-200 cursor-pointer text-gray-700 text-xl transition-colors">
+          <i class="ri-menu-line"></i>
+        </label>
+      </div>
+      <div class="drawer-side z-50">
+        <label for="menu-sidebar" aria-label="close sidebar" class="drawer-overlay"></label>
+        <app-sidebar mode="drawer"></app-sidebar>
+      </div>
+    </div>
+    <!-- Greeting -->
+    <div class="flex flex-col items-start leading-tight">
+      <small class="text-gray-400 text-xs">Hello,</small>
+      <p class="font-semibold text-sm text-gray-800">{{user.name}}</p>
+    </div>
+  </div>
+  <div class="flex items-center gap-2">
+
+    <!-- home -->
+    <button
+      (click)="goToHome()"
+      title="Home"
+      aria-label="Home"
+      class="w-10 h-10 rounded-full flex items-center justify-center text-lg text-gray-600 hover:text-indigo-600 hover:bg-gray-100 transition-colors"
+    >
+      <i class="ri-home-5-line"></i>
+    </button>
+
+    <!-- trash -->
+    @if (['ADMIN', 'SUPER_ADMIN'].includes(user?.role_type)) {
+      <a
+        routerLink="/trash"
+        routerLinkActive="text-red-600 bg-red-50"
+        title="Trash"
+        aria-label="Trash"
+        class="w-10 h-10 rounded-full flex items-center justify-center text-lg text-gray-600 hover:text-red-600 hover:bg-gray-100 transition-colors"
+      >
+        <i class="ri-delete-bin-6-line"></i>
+      </a>
+    }
+
+    <!-- notifications -->
+
+@if (['ADMIN', 'SUPER_ADMIN', 'ISV', 'ISV_SELLER', 'CLIENT', 'USER'].includes(user?.role_type)) {
+  <div class="drawer drawer-end w-auto">
+    <input id="notification" type="checkbox" class="drawer-toggle hidden" />
+    <div class="drawer-content">
+      <label for="notification" class="btn btn-sm w-10 h-10 rounded-full bg-transparent shadow-none border-0 flex text-lg relative">
+        <i class="ri-notification-3-line"></i>
+        @if (unreadCount > 0) {
+          <span class="absolute -top-1 -right-1 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+            {{ unreadCount > 99 ? '99+' : unreadCount }}
+          </span>
+        }
+      </label>
+    </div>
+    <div class="drawer-side z-10">
+      <label for="notification" aria-label="close sidebar" class="drawer-overlay"></label>
+      <div class="bg-base-200 text-base-content min-h-full w-full max-w-sm p-4">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="font-semibold text-lg">Notifications ({{ unreadCount }})</h3>
+          @if (unreadCount > 0) {
+            <button (click)="markAllAsRead()" class="text-xs font-semibold text-indigo-600 hover:text-indigo-800 bg-indigo-50 hover:bg-indigo-100 px-3 py-1.5 rounded-lg transition-colors">
+              Mark all as read
+            </button>
+          }
+        </div>
+        @if (notifications.length === 0) {
+          <p class="text-gray-500 text-sm text-center py-8">No new notifications</p>
+        }
+        @for (n of notifications; track n._uniqueId) {
+          <div class="flex items-start gap-3 p-3 mb-2 rounded-lg shadow-sm transition-all"
+               [class.bg-white]="!n.is_read"
+               [class.border-l-4]="!n.is_read"
+               [class.border-indigo-500]="!n.is_read"
+               [class.bg-gray-50]="n.is_read"
+               [class.opacity-60]="n.is_read">
+            <i class="{{ getIcon(n.type) }} text-xl mt-1 text-primary"></i>
+            <div class="flex-1">
+              <p class="text-sm" [class.font-semibold]="!n.is_read">{{ n.message }}</p>
+              <p class="text-xs text-gray-400 mt-1">{{ n.created_at | date:'short' }}</p>
+            </div>
+            @if (!n.is_read) {
+              <button (click)="markAsRead(n)" title="Mark as read"
+                class="p-1.5 rounded-full text-gray-400 hover:text-indigo-600 hover:bg-indigo-50 transition-colors flex-shrink-0">
+                <i class="ri-check-line text-sm"></i>
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+}
+
+
+
+
+    <!-- notifications -->
+    <!-- <button (click)="toggleDarkMode()" 
+    class="btn btn-sm w-10 h-10 rounded-full bg-transparent shadow-none border-0 flex text-lg">
+    @if (isDarkMode$ | async) {
+      <i class="ri-sun-line"></i>
+    } @else {
+      <i class="ri-moon-line"></i>
+    }
+  </button> -->
+  
+    <!-- <button class="btn btn-circle text-xl"><i class="ri-settings-line"></i></button> -->
+
+    <div class="dropdown dropdown-end relative">
+      <div
+        tabindex="0"
+        role="button"
+        class="flex flex-nowrap items-center gap-2 h-10 p-0 cursor-pointer bg-transparent border-0 shadow-none"
+      >
+       <div
+  class="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-sm font-semibold uppercase"
+>
+  {{ user.role_type === 'ADMIN'
+      ? 'NZ'
+      : (user.name | slice:0:2)
+  }}
+</div>
+        <i class="ri-arrow-down-s-line"></i>
+      </div>
+      <ul tabindex="0" class="capitalize dropdown-content menu bg-base-100 rounded-box z-[9999] w-60 p-2 shadow-2xl border">
+        <div class=" capitalize p-3">
+            <div class="flex flex-col items-start bg-transparent hover:bg-transparent focus-within:bg-transparent">
+                <div class="text-sm font-semibold capitalize">{{user.name}}</div>
+                <div class="text-xs text-gray-500 lowercase">{{user.email}}</div>
+                <div class="text-xs text-gray-500 capitalize mt-2">role: {{user.role_type}}</div>
+            </div>
+        </div>
+        @if(user.role_type === 'ISV'){
+        <hr class="my-2">
+<li>
+    <a (click)="goToProfile()">
+      <i class="ri-user-6-line"></i> Profile
+    </a>
+  </li>
+}
+
+       
+
+        <hr class="my-2">
+        <li class=""><a class="bg-red-50 text-red-600 rounded-lg hover:bg-red-100" (click)="logout()"><i class="ri-logout-circle-line"></i> Logout</a></li>
+      </ul>
+    </div>
+
+  </div>
+</nav>

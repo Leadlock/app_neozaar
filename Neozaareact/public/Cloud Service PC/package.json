@@ -1,0 +1,10 @@
+{
+  "name": "neozaar-pricing-builder",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node scripts/build.mjs",
+    "validate": "node scripts/validate-worker.mjs",
+    "dev": "node scripts/dev-server.mjs"
+  }
+}

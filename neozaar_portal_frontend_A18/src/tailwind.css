@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+.primary {
+  @apply bg-primary text-white;
+}
+
+/* CRM scrollbars */
+.crm-sidebar::-webkit-scrollbar,
+.crm-page-outlet::-webkit-scrollbar,
+.crm-notif-list::-webkit-scrollbar {
+  width: 5px !important;
+  height: 5px !important;
+}
+.crm-sidebar::-webkit-scrollbar-track,
+.crm-page-outlet::-webkit-scrollbar-track,
+.crm-notif-list::-webkit-scrollbar-track {
+  background: #F4F1ED !important;
+  border-radius: 999px !important;
+  box-shadow: inset 2px 2px 4px rgba(16,42,67,0.08), inset -2px -2px 4px rgba(255,255,255,0.85) !important;
+}
+.crm-sidebar::-webkit-scrollbar-thumb,
+.crm-page-outlet::-webkit-scrollbar-thumb,
+.crm-notif-list::-webkit-scrollbar-thumb {
+  background: rgba(16,42,67,0.25) !important;
+  border-radius: 999px !important;
+  border: 1px solid #F4F1ED !important;
+}
+.crm-sidebar::-webkit-scrollbar-thumb:hover,
+.crm-page-outlet::-webkit-scrollbar-thumb:hover,
+.crm-notif-list::-webkit-scrollbar-thumb:hover {
+  background: rgba(16,42,67,0.45) !important;
+}

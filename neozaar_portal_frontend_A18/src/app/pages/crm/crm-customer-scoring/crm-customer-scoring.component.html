@@ -1,0 +1,206 @@
+<div class="crm-page crm-scoring-page">
+
+  <!-- Header -->
+  <div class="crm-scoring-header">
+    <div>
+      <h1 class="crm-scoring-title">Customer Scoring</h1>
+      <p class="crm-scoring-sub">Pre-opportunity engagement scoring — threshold 30 pts → auto-converts to Opportunity</p>
+    </div>
+  </div>
+
+  <!-- Date Range & Owner Filters -->
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.25rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">📅 Date Range</label>
+      <select class="neo-select" [(ngModel)]="dateRange" (change)="onFilterChange()">
+        @for (d of dateRanges; track d.value) { <option [value]="d.value">{{ d.label }}</option> }
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">👤 Owner / User</label>
+      <select class="neo-select" [(ngModel)]="filterOwner" (change)="onFilterChange()">
+        <option value="">All Owners</option>
+        @for (o of ownerOptions; track o) { <option [value]="o">{{ o }}</option> }
+      </select>
+    </div>
+    @if (dateRange || filterOwner) {
+      <button class="neo-btn" style="align-self:flex-end"
+        (click)="dateRange='';filterOwner='';onFilterChange()">Clear</button>
+    }
+  </div>
+
+  <!-- Active filter chips / tracker summary -->
+  @if (dateRange || filterOwner) {
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem;align-items:center">
+      @if (dateRange) {
+        <span style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:0.2rem 0.65rem;font-size:0.72rem;color:#1d4ed8;display:flex;align-items:center;gap:0.4rem">
+          📅 @for (d of dateRanges; track d.value) { @if (d.value === dateRange) { {{ d.label }} } }
+          <span style="cursor:pointer;opacity:0.6" (click)="dateRange='';onFilterChange()">✕</span>
+        </span>
+      }
+      @if (filterOwner) {
+        <span style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:0.2rem 0.65rem;font-size:0.72rem;color:#15803d;display:flex;align-items:center;gap:0.4rem">
+          👤 {{ filterOwner }}
+          <span style="cursor:pointer;opacity:0.6" (click)="filterOwner='';onFilterChange()">✕</span>
+        </span>
+      }
+      <span style="font-size:0.72rem;color:var(--crm-text-secondary)">
+        {{ filteredLeads.length }} customer{{ filteredLeads.length !== 1 ? 's' : '' }} matched
+      </span>
+    </div>
+  }
+
+  <!-- Scoring Rules -->
+  <div class="neo-card-sm crm-scoring-rules">
+    <div class="crm-scoring-rules-title">Engagement Scoring Model — Threshold: 30 pts</div>
+    <div class="crm-scoring-rules-track">
+      @for (event of scoreEvents; track event.key; let last = $last) {
+        <div class="crm-scoring-rule-step" [class.crm-scoring-rule-step-cta]="event.points >= 20">
+          <div class="crm-scoring-rule-icon-wrap" [class.crm-scoring-rule-icon-cta]="event.points >= 20">
+            <span class="crm-scoring-rule-icon">{{ event.icon }}</span>
+          </div>
+          <div class="crm-scoring-rule-body">
+            <span class="crm-scoring-rule-label">{{ event.label }}</span>
+            <span class="crm-scoring-rule-pts" [class.crm-scoring-rule-pts-cta]="event.points >= 20">+{{ event.points }} pts</span>
+          </div>
+        </div>
+        @if (!last) {
+          <div class="crm-scoring-rule-arrow">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+          </div>
+        }
+      }
+      <!-- Conversion marker -->
+      <div class="crm-scoring-rule-arrow">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+      </div>
+      <div class="crm-scoring-rule-step crm-scoring-rule-step-cta">
+        <div class="crm-scoring-rule-icon-wrap crm-scoring-rule-icon-cta">
+          <span class="crm-scoring-rule-icon">🚀</span>
+        </div>
+        <div class="crm-scoring-rule-body">
+          <span class="crm-scoring-rule-label" style="color:#fff">Score ≥ 30</span>
+          <span class="crm-scoring-rule-pts crm-scoring-rule-pts-cta">→ Opportunity</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Summary KPIs -->
+  <div class="crm-scoring-kpis">
+    <div class="neo-stat crm-scoring-stat">
+      <span class="neo-stat-label">Opportunity Ready (30+)</span>
+      <span class="neo-stat-value crm-scoring-val" style="color:#059669">{{ opportunityReady.length }}</span>
+    </div>
+    <div class="neo-stat crm-scoring-stat">
+      <span class="neo-stat-label">Engaged (20–29)</span>
+      <span class="neo-stat-value crm-scoring-val" style="color:#f59e0b">{{ engaged.length }}</span>
+    </div>
+    <div class="neo-stat crm-scoring-stat">
+      <span class="neo-stat-label">Interested (10–19)</span>
+      <span class="neo-stat-value crm-scoring-val" style="color:#3b82f6">{{ interested.length }}</span>
+    </div>
+    <div class="neo-stat crm-scoring-stat">
+      <span class="neo-stat-label">Registered (1–9)</span>
+      <span class="neo-stat-value crm-scoring-val">{{ registered.length }}</span>
+    </div>
+    <div class="neo-stat crm-scoring-stat">
+      <span class="neo-stat-label">Converted</span>
+      <span class="neo-stat-value crm-scoring-val" style="color:#6366f1">{{ converted.length }}</span>
+    </div>
+  </div>
+
+  <!-- Customer List -->
+  @if (loading) {
+    <div class="neo-card crm-scoring-empty">Loading...</div>
+  }
+
+  @if (!loading) {
+    <div class="crm-scoring-list">
+      @for (lead of pagedLeads; track lead.id) {
+        <div class="neo-card-sm crm-scoring-item">
+
+          <!-- Customer Row -->
+          <div class="crm-scoring-row" (click)="toggleLead(lead)">
+            <div class="crm-scoring-circle" [style.background]="lead.converted_to_opportunity_id ? '#6366f1' : getScoreColor(lead.score || 0)">
+              {{ lead.score || 0 }}
+            </div>
+            <div class="crm-scoring-info">
+              <div class="crm-scoring-name-row">
+                <span class="crm-scoring-name">{{ lead.name }}</span>
+                @if (lead.converted_to_opportunity_id) {
+                  <span class="neo-badge crm-scoring-badge" style="background:#ede9fe;color:#6366f1">Converted</span>
+                } @else {
+                  <span class="neo-badge neo-badge-gray crm-scoring-badge">{{ getScoreLabel(lead.score || 0) }}</span>
+                }
+              </div>
+              <span class="crm-scoring-meta">
+                {{ lead.email }} · {{ lead.company || '—' }}
+                @if (lead.converted_to_opportunity_id) {
+                  <span style="color:#6366f1;font-weight:600"> · Opp #{{ lead.converted_to_opportunity_id }}</span>
+                }
+              </span>
+            </div>
+            @if (lead.product_interest) {
+              <span class="neo-badge neo-badge-new crm-scoring-badge">{{ lead.product_interest }}</span>
+            }
+            <!-- Score bar scaled to threshold (30) -->
+            <div class="crm-scoring-bar-wrap">
+              <div class="neo-score-bar" style="height:5px">
+                <div class="neo-score-fill"
+                  [style.width.%]="Math.min((lead.score || 0) / CONVERSION_THRESHOLD * 100, 100)"
+                  [style.background]="lead.converted_to_opportunity_id ? '#6366f1' : getScoreColor(lead.score || 0)">
+                </div>
+              </div>
+            </div>
+            <span class="crm-scoring-stage">{{ lead.lead_stage || lead.status }}</span>
+            <span class="crm-scoring-toggle">{{ expandedLeadId === lead.id ? '▲' : '▼' }}</span>
+          </div>
+
+          <!-- Expanded: Customer Score History -->
+          @if (expandedLeadId === lead.id) {
+            <div class="crm-scoring-events">
+              @if (!scoreHistories[lead.id]) {
+                <p class="crm-scoring-events-empty">Loading events...</p>
+              }
+              @if (scoreHistories[lead.id] && getHistory(lead.id).length === 0) {
+                <p class="crm-scoring-events-empty">No customer scoring events recorded yet.</p>
+              }
+              @if (getHistory(lead.id).length > 0) {
+                @for (ev of getHistory(lead.id); track ev.id) {
+                  <div class="crm-scoring-event-row">
+                    <span class="crm-scoring-event-dot" [style.background]="getEventMeta(ev.reason).color"></span>
+                    <span class="crm-scoring-event-icon">{{ getEventMeta(ev.reason).icon }}</span>
+                    <span class="crm-scoring-event-label">{{ getEventMeta(ev.reason).label }}</span>
+                    <span class="crm-scoring-event-pts">{{ ev.new_score > ev.old_score ? '+' : '' }}{{ ev.new_score - ev.old_score }} pts</span>
+                    <span class="crm-scoring-event-total">→ {{ ev.new_score }}</span>
+                    <span class="crm-scoring-event-time">{{ ev.created_at | date:'dd MMM, HH:mm' }}</span>
+                  </div>
+                }
+              }
+            </div>
+          }
+
+        </div>
+      }
+
+      @if (!leads.length) {
+        <div class="neo-card crm-scoring-empty">No customers to score yet</div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="crm-scoring-pagination">
+        <button class="crm-scoring-pg-btn" (click)="prevPage()" [disabled]="page === 1">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <span class="crm-scoring-pg-info">{{ page }} / {{ totalPages }}</span>
+        <button class="crm-scoring-pg-btn" (click)="nextPage()" [disabled]="page === totalPages">
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    }
+  }
+
+</div>

@@ -1,0 +1,30 @@
+{
+  "bannerTitle": "We value your privacy",
+  "bannerBody": "We use cookies to run this site and, with your consent, to understand how it is used. Necessary cookies are always on.",
+  "policyLine": "Read our",
+  "cookiePolicy": "Cookie Policy",
+  "and": "and",
+  "privacyPolicy": "Privacy Policy",
+  "withdrawLine": "You can change your choice any time from \"Cookie Preferences\" in the footer; grievances may be raised with the Data Protection Board of India.",
+  "customise": "Customise",
+  "rejectAll": "Reject All",
+  "acceptAll": "Accept All",
+  "modalTitle": "Cookie Preferences",
+  "modalIntro": "Choose which categories to allow. Your choice is recorded and can be changed here at any time.",
+  "seeFullList": "See the Cookie Policy for the full list.",
+  "save": "Save Preferences",
+  "alwaysActive": "Always Active",
+  "languageLabel": "Language",
+  "categories": {
+    "necessary": {
+      "label": "Strictly Necessary",
+      "desc": "Authentication, session, security and load-balancing. Required for the site to function — cannot be switched off.",
+      "detail": "Recipients: NeoZaar · Retention: session / up to 12 months"
+    },
+    "analytics": {
+      "label": "Analytics",
+      "desc": "Help us measure and improve how the site is used.",
+      "detail": "Recipients: Google LLC (Google Analytics 4) · Retention: up to 14 months"
+    }
+  }
+}

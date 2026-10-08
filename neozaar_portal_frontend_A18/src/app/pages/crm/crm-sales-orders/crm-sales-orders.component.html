@@ -1,0 +1,163 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Sales Orders</h1>
+      <p class="crm-subtitle">Manage confirmed orders and track fulfilment</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Order</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="filters.search" placeholder="Order number, contact…" />
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">Status</label>
+      <select class="neo-select" [(ngModel)]="filters.status">
+        <option value="">All Statuses</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Search</button>
+  </div>
+
+  <!-- Table -->
+  <div class="neo-table-wrap">
+    @if (loading) {
+      <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading orders...</div>
+    }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead>
+          <tr>
+            <th>Order #</th>
+            <th>Contact / Company</th>
+            <th>Quote</th>
+            <th>Order Date</th>
+            <th>Delivery Date</th>
+            <th style="text-align:right">Total</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (o of filteredOrders; track o.id) {
+            <tr>
+              <td style="font-weight:700;color:var(--crm-text);font-size:0.82rem">
+                {{ o.order_number || ('SO-' + o.id) }}
+              </td>
+              <td>
+                <span style="font-weight:600;color:var(--crm-text);font-size:0.82rem;display:block">
+                  {{ o.contact_company || o.contact_name || '—' }}
+                </span>
+                @if (o.contact_name && o.contact_company) {
+                  <span style="font-size:0.7rem;color:var(--crm-text-secondary)">{{ o.contact_name }}</span>
+                }
+              </td>
+              <td style="font-size:0.78rem;color:var(--crm-text-secondary)">
+                {{ o.quote_id ? ('Q-' + o.quote_id) : '—' }}
+              </td>
+              <td style="font-size:0.78rem;color:var(--crm-text-secondary)">
+                {{ o.order_date | date:'dd MMM yyyy' }}
+              </td>
+              <td style="font-size:0.78rem;color:var(--crm-text-secondary)">
+                {{ o.delivery_date ? (o.delivery_date | date:'dd MMM yyyy') : '—' }}
+              </td>
+              <td style="font-weight:700;color:var(--crm-primary);text-align:right">
+                ₹{{ getOrderTotal(o).toLocaleString() }}
+              </td>
+              <td>
+                <span class="neo-badge" [ngClass]="statusColor(o.status)">{{ o.status }}</span>
+              </td>
+              <td>
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  <button class="neo-btn" style="padding:0.3rem 0.7rem;font-size:0.72rem" (click)="openEdit(o)">Edit</button>
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.7rem;font-size:0.72rem" (click)="delete(o.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!filteredOrders.length) {
+            <tr>
+              <td colspan="8" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+                No sales orders yet. Create your first order.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Create / Edit Modal -->
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()" style="max-width:680px">
+      <h2 style="font-weight:800;margin-bottom:1.5rem;color:var(--crm-text);font-size:1.2rem">
+        {{ editMode ? 'Edit Sales Order' : 'New Sales Order' }}
+      </h2>
+
+      <div class="crm-grid-2">
+        <div class="form-group">
+          <label class="form-label">Order Number</label>
+          <input class="neo-input" [(ngModel)]="form.order_number" placeholder="Auto-generated if blank" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="neo-select" [(ngModel)]="form.status">
+            @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Delivery Date</label>
+          <input class="neo-input" [(ngModel)]="form.delivery_date" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount (₹)</label>
+          <input class="neo-input" [(ngModel)]="form.discount" type="number" min="0" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax (₹)</label>
+          <input class="neo-input" [(ngModel)]="form.tax" type="number" min="0" placeholder="0" />
+        </div>
+      </div>
+
+      <!-- Line Items -->
+      <div style="margin:0.5rem 0 1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+          <label class="form-label" style="margin:0">Line Items</label>
+          <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="addItem()">+ Add Item</button>
+        </div>
+        @for (item of form.items; track $index; let i = $index) {
+          <div style="display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.5rem">
+            <div style="flex:3"><input class="neo-input" [(ngModel)]="item.description" placeholder="Description" /></div>
+            <div style="flex:1"><input class="neo-input" [(ngModel)]="item.quantity" type="number" min="1" placeholder="Qty" /></div>
+            <div style="flex:1.5"><input class="neo-input" [(ngModel)]="item.unit_price" type="number" min="0" placeholder="Price (₹)" /></div>
+            <button class="neo-btn neo-btn-danger" style="padding:0.35rem 0.6rem;font-size:0.7rem" (click)="removeItem(i)">×</button>
+          </div>
+        }
+        <div style="margin-top:0.75rem;display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;font-size:0.8rem">
+          <span style="color:var(--crm-text-secondary)">Subtotal: <strong>₹{{ subtotal.toLocaleString() }}</strong></span>
+          <span style="color:var(--crm-text-secondary)">Discount: <strong>−₹{{ (+form.discount||0).toLocaleString() }}</strong></span>
+          <span style="color:var(--crm-text-secondary)">Tax: <strong>+₹{{ (+form.tax||0).toLocaleString() }}</strong></span>
+          <span style="font-weight:800;font-size:0.9rem;color:var(--crm-text);border-top:1px solid var(--crm-border);padding-top:0.25rem;margin-top:0.15rem">
+            Total: ₹{{ total.toLocaleString() }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="neo-input" [(ngModel)]="form.notes" rows="2" placeholder="Internal notes…"></textarea>
+      </div>
+
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create Order' }}</button>
+      </div>
+    </div>
+  </div>
+}

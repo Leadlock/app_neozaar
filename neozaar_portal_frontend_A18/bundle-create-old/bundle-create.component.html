@@ -1,0 +1,722 @@
+
+ <h2 class="text-2xl font-semibold mb-6">Create Bundle</h2>
+<div class="relative border-b border-gray-200 px-4 py-2 flex space-x-6">
+  <div
+    *ngFor="let tab of steps; let i = index"
+    class="tab-button relative pb-2 text-sm cursor-pointer px-4"
+    [ngClass]="{
+      'text-orange-600 font-semibold': currentStep === i,
+      'text-gray-500 hover:text-gray-800': currentStep !== i
+    }"
+    (click)="setActiveTab(i)"
+  >
+    {{ tab.label }}
+     
+  </div>
+
+  <!-- Progressive underline starting from tab[0] -->
+  <div
+    class="tab-underline absolute bottom-0 left-0 h-[3px] bg-orange-500 transition-all duration-300"
+    style="width: 0;"
+  ></div>
+</div>
+
+
+<form [formGroup]="productForm"  class="p-2 min-h-screen max-w-8xl mx-auto">
+ 
+
+  <!-- Basic Info Section -->
+  <div [formGroup]="productInfoForm"  *ngIf="currentStep === 0" class="my-8">
+    <h3 class="text-lg font-semibold">Product Information</h3>
+    <div class="border-t  border-dashed border-gray-300 pt-4 space-y-6">
+
+      <!-- Title -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <p class="font-medium req">Bundle Name </p>
+        <div>
+
+          <input type="text" formControlName="name" placeholder="Title"
+            class="input input-bordered w-full sm:w-80 md:w-96" />
+          @if (productInfoForm.get('name')?.invalid &&
+          productInfoForm.get('name')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Title</p>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req">Short Description (Tagline)</p>        
+        <div>
+          <textarea formControlName="description" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+          @if (productInfoForm.get('description')?.invalid &&
+          productInfoForm.get('description')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Short Description</p>
+          }
+        </div>
+      </div>
+
+       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req">Detailed Description</p>        
+        <div>
+          <textarea formControlName="longdescription" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+              @if (productInfoForm.get('longdescription')?.invalid &&
+          productInfoForm.get('longdescription')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Details Description</p>
+          }
+        </div>
+      </div>
+           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4 mt-2">
+        <p class="font-medium req">Demo Video Link</p>        
+        <div>
+          <input formControlName="demovideoLink" class="input input-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Text"/>
+              @if (productInfoForm.get('demovideoLink')?.invalid &&
+          productInfoForm.get('demovideoLink')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Demo Video Link</p>
+          }
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Bundle Type</label>
+  <div>
+
+    <select formControlName="bundleType" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option value="" disabled selected>Select Bundle Type</option>
+      <option value="Migration Accelerator">Migration Accelerator</option>
+      <option value="Modernization Accelerator">Modernization Accelerator</option>
+      <option value="AI/Analytics FastTrack">AI/Analytics FastTrack</option>
+      <option value="Security Pack">Security Pack</option>
+      <option value="Industry Solution Pack [Retail, Education, BFSI, Pharma, Logistics, IT/ITES]">
+        Industry Solution Pack [Retail, Education, BFSI, Pharma, Logistics, IT/ITES]
+      </option>
+      <option value="Custom Enterprise Bundle">Custom Enterprise Bundle</option>
+    </select>
+                @if (  productInfoForm.get('bundleType')?.invalid &&
+          productInfoForm.get('bundleType')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Bundle Type</p>
+          }
+  </div>
+</div>
+
+
+ @for (field of selectedFields; track $index) {
+ <div  #searchContainer class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mt-5">
+    <label class="font-medium pt-2 req">Supported Regions</label>
+
+  <!-- Selected Tags -->
+   <div>
+  <div class="flex flex-wrap gap-2 mb-2">
+    @for (tag of productForm.get('taxonomy_data')?.get(field.slug)?.value; track $index) {
+      <button type="button"
+        class="btn btn-xs font-semibold bg-orange-500 text-white hover:text-black"
+        (click)="removeTag(field.slug, tag)">
+        {{ tag }} &times;
+      </button>
+    }
+  </div>
+
+  <!-- Search Box -->
+ <!-- Search Box with + Add Button -->
+<div class="flex items-center border rounded-md px-3 py-2 w-full sm:w-80 md:w-96 bg-white mb-2">
+  <i class="ri-search-2-line mr-2 text-xl"></i>
+  <input type="text" placeholder="Search" maxlength="35"
+   (keypress)="allowOnlyAlphabets($event)"
+    [formControl]="searchControls[field.slug]"
+    class="w-full outline-none text-sm" />
+
+  <!-- Add (+) Button -->
+  @if (shouldShowAddButton(field.slug)) {
+    <button type="button"
+      class="ml-2 text-green-600 hover:text-green-800 font-bold text-lg"
+      (click)="addNewOption(field.slug)">
+     <i class="ri-add-box-fill text-gray-400 text-2xl"></i>
+    </button>
+  }
+</div>
+
+
+  <!-- Filtered Options -->
+  @if (filteredOptions[field.slug]) {
+    <div class="flex flex-wrap gap-2">
+      @for (opt of filteredOptions[field.slug]; track $index) {
+        <span (click)="toggleChip(field.slug, opt)" class="cursor-pointer px-2 py-1 text-sm rounded-md"
+          [class.bg-black]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+          [class.text-white]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+          [class.bg-gray-200]="!productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)">
+          {{ opt }}
+        </span>
+      }
+    </div>
+  }
+  </div>
+</div>
+}
+
+<!-- <app-file-upload [attachmentsFormArray]="attachments"></app-file-upload>
+
+<app-image-upload [imageFormArray]="screenshots"></app-image-upload>
+    -->
+</div>
+  </div>
+
+
+
+
+  <!-- Category & Pricing -->
+  <div [formGroup]="technicalInfoForm" *ngIf="currentStep === 1" class="my-8">
+    <h3 class="text-lg font-semibold">Category & Pricing</h3>
+    <div class="border-t border-dashed border-gray-300 pt-4 space-y-6">
+
+
+         <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req">Primary Business Outcome</p>
+<div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of Newcategories.primarybusinessoutcome"
+       (click)="toggleValue('primarybusinessoutcome', category)"
+       [ngClass]="{
+         'bg-orange-500 text-white': isSelected('primarybusinessoutcome', category),
+         'bg-gray-200 text-black': !isSelected('primarybusinessoutcome', category)
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+</div>
+<!-- 
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium">Title</p>
+<div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of Newcategories.supportedAwsService"
+       (click)="toggleValue('supportedAwsService', category)"
+       [ngClass]="{
+         'bg-orange-500 text-white': isSelected('supportedAwsService', category),
+         'bg-gray-200 text-black': !isSelected('supportedAwsService', category)
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+</div> -->
+
+ 
+   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Target Customer Segments</label>
+  <div>
+
+    <select formControlName="targetCustomerSegments" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option value="" disabled selected>Select Target Customer Segment</option>
+      <option value="SMB">SMB</option>
+      <option value="Mid-Market">Mid-Market</option>
+      <option value="Enterprise">Enterprise</option>
+      <option value="Government">Government</option>
+    </select>
+            @if ( technicalInfoForm.get('targetCustomerSegments')?.invalid &&
+         technicalInfoForm.get('targetCustomerSegments')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Target Customer Segment</p>
+          }
+  </div>
+</div>
+
+   <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Workload Types</label>
+  <div>
+
+    <select formControlName="workloadTypes" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option value="" disabled selected>Select Workload Type</option>
+      <option value="Backup Software">Backup Software</option>
+      <option value="AI Engine">AI Engine</option>
+      <option value="Security Platform">Security Platform</option>
+      <option value="Migration/Modernisation">Migration/Modernisation</option>
+      <option value="Others">Others</option>
+    </select>
+                @if ( technicalInfoForm.get('workloadTypes')?.invalid &&
+           technicalInfoForm.get('workloadTypes')?.touched) {
+            <p class="text-xs text-red-500"> Please enter Workload Type</p>
+            }
+  </div>
+</div>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req">Cloud Provider Focus</p>
+<div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of Newcategories.cloudPlatform"
+       (click)="toggleValue('cloudProvider', category)"
+       [ngClass]="{
+         'bg-orange-500 text-white': isSelected('cloudProvider', category),
+         'bg-gray-200 text-black': !isSelected('cloudProvider', category)
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+</div>
+      
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium text-sm req">Bundle pricing model</label>
+  <div>
+
+    <select formControlName="bundle_pricing_model" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Bundle pricing model</option>
+      <option>Fixed Fee</option>
+      <option>Subscription</option>
+      <option>Custom Quote</option>
+    
+    </select>
+                @if ( technicalInfoForm.get('bundle_pricing_model')?.invalid &&
+         technicalInfoForm.get('bundle_pricing_model')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Bundle pricing model</p>
+          }
+  </div>
+
+</div>
+
+          <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium">Long Description</p>        
+        <div>
+          <textarea formControlName="technicalPrerequsite" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+        </div>
+      </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium">Long Description</p>        
+        <div>
+          <textarea formControlName="meteringEndPoint" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+        </div>
+      </div> -->
+  
+
+    </div>
+  </div>
+
+  <!-- Product Info -->
+   <div [formGroup]="pricingInfoForm" *ngIf="currentStep === 2" class="my-8">
+  <h3 class="text-lg font-semibold mt-6">Bundle composition</h3>
+  <div class="border-t border-dashed border-gray-300 pt-6 space-y-6">
+    <div class="flex justify-center">
+      <div class="w-full">
+
+<!-- //Deployment type -->
+   
+
+     
+
+  <div class=" pt-4 mt-6">
+    <h3 class="border-b border-dashed border-gray-300 text-lg font-semibold mb-2">Add Products, Services and Spectrum Partners</h3>
+    <div
+      class=" pt-4 space-y-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p class="font-medium text-sm mb-2 req">Selected Products</p>
+      <div>
+
+
+        <div class="space-y-2">
+          @for (product of productSelectData; track $index) {
+          <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img [src]="product.product_logo || product.logo" class="w-12 h-12 rounded" />
+              <div>
+                <p class="font-semibold text-sm truncate w-52">{{ product.name }}</p>
+                <p class="text-xs text-gray-500 italic"> {{ product?.long_description?.length > 35 ?(product.long_description | slice:0:35) + '...' : product.long_description }}</p>
+              </div>
+            </div>
+            <button type="button" (click)="removeItem(product, 'products')">
+              <i class="ri-close-line text-lg"></i>
+            </button>
+          </div>
+          }
+        </div>
+        <div class="mt-4">
+          <button type="button"   (click)="openAddproductModal('products')"
+            class="flex items-center gap-2 px-4 py-2 rounded-full bg-black text-white text-sm">
+            <i class="ri-add-line text-lg"></i>
+            Add More Products
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Services Section -->
+    <div class="pt-4 space-y-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p class="font-medium text-sm mb-2">Selected Services</p>
+      <div>
+        <div class="space-y-2">
+          @for (service of serviceSelectData; track $index) {
+          <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img [src]="service.logo || service.product_logo" class="w-12 h-12 rounded" />
+              <div>
+                <p class="font-semibold text-sm truncate w-52">{{ service.name }}</p>
+                <p class="text-xs text-gray-500 italic">{{ service?.description?.length > 35 ? (service.description | slice:0:35) + '...' : service.description }}</p>
+              </div>
+            </div>
+            <button type="button" (click)="removeItem(service, 'services')">
+              <i class="ri-close-line text-lg"></i>
+            </button>
+          </div>
+          }
+        </div>
+        <div class="mt-4">
+          <button type="button" (click)="openAddproductModal('services')"
+            class="flex items-center gap-2 px-4 py-2 rounded-full bg-black text-white text-sm">
+            <i class="ri-add-line text-lg"></i>
+            Add Services
+          </button>
+        </div>
+      </div>
+    </div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium text-sm req">Product Role in Bundle</label>
+  <div>
+
+    <select formControlName="productRole" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Product Role</option>
+      <option>Backup Software</option>
+      <option>AI Engine</option>
+      <option>Security Platform</option>
+      <option>Open Migration / Modernisation</option>
+      <option>Others</option>
+    </select>
+                @if ( pricingInfoForm.get('productRole')?.invalid &&
+pricingInfoForm.get('productRole')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Product Role in Bundle</p>
+          }
+  </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium text-sm req">Service Role in Bundle</label>
+  <div>
+
+    <select formControlName="serviceRole" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Service Role</option>
+      <option>Deployment</option>
+      <option>Integration</option>
+      <option>Managed Support</option>
+      <option>Training</option>
+    </select>
+      @if (  pricingInfoForm.get('serviceRole')?.invalid &&
+         pricingInfoForm.get('serviceRole')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Service Role in Bundle</p>
+          }
+  </div>
+</div>
+    
+  </div>
+
+
+ </div>
+    </div>
+  </div>
+  </div>
+
+     <div [formGroup]="supportInfoForm" *ngIf="currentStep === 3" class="my-8">
+  <h3 class="text-lg font-semibold mt-6 req">Commercials & Engagement</h3>
+  <div class="border-t border-dashed border-gray-300 pt-6 space-y-6">
+    <div class="flex justify-center">
+      <div class="w-full">
+
+<!-- //Deployment type -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Licensing Model Used</label>
+  <div>
+    <select formControlName="licensingmodel" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Licensing Model</option>
+      <option>Subscription</option>
+      <option>Pay-as-you-go</option>
+      <option>BYOL</option>
+    </select>
+    @if (supportInfoForm.get('licensingmodel')?.invalid &&
+         supportInfoForm.get('licensingmodel')?.touched) {
+           <p class="text-xs text-red-500 "> Please select Licensing Model</p>
+          }
+        </div>
+</div>
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req">Indicative Price or Range</p>        
+        <div>
+          <textarea formControlName="indicative_price_range" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+          @if (supportInfoForm.get('indicative_price_range')?.invalid &&
+         supportInfoForm.get('indicative_price_range')?.touched) {
+          <p class="text-xs text-red-500 "> Please enter Indicative Price or Range</p>
+          }
+        </div>
+      </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium req">Free Assessment/POC Available?</label>
+        <div>
+          <div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of externalSupport"
+       (click)="selectfreeacc(category)" 
+       [ngClass]="{
+         'bg-black text-white': selectfree.value === category,
+         'bg-gray-200 text-black': selectfree.value !== category
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+        </div>
+      </div>
+    
+  <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Engagement Duration</label>
+  <div>
+
+    <select formControlName="engagementDuration" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Engagement Duration</option>
+      <option>&lt;1 month</option>
+      <option>1–3 months</option>
+      <option>&gt;3 months</option>
+      <option>Ongoing</option>
+    </select>
+        @if (supportInfoForm.get('engagementDuration')?.invalid &&
+         supportInfoForm.get('engagementDuration')?.touched) {
+          <p class="text-xs text-red-500 "> Please enter Engagement Duration</p>
+          }
+  </div>
+</div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+  <label class="font-medium req">Delivery Mode</label>
+  <div>
+
+    <select formControlName="deliveryMode" class="select select-bordered w-full sm:w-80 md:w-96">
+      <option disabled selected>Select Delivery Mode</option>
+      <option>Remote</option>
+      <option>Hybrid</option>
+      <option>Onsite</option>
+    </select>
+        @if (supportInfoForm.get('deliveryMode')?.invalid &&
+         supportInfoForm.get('deliveryMode')?.touched) {
+          <p class="text-xs text-red-500 "> Please enter Delivery Mode</p>
+          }
+  </div>
+</div>
+  
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium ">External Support Required</label>
+        <div>
+          <div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of externalSupport"
+       (click)="selectExternalsupport(category)"
+       [ngClass]="{
+         'bg-black text-white': selectedExternalsupport.value === category,
+         'bg-gray-200 text-black': selectedExternalsupport.value !== category
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+        </div>
+      </div>
+
+    
+   
+      
+
+
+ </div>
+    </div>
+  </div>
+  </div>
+
+
+   <div [formGroup]="mediaInfoForm" *ngIf="currentStep === 4" class="my-8">
+  <h3 class="text-lg font-semibold mt-6">Product Info</h3>
+  <div class="border-t border-dashed border-gray-300 pt-6 space-y-6">
+    <div class="flex justify-center">
+      <div class="w-full">
+
+<!-- //Deployment type -->
+
+       <!-- Cover Image -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div class="text-sm font-medium text-gray-600">
+          <p class="req">Bundle Logo </p>
+          <p class="text-xs text-gray-400">JPEG or PNG, Max 2MB<br />Dimension 500 X 500</p>
+        </div>
+
+        <div class="w-full sm:w-[10rem] md:w-[13rem] lg:w-[16rem]">
+          <div
+            class="aspect-square border-2 border-zinc-300 border-dashed rounded-md flex justify-center items-center relative group hover:border-zinc-500 overflow-hidden">
+            @if (customCouponImageUrl) {
+            <div>
+              <img class="w-full h-full object-cover" src="{{customCouponImageUrl}}" alt="">
+              <div
+                class="flex items-center justify-center gap-2 text-white bg-black/50 backdrop-blur-sm absolute top-0 left-0 w-full h-full opacity-0 transition duration-300 group-hover:opacity-100">
+                <i class="ri-image-edit-fill text-3xl"></i>
+                <p class="text-sm border-l border-white pl-2 font-medium">Change Product Image</p>
+              </div>
+            </div>
+            } @else {
+            <div class="flex items-center gap-2 text-zinc-400">
+              <i class="ri-image-fill text-3xl group-hover:text-zinc-500"></i>
+              <p class="text-sm border-l border-zinc-300 pl-2 font-medium">Upload Product Image</p>
+            </div>
+            }
+            <input formControlName="image_url" type="file" (change)="addCouponImage($event)"
+              class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" accept="image/*">
+          </div>
+
+          @if (mediaInfoForm.get('image_url')?.invalid &&
+          mediaInfoForm.get('image_url')?.touched) {
+          <span class="text-xs text-red-500">Upload Image</span>
+          }
+
+        </div>
+      </div>
+
+
+       <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mt-3">
+            <div>
+
+              <label class="font-medium mt-1 req">Broucher Upload / Datasheet</label>
+            </div>        
+        <div>
+          <app-file-upload [attachmentsFormArray]="broucherUpload"></app-file-upload>
+
+        </div>
+      </div> 
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+            <div>
+
+              <label class="font-medium mt-1 req">customer case Study Upload</label>
+            
+            </div>        
+        <div>
+          <app-file-upload [attachmentsFormArray]="customerCasestudyUpload"></app-file-upload>
+
+        </div>
+      </div>
+
+
+
+ </div>
+    </div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start my-4">
+  <p class="font-medium req">Consent to Data Privacy Policy</p>
+  <div>
+    <input
+      type="checkbox"
+      id="policy"
+      formControlName="consent_data_privacy_policy"
+      class="peer hidden"
+    />
+    <label
+      for="policy"
+      class="cursor-pointer w-6 h-6 border-2 border-gray-400  text-gray-100
+             peer-checked:bg-orange-500 peer-checked:text-white 
+             peer-checked:border-orange-500 flex justify-center items-center"
+    >
+      <i class="ri-check-line"></i>
+    </label>
+  </div>
+</div>
+
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start my-4">
+  <p class="font-medium req">Accept Marketplace Terms & Conditions</p>
+  <div>
+    <input
+      type="checkbox"
+      id="accept"
+      formControlName="accept_bundle_listing_terms"
+      class="peer hidden"
+    />
+    <label
+      for="accept"
+      class="cursor-pointer w-6 h-6 border-2 border-gray-400 
+              text-gray-100
+             peer-checked:bg-orange-500 peer-checked:text-white 
+             peer-checked:border-orange-500 flex justify-center items-center"
+    >
+      <i class="ri-check-line"></i>
+    </label>
+  </div>
+</div>
+  </div>
+
+  </div>
+
+
+  
+  
+  <!-- Navigation -->
+    <div class="flex justify-end gap-4 mt-8">
+          <button
+            type="button"
+            *ngIf="currentStep > 0 "
+            (click)="prevStep()"
+            class="px-4 py-2 border rounded"
+          >
+            Back
+          </button>
+          
+            <button
+              type="button"
+              *ngIf="currentStep < 4 " 
+              (click)="setActiveTab(this.currentStep+1)"
+              class="px-4 py-2 bg-orange-500 text-white rounded"
+            >
+              Next
+            </button>
+          
+        </div>
+        @if (currentStep === 4) {
+          <hr>
+  <div class="mt-10 text-center flex justify-end gap-2">
+<!-- Reset only -->
+<button type="button"
+      [disabled]="isreqSending"
+        class="text-black px-5 py-2 rounded-full"
+        (click)="onSubmit('discard')">
+  Discard
+</button> 
+
+<!-- Draft -->
+<button type="button"
+        [disabled]="isreqSending"
+        class="bg-black text-white px-5 py-2 rounded-full"
+        (click)="onSubmit('draft')">
+  Save as Draft
+</button> 
+
+<!-- Approval -->
+<button type="button"
+         [disabled]="isreqSending"
+        class="bg-orange-500 text-white px-5 py-2 rounded-full"
+        (click)="onSubmit('approval')">
+   <ng-container *ngIf="isreqSending; else btnText">
+    <span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span>
+    Submitting...
+  </ng-container>
+
+  <ng-template #btnText>
+    Send for Approval
+  </ng-template>
+</button>
+
+
+    </div>
+  }
+</form>
+
+<!-- @if (isproductSelectModalOpen) {
+<app-selectable-product-list-modal [isOpen]="isproductSelectModalOpen" type="group" [categoryData]="productSelectData"
+  (closeModalemmit)="closedModal($event)"></app-selectable-product-list-modal>
+
+} -->
+  @if (isproductSelectModalOpen) {
+  <app-selectable-product-list-modal 
+    [isOpen]="isproductSelectModalOpen"
+    [type]="currentModalType"
+    [categoryData]="getCurrentSelections()"
+    (closeModalemmit)="closedModal($event)">
+  </app-selectable-product-list-modal>
+}
+<div *ngIf="isreqSending" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+  <span class="loading loading-spinner loading-lg text-warning"></span>
+</div>

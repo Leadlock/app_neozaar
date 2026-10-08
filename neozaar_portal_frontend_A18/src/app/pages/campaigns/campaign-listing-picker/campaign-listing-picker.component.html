@@ -1,0 +1,73 @@
+@if(isOpen){
+<div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+  <div class="bg-white rounded-xl w-full max-w-2xl max-h-[85vh] flex flex-col overflow-hidden">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+      <h2 class="text-lg font-bold text-gray-800">Add listings to this campaign</h2>
+      <button (click)="close()" class="text-gray-400 hover:text-gray-600"><i class="ri-close-line text-xl"></i></button>
+    </div>
+
+    <!-- Type tabs + search -->
+    <div class="px-5 pt-4 flex items-center justify-between gap-3">
+      <div class="flex gap-1 bg-gray-100 rounded-lg p-1">
+        @for(t of types; track t){
+          <button (click)="setType(t)"
+            class="px-3 py-1.5 text-sm font-medium rounded-md capitalize transition-colors"
+            [ngClass]="activeType === t ? 'bg-white text-orange-600 shadow-sm' : 'text-gray-500 hover:text-gray-700'">
+            {{ t }}s
+          </button>
+        }
+      </div>
+      <input [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" type="text" placeholder="Search…"
+        class="flex-1 max-w-xs px-3 py-1.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+    </div>
+
+    <!-- Item list -->
+    <div class="flex-1 overflow-y-auto px-5 py-4">
+      @if(isLoading){
+        <p class="text-center text-gray-400 py-8">Loading…</p>
+      } @else if(!items.length){
+        <p class="text-center text-gray-400 py-8">No published {{ activeType }}s found.</p>
+      } @else {
+        <div class="space-y-2">
+          @for(item of items; track item.id){
+            <label class="flex items-center gap-3 p-2.5 rounded-lg border border-gray-100 hover:bg-gray-50 cursor-pointer">
+              <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggle(item)" class="w-4 h-4 accent-orange-600" />
+              <img [src]="item.product_logo || item.screenshots?.[0]" alt="" class="w-9 h-9 rounded-lg object-cover bg-gray-100 flex-shrink-0" />
+              <div class="min-w-0">
+                <p class="text-sm font-medium text-gray-800 truncate">{{ item.name }}</p>
+                @if(item.brand_name){
+                  <p class="text-xs text-gray-400">{{ item.brand_name }}</p>
+                }
+              </div>
+            </label>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- Pagination -->
+    @if(totalPages > 1){
+      <div class="flex items-center justify-center gap-2 px-5 py-2 border-t border-gray-100">
+        <button (click)="prevPage()" [disabled]="currentPage === 1" class="px-2.5 py-1 text-xs rounded border border-gray-200 disabled:opacity-40">Prev</button>
+        <span class="text-xs text-gray-500">{{ currentPage }} / {{ totalPages }}</span>
+        <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="px-2.5 py-1 text-xs rounded border border-gray-200 disabled:opacity-40">Next</button>
+      </div>
+    }
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+      <span class="text-sm text-gray-500">{{ selected.size }} selected</span>
+      <div class="flex gap-2">
+        <button (click)="close()" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+        <button (click)="confirm()" [disabled]="!selected.size"
+          class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed">
+          Add {{ selected.size || '' }}
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>
+}

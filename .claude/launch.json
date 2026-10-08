@@ -1,0 +1,13 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "Neozaar Next.js",
+      "url": "http://localhost:3000"
+    },
+    {
+      "name": "Neozaar Portal (Angular)",
+      "url": "http://localhost:4200"
+    }
+  ]
+}

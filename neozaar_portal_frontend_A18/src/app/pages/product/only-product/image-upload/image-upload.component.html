@@ -1,0 +1,40 @@
+<div>
+  <div class="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 gap-4">
+    <!-- Image Preview Cards -->
+    <div
+      *ngFor="let fileControl of imageFormArray.controls; let i = index"
+      class="relative border rounded overflow-hidden group"
+    >
+
+      <img
+        [src]="imagePreviews[i]"
+        class="w-full h-24 object-cover"
+        alt="preview"
+      />
+      <button
+        class="absolute top-1 right-1 bg-white rounded-full p-1 text-red-600 hover:text-red-800 shadow"
+        type="button"
+        (click)="removeImage(i)"
+      >
+        <i class="ri-close-circle-fill text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Upload Button -->
+    <div
+      *ngIf="imageFormArray.length < maxImages"
+      class="flex items-center justify-center border-2 border-dashed border-orange-400 rounded h-24 cursor-pointer hover:bg-orange-50"
+      (click)="fileInput.click()"
+    >
+      <input
+        type="file"
+        #fileInput
+        class="hidden"
+        (change)="onImageSelected($event)"
+        accept="image/jpeg,image/png"
+        multiple
+      />
+      <i class="ri-image-add-line text-2xl text-orange-400"></i>
+    </div>
+  </div>
+</div>

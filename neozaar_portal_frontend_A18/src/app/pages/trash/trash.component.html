@@ -1,0 +1,191 @@
+<div class="p-6 max-w-7xl mx-auto">
+  <!-- Header -->
+  <div class="flex items-start justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-800">Trash</h1>
+      <p class="text-zinc-500 text-sm mt-1">
+        {{ totalCount }} item{{ totalCount !== 1 ? 's' : '' }} awaiting permanent deletion
+      </p>
+    </div>
+    @if (totalCount > 0) {
+      <button
+        class="px-4 py-2 bg-red-600 text-white text-sm font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition"
+        (click)="openConfirm(true)"
+        [disabled]="purging">
+        Empty All Trash
+      </button>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 flex-wrap mb-5">
+    @for (tab of tabs; track tab.key) {
+      <button
+        class="px-4 py-1.5 rounded-full text-sm font-medium border transition"
+        [class.bg-zinc-800]="activeTab === tab.key"
+        [class.text-white]="activeTab === tab.key"
+        [class.border-zinc-800]="activeTab === tab.key"
+        [class.bg-white]="activeTab !== tab.key"
+        [class.text-zinc-600]="activeTab !== tab.key"
+        [class.border-zinc-300]="activeTab !== tab.key"
+        (click)="setTab(tab.key)">
+        {{ tab.label }}
+        @if (counts[tab.key] > 0) {
+          <span class="ml-1.5 bg-red-500 text-white text-xs px-1.5 py-0.5 rounded-full">
+            {{ counts[tab.key] }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Bulk action bar -->
+  @if (selectedCount > 0) {
+    <div class="flex items-center gap-4 px-4 py-3 bg-white border border-zinc-200 rounded-lg mb-4 shadow-sm">
+      <span class="text-sm text-zinc-500">{{ selectedCount }} selected</span>
+      <button
+        class="px-3 py-1.5 bg-red-600 text-white text-xs font-medium rounded-lg hover:bg-red-700 disabled:opacity-50 transition"
+        (click)="openConfirm(false)"
+        [disabled]="purging">
+        Delete Selected Permanently
+      </button>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (loading) {
+    <div class="py-20 text-center text-zinc-400">Loading...</div>
+  }
+
+  @if (!loading) {
+    <div class="bg-white border border-zinc-200 rounded-xl overflow-hidden shadow-sm">
+      <div class="overflow-x-auto">
+        <table class="w-full text-sm">
+          <thead class="bg-zinc-50 border-b border-zinc-200">
+            <tr>
+              <th class="w-10 px-4 py-3 text-left">
+                <input type="checkbox" [checked]="allPageChecked" (change)="toggleAll()" [disabled]="currentRows.length === 0" />
+              </th>
+              <th class="px-4 py-3 text-left font-semibold text-zinc-600">Name</th>
+
+              @if (activeTab === 'products') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Type</th>
+              }
+              @if (activeTab === 'leads' || activeTab === 'accounts' || activeTab === 'contacts') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Email</th>
+              }
+              @if (activeTab === 'leads') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Status</th>
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Score</th>
+              }
+              @if (activeTab === 'accounts') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Type</th>
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Industry</th>
+              }
+              @if (activeTab === 'contacts') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Phone</th>
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Designation</th>
+              }
+              @if (activeTab === 'opportunities') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Stage</th>
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Value</th>
+              }
+              @if (activeTab === 'tasks') {
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Status</th>
+                <th class="px-4 py-3 text-left font-semibold text-zinc-600">Due Date</th>
+              }
+              <th class="px-4 py-3 text-left font-semibold text-zinc-600">Deleted On</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-zinc-100">
+            @for (row of currentRows; track row.id) {
+              <tr class="hover:bg-zinc-50 transition" [class.opacity-50]="purging">
+                <td class="px-4 py-3">
+                  <input type="checkbox"
+                    [checked]="currentSelected.has(row.id)"
+                    (change)="toggle(row.id)" />
+                </td>
+                <td class="px-4 py-3 font-semibold text-zinc-800">{{ displayName(row) }}</td>
+
+                @if (activeTab === 'products') {
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full text-xs capitalize">{{ row.type || '—' }}</span>
+                  </td>
+                }
+                @if (activeTab === 'leads' || activeTab === 'accounts' || activeTab === 'contacts') {
+                  <td class="px-4 py-3 text-zinc-500">{{ row.email || '—' }}</td>
+                }
+                @if (activeTab === 'leads') {
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full text-xs">{{ row.status || '—' }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-zinc-500">{{ row.score ?? '—' }}</td>
+                }
+                @if (activeTab === 'accounts') {
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 bg-orange-100 text-orange-700 rounded-full text-xs">{{ row.type || '—' }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-zinc-500">{{ row.industry || '—' }}</td>
+                }
+                @if (activeTab === 'contacts') {
+                  <td class="px-4 py-3 text-zinc-500">{{ row.phone || '—' }}</td>
+                  <td class="px-4 py-3 text-zinc-500">{{ row.title || '—' }}</td>
+                }
+                @if (activeTab === 'opportunities') {
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full text-xs">{{ row.stage || '—' }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-zinc-500">{{ row.value ? ('₹' + row.value) : '—' }}</td>
+                }
+                @if (activeTab === 'tasks') {
+                  <td class="px-4 py-3">
+                    <span class="px-2 py-0.5 bg-zinc-100 text-zinc-600 rounded-full text-xs">{{ row.status || '—' }}</span>
+                  </td>
+                  <td class="px-4 py-3 text-zinc-500">{{ formatDate(row.due_date) }}</td>
+                }
+                <td class="px-4 py-3 text-zinc-400 text-xs">{{ formatDate(row.updated_at) }}</td>
+              </tr>
+            }
+            @if (currentRows.length === 0) {
+              <tr>
+                <td colspan="6" class="py-16 text-center text-zinc-400">
+                  No deleted {{ activeTab }} found
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</div>
+
+<!-- Confirmation modal -->
+@if (confirmOpen) {
+  <div class="fixed inset-0 bg-black/40 z-50 flex items-center justify-center" (click)="cancelConfirm()">
+    <div class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4" (click)="$event.stopPropagation()">
+      <h3 class="text-lg font-bold text-zinc-800 mb-2">Permanently Delete?</h3>
+      <p class="text-zinc-500 text-sm mb-6 leading-relaxed">
+        @if (confirmAll) {
+          This will permanently delete <strong class="text-zinc-800">all {{ totalCount }} items</strong> in the trash.
+          This action cannot be undone.
+        } @else {
+          This will permanently delete <strong class="text-zinc-800">{{ selectedCount }} selected item{{ selectedCount !== 1 ? 's' : '' }}</strong>.
+          This action cannot be undone.
+        }
+      </p>
+      <div class="flex gap-3 justify-end">
+        <button
+          class="px-4 py-2 text-sm border border-zinc-300 rounded-lg text-zinc-600 hover:bg-zinc-50 transition"
+          (click)="cancelConfirm()">
+          Cancel
+        </button>
+        <button
+          class="px-4 py-2 text-sm bg-red-600 text-white rounded-lg hover:bg-red-700 transition"
+          (click)="purge()">
+          Delete Forever
+        </button>
+      </div>
+    </div>
+  </div>
+}

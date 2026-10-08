@@ -1,0 +1,108 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Tasks & Follow-ups</h1>
+      <p class="crm-subtitle">Stay on top of your action items and deadlines</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Task</button>
+  </div>
+
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">Status</label>
+      <select class="neo-select" [(ngModel)]="filters.status" (change)="load()">
+        <option value="">All</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:140px">
+      <label class="form-label">Priority</label>
+      <select class="neo-select" [(ngModel)]="filters.priority" (change)="load()">
+        <option value="">All</option>
+        @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Filter</button>
+  </div>
+
+  <div class="neo-table-wrap">
+    @if (loading) { <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading tasks...</div> }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead><tr><th>Title</th><th>Related To</th><th>Priority</th><th>Due Date</th><th>Status</th><th>Owner</th><th>Actions</th></tr></thead>
+        <tbody>
+          @for (t of tasks; track t.id) {
+            <tr [style.background]="isOverdue(t) ? 'rgba(16,42,67,0.04)' : ''">
+              <td style="font-weight:600;color:var(--crm-text)">{{ t.title }}</td>
+              <td style="font-size:0.8rem;color:var(--crm-text-secondary)">{{ t.related_type ? t.related_type + ' #' + t.related_id : '—' }}</td>
+              <td>
+                <span class="neo-badge"
+                  [class.neo-badge-danger]="t.priority==='Urgent'"
+                  [class.neo-badge-warning]="t.priority==='High'"
+                  [class.neo-badge-new]="t.priority==='Medium'"
+                  [class.neo-badge-gray]="t.priority==='Low'">
+                  {{ t.priority }}
+                </span>
+              </td>
+              <td style="font-size:0.85rem" [style.color]="isOverdue(t) ? 'var(--crm-text)' : 'var(--crm-text-secondary)'" [style.font-weight]="isOverdue(t) ? '600' : '400'">
+                {{ t.due_date ? (t.due_date | date:'dd MMM yyyy HH:mm') : '—' }}
+              </td>
+              <td><span class="neo-badge" [ngClass]="statusColor(t.status)">{{ t.status }}</span></td>
+              <td style="color:var(--crm-text-secondary)">{{ t.owner_name || '—' }}</td>
+              <td>
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="openEdit(t)">Edit</button>
+                  @if (t.status !== 'Completed') {
+                    <button class="neo-btn neo-btn-success" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="complete(t)">✓ Done</button>
+                  }
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="delete(t.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!tasks.length) { <tr><td colspan="7" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+            No tasks found
+          </td></tr> }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.75rem;color:var(--crm-text);font-size:1.25rem">{{ editMode ? 'Edit Task' : 'New Task' }}</h2>
+      <div class="form-group"><label class="form-label">Title *</label><input class="neo-input" [(ngModel)]="form.title" /></div>
+      <div class="crm-grid-2">
+        <div class="form-group"><label class="form-label">Priority</label>
+          <select class="neo-select" [(ngModel)]="form.priority">
+            @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Status</label>
+          <select class="neo-select" [(ngModel)]="form.status">
+            @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Due Date</label><input class="neo-input" [(ngModel)]="form.due_date" type="datetime-local" /></div>
+        <div class="form-group"><label class="form-label">Reminder</label><input class="neo-input" [(ngModel)]="form.reminder_at" type="datetime-local" /></div>
+        <div class="form-group"><label class="form-label">Related To</label>
+          <select class="neo-select" [(ngModel)]="form.related_type">
+            <option value="">None</option>
+            @for (r of relatedTypes; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Related ID</label><input class="neo-input" [(ngModel)]="form.related_id" type="number" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="neo-input" [(ngModel)]="form.description" rows="2"></textarea></div>
+      @if (editMode) {
+        <div class="form-group"><label class="form-label">Completion Notes</label><textarea class="neo-input" [(ngModel)]="form.completion_notes" rows="2"></textarea></div>
+      }
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create' }}</button>
+      </div>
+    </div>
+  </div>
+}

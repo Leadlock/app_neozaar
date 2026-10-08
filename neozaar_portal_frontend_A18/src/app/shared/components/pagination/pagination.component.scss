@@ -1,0 +1,11 @@
+#pagination{
+    .btn{
+        @apply bg-white;
+    }
+    &.btn-disabled{
+        @apply cursor-not-allowed border;
+    }
+    .page-active{
+        @apply bg-zinc-100 text-zinc-600 font-semibold;
+    }
+}

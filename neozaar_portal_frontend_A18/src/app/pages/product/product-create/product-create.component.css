@@ -1,0 +1,6 @@
+.disabled {
+  cursor: not-allowed;
+  user-select: none;  
+  caret-color: transparent;  
+   pointer-events: none;    
+}

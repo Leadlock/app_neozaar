@@ -1,0 +1,89 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Contacts</h1>
+      <p class="crm-subtitle">People associated with your accounts and deals</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Contact</button>
+  </div>
+
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="filters.search" placeholder="Name, email..." (keyup.enter)="load()" />
+    </div>
+    <button class="neo-btn" (click)="load()">Search</button>
+  </div>
+
+  <div class="neo-table-wrap">
+    @if (loading) { <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading...</div> }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead><tr><th>Company</th><th>Contact Person</th><th>Account</th><th>Email</th><th>Phone</th><th>Role</th><th>Actions</th></tr></thead>
+        <tbody>
+          @for (c of contacts; track c.id) {
+            <tr>
+              <td style="font-weight:600;color:var(--crm-text)">{{ c.company || '—' }}</td>
+              <td style="color:var(--crm-text-secondary);font-size:0.825rem">{{ c.name || '—' }}</td>
+              <td style="color:var(--crm-text-secondary)">{{ c.account_name || '—' }}</td>
+              <td style="color:var(--crm-text-secondary);font-size:0.825rem">{{ c.email || '—' }}</td>
+              <td style="color:var(--crm-text-secondary)">{{ c.phone || '—' }}</td>
+              <td><span class="neo-badge neo-badge-orange">{{ c.role || '—' }}</span></td>
+              <td>
+                <div style="display:flex;gap:0.4rem">
+                  <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="openEdit(c)">Edit</button>
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="delete(c.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!contacts.length) { <tr><td colspan="7" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+            No contacts found
+          </td></tr> }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (pages > 1) {
+    <div class="pagination">
+      <button class="neo-btn" (click)="prevPage()" [disabled]="page===1">← Prev</button>
+      <span class="pagination-info">Page {{ page }} of {{ pages }}</span>
+      <button class="neo-btn" (click)="nextPage()" [disabled]="page===pages">Next →</button>
+    </div>
+  }
+</div>
+
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.75rem;color:var(--crm-text);font-size:1.25rem">{{ editMode ? 'Edit Contact' : 'New Contact' }}</h2>
+      <div class="crm-grid-2">
+        <div class="form-group"><label class="form-label">Company Name *</label><input class="neo-input" [(ngModel)]="form.company" placeholder="Company name" /></div>
+        <div class="form-group"><label class="form-label">Contact Person</label><input class="neo-input" [(ngModel)]="form.name" placeholder="Full name" /></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="neo-input" [(ngModel)]="form.email" type="email" /></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="neo-input" [(ngModel)]="form.phone" /></div>
+        <div class="form-group"><label class="form-label">WhatsApp</label><input class="neo-input" [(ngModel)]="form.whatsapp" /></div>
+        <div class="form-group"><label class="form-label">Designation</label><input class="neo-input" [(ngModel)]="form.designation" /></div>
+        <div class="form-group"><label class="form-label">Role</label>
+          <select class="neo-select" [(ngModel)]="form.role">
+            <option value="">Select role</option>
+            @for (r of roles; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Country</label><input class="neo-input" [(ngModel)]="form.country" /></div>
+        <div class="form-group"><label class="form-label">Account</label>
+          <select class="neo-select" [(ngModel)]="form.account_id">
+            <option [ngValue]="null">— No account —</option>
+            @for (a of accounts; track a.id) { <option [ngValue]="a.id">{{ a.name }}</option> }
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="neo-input" [(ngModel)]="form.notes" rows="2"></textarea></div>
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create' }}</button>
+      </div>
+    </div>
+  </div>
+}

@@ -1,0 +1,260 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-5">
+    <div>
+      <h1 class="text-xl font-bold text-gray-900">Sellers & Affiliates</h1>
+      <p class="text-sm text-gray-400 mt-0.5">Manage sellers, affiliates — assign items and generate referral links</p>
+    </div>
+  </div>
+
+  <p *ngIf="assignmentSuccess" role="status" class="mb-4 text-sm text-emerald-700">{{ assignmentSuccess }}</p>
+  <!-- TABLE -->
+  <div class="bg-white border border-gray-100 rounded-xl shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="bg-gray-50 border-b border-gray-100 text-xs font-semibold text-gray-400 uppercase tracking-wider">
+            <th class="px-5 py-3 text-left">#</th>
+            <th class="px-5 py-3 text-left">Name</th>
+            <th class="px-5 py-3 text-left">Role</th>
+            <th class="px-5 py-3 text-left">Mobile</th>
+            <th class="px-5 py-3 text-left">Status</th>
+            <th class="px-5 py-3 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-50">
+          <tr *ngIf="loading">
+            <td colspan="6" class="px-5 py-8 text-center text-gray-400">Loading...</td>
+          </tr>
+          <tr *ngIf="!loading && sellers.length === 0">
+            <td colspan="6" class="px-5 py-8 text-center text-gray-400">No sellers or affiliates found.</td>
+          </tr>
+          <tr *ngFor="let seller of sellers; let i = index" class="hover:bg-gray-50/50 transition-colors">
+            <td class="px-5 py-3.5 text-gray-400 font-medium">{{ ((pagination.page - 1) * pagination.limit) + i + 1 }}</td>
+            <td class="px-5 py-3.5">
+              <div class="flex items-center gap-3">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold uppercase flex-shrink-0"
+                  [ngClass]="seller.role_type === 'ISV_SELLER' ? 'bg-purple-100 text-purple-600' : 'bg-teal-100 text-teal-600'">
+                  {{ seller.name?.charAt(0) }}
+                </div>
+                <div>
+                  <p class="font-semibold text-gray-800">{{ seller.name }}</p>
+                  <p class="text-xs text-gray-400">{{ seller.email }}</p>
+                </div>
+              </div>
+            </td>
+            <td class="px-5 py-3.5">
+              <span class="px-2.5 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="seller.role_type === 'ISV_SELLER' ? 'bg-purple-50 text-purple-600' : 'bg-teal-50 text-teal-600'">
+                {{ seller.role_type === 'ISV_SELLER' ? 'ISV Seller' : 'Affiliate' }}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-gray-600">{{ seller.mobile || '—' }}</td>
+            <td class="px-5 py-3.5">
+              <span class="px-2.5 py-1 text-xs font-semibold rounded-full"
+                [ngClass]="seller.is_active ? 'bg-emerald-50 text-emerald-600' : 'bg-red-50 text-red-500'">
+                {{ seller.is_active ? 'Active' : 'Inactive' }}
+              </span>
+            </td>
+            <td class="px-5 py-3.5 text-right">
+              <div class="flex items-center justify-end gap-2">
+                <button (click)="openAssignModal(seller)"
+                  class="px-3 py-1.5 text-xs font-semibold bg-orange-50 text-orange-600 hover:bg-orange-100 rounded-lg transition-colors">
+                  <i class="ri-settings-3-line mr-1"></i> Assign
+                </button>
+                <button (click)="openLinkModal(seller)"
+                  class="px-3 py-1.5 text-xs font-semibold bg-indigo-50 text-indigo-600 hover:bg-indigo-100 rounded-lg transition-colors">
+                  <i class="ri-links-line mr-1"></i> UTM Link
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINATION -->
+    <div *ngIf="pagination.total_pages > 0" class="flex items-center justify-between px-5 py-4 border-t border-gray-50">
+      <p class="text-sm text-gray-400">
+        Page <span class="font-semibold text-gray-700">{{ pagination.page }}</span> of
+        <span class="font-semibold text-gray-700">{{ pagination.total_pages }}</span>
+        &nbsp;·&nbsp; {{ pagination.total }} partner(s)
+      </p>
+      <div class="flex items-center gap-1.5">
+        <button [disabled]="!pagination.has_prev" (click)="goToPage(pagination.page - 1)"
+          class="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <i class="ri-arrow-left-s-line"></i>
+        </button>
+        <button *ngFor="let p of pagination.pages" (click)="goToPage(p)"
+          class="w-8 h-8 text-sm rounded-lg border transition-colors"
+          [ngClass]="{'bg-indigo-600 text-white border-indigo-600': p === pagination.page, 'bg-white text-gray-600 border-gray-200 hover:bg-gray-50': p !== pagination.page}">
+          {{ p }}
+        </button>
+        <button [disabled]="!pagination.has_next" (click)="goToPage(pagination.page + 1)"
+          class="p-2 rounded-lg border border-gray-200 bg-white text-gray-500 hover:bg-gray-50 disabled:opacity-40 disabled:cursor-not-allowed transition-colors">
+          <i class="ri-arrow-right-s-line"></i>
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── UTM LINK MODAL ─────────────────────────────────────── -->
+<div *ngIf="showLinkModal" class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showLinkModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 z-10">
+    <div class="flex items-center justify-between mb-4">
+      <h2 class="text-base font-bold text-gray-900">UTM Referral Link — {{ selectedSeller?.name }}</h2>
+      <button (click)="showLinkModal = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <i class="ri-close-line text-lg"></i>
+      </button>
+    </div>
+    <p class="text-xs text-gray-400 mb-3">Share this link with the seller. Any lead or signup generated through this link will be tracked to their account.</p>
+    <div class="flex items-center gap-2 bg-gray-50 border border-gray-200 rounded-lg px-3 py-2.5">
+      <span class="text-xs text-gray-600 break-all flex-1">{{ generatedLink }}</span>
+      <button (click)="copyLink()" class="flex-shrink-0 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors"
+        [ngClass]="copied ? 'bg-emerald-600 text-white' : 'bg-indigo-600 text-white hover:bg-indigo-700'">
+        <i [class]="copied ? 'ri-check-line mr-1' : 'ri-file-copy-line mr-1'"></i>
+        {{ copied ? 'Copied!' : 'Copy' }}
+      </button>
+    </div>
+  </div>
+</div>
+
+<!-- ── ASSIGN MODAL ───────────────────────────────────────── -->
+<div *ngIf="showAssignModal" class="fixed inset-0 z-50 flex items-center justify-center">
+  <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" (click)="showAssignModal = false"></div>
+  <div class="relative bg-white rounded-2xl shadow-2xl w-full max-w-2xl z-10 flex flex-col" style="max-height: 85vh;">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+      <div>
+        <h2 class="text-base font-bold text-gray-900">Assign Items — {{ assignSeller?.name }}</h2>
+        <p *ngIf="assignmentsLoading" role="status" class="text-sm text-gray-500">Loading assignment options...</p>
+        <p *ngIf="assignmentError" role="alert" class="text-sm text-red-600">{{ assignmentError }}</p>
+        <p class="text-xs text-gray-400 mt-0.5">Select categories, products, services or solutions this seller can promote</p>
+      </div>
+      <button (click)="showAssignModal = false" class="p-1.5 rounded-lg text-gray-400 hover:text-gray-600 hover:bg-gray-100 transition-colors">
+        <i class="ri-close-line text-lg"></i>
+      </button>
+    </div>
+
+    <!-- Tabs -->
+    <div class="flex border-b border-gray-100 px-6">
+      <button *ngFor="let tab of tabs"
+        (click)="activeTab = tab.key; assignSearch = ''"
+        class="px-4 py-3 text-sm font-medium border-b-2 transition-colors mr-1"
+        [ngClass]="activeTab === tab.key
+          ? 'border-orange-500 text-orange-600'
+          : 'border-transparent text-gray-500 hover:text-gray-700'">
+        {{ tab.label }}
+        <span class="ml-1.5 text-xs px-1.5 py-0.5 rounded-full"
+          [ngClass]="selectedIds[tab.key].size > 0 ? 'bg-orange-100 text-orange-600' : 'bg-gray-100 text-gray-400'">
+          {{ selectedIds[tab.key].size }}
+        </span>
+      </button>
+    </div>
+
+    <!-- Context hint -->
+    <div class="px-6 pt-3">
+      <p *ngIf="activeTab === 'category'" class="text-xs text-blue-600 bg-blue-50 rounded-lg px-3 py-2">
+        <i class="ri-information-line mr-1"></i>
+        Assigning a <strong>category</strong> gives the seller access to <strong>all current and future products</strong> in that category.
+      </p>
+      <p *ngIf="activeTab !== 'category'" class="text-xs text-amber-600 bg-amber-50 rounded-lg px-3 py-2">
+        <i class="ri-information-line mr-1"></i>
+        Assigning specific items gives the seller access to <strong>only those selected items</strong>, regardless of category.
+      </p>
+    </div>
+
+    <!-- Search -->
+    <div class="px-6 pt-3 pb-2">
+      <div class="flex items-center bg-gray-50 border border-gray-200 rounded-lg px-3 py-2">
+        <i class="ri-search-line text-gray-400 mr-2"></i>
+        <input [(ngModel)]="assignSearch" type="text" placeholder="Search..." class="bg-transparent outline-none text-sm w-full text-gray-700">
+      </div>
+    </div>
+
+    <!-- List -->
+    <div class="flex-1 overflow-y-auto px-6 pb-4">
+
+      <!-- Currently assigned chips -->
+      <div *ngIf="assignedInTab.length > 0" class="mb-3">
+        <p class="text-xs font-semibold text-gray-400 uppercase tracking-wider mb-2">Currently Assigned</p>
+        <div class="flex flex-wrap gap-2">
+          <span *ngFor="let item of assignedInTab"
+            class="flex items-center gap-1.5 pl-3 pr-2 py-1 bg-orange-50 border border-orange-200 text-orange-700 text-xs font-medium rounded-full">
+            {{ item.name }}
+            <button (click)="toggle(item.id)" class="w-4 h-4 flex items-center justify-center rounded-full hover:bg-orange-200 transition-colors" title="Unassign">
+              <i class="ri-close-line text-xs"></i>
+            </button>
+          </span>
+        </div>
+        <hr class="mt-3 border-gray-100">
+      </div>
+
+      <div *ngIf="filteredOptions.length === 0" class="py-8 text-center text-sm text-gray-400">
+        No items found
+      </div>
+
+      <!-- Category rows: show product count + type restriction toggles -->
+      <ng-container *ngIf="activeTab === 'category'">
+        <div *ngFor="let item of filteredOptions"
+          class="py-2.5 px-3 rounded-lg hover:bg-gray-50 transition-colors">
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggle(item.id)"
+              class="w-4 h-4 accent-orange-500 cursor-pointer flex-shrink-0">
+            <span class="flex-1 text-sm text-gray-700">{{ item.name }}</span>
+            <span class="text-xs text-gray-400 bg-gray-100 px-2 py-0.5 rounded-full">
+              {{ item.product_count || 0 }} product{{ item.product_count !== 1 ? 's' : '' }}
+            </span>
+          </label>
+          <!-- Type restriction row — only shown when category is selected -->
+          <div *ngIf="isSelected(item.id)" class="mt-2 ml-7 flex items-center gap-2 flex-wrap">
+            <span class="text-xs text-gray-400">Allow types:</span>
+            <button *ngFor="let t of ['product','service','solution']"
+              (click)="toggleAllowedType(item.id, t)"
+              class="px-2.5 py-1 text-xs font-medium rounded-full border transition-colors capitalize"
+              [ngClass]="isTypeAllowed(item.id, t)
+                ? 'bg-orange-500 text-white border-orange-500'
+                : 'bg-white text-gray-400 border-gray-200 hover:border-gray-400'">
+              {{ t }}
+            </button>
+            <span class="text-xs text-gray-400 italic">{{ getAllowedTypesLabel(item.id) }}</span>
+          </div>
+        </div>
+      </ng-container>
+
+      <!-- Product / Service / Solution rows: show category tag -->
+      <ng-container *ngIf="activeTab !== 'category'">
+        <label *ngFor="let item of filteredOptions"
+          class="flex items-center gap-3 py-2.5 px-3 rounded-lg hover:bg-gray-50 cursor-pointer transition-colors">
+          <input type="checkbox" [checked]="isSelected(item.id)" (change)="toggle(item.id)"
+            class="w-4 h-4 accent-orange-500 cursor-pointer flex-shrink-0">
+          <span class="flex-1 text-sm text-gray-700">{{ item.name }}</span>
+          <span *ngIf="item.category?.length" class="text-xs text-indigo-600 bg-indigo-50 px-2 py-0.5 rounded-full">
+            {{ item.category[0] }}
+          </span>
+        </label>
+      </ng-container>
+    </div>
+
+    <!-- Footer -->
+    <div class="flex items-center justify-between px-6 py-4 border-t border-gray-100 bg-gray-50 rounded-b-2xl">
+      <p class="text-sm text-gray-500">
+        <span class="font-semibold text-gray-800">{{ totalSelected() }}</span> item(s) selected
+      </p>
+      <div class="flex gap-2">
+        <button (click)="showAssignModal = false"
+          class="px-4 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+          Cancel
+        </button>
+        <button (click)="saveAssignments()" [disabled]="assigning || !assignmentsReady"
+          class="px-5 py-2 text-sm font-semibold text-white bg-orange-600 hover:bg-orange-700 rounded-lg transition-colors disabled:opacity-50">
+          <span *ngIf="assigning" class="loading loading-spinner loading-xs mr-1"></span>
+          Save Assignments
+        </button>
+      </div>
+    </div>
+
+  </div>
+</div>

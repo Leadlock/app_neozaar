@@ -1,0 +1,15 @@
+<main class="flex w-full h-screen overflow-hidden">
+    <!-- Sidebar: Fixed, desktop only -->
+    <app-sidebar class="hidden lg:block flex-shrink-0"></app-sidebar>
+  
+    <div class="flex flex-col h-full min-h-0 overflow-hidden w-full lg:ml-64">
+      <!-- Navbar -->
+      <app-navbar class="w-full flex-shrink-0 h-16"></app-navbar>
+  
+      <!-- Main Content -->
+      <div id="main-content" class="flex-1 min-h-0 overflow-y-auto bg-zinc-50">
+        <router-outlet />
+      </div>
+    </div>
+  </main>
+  

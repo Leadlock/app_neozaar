@@ -1,0 +1,11 @@
+{
+  "/azure-blob": {
+    "target": "https://neozaarassets.blob.core.windows.net",
+    "secure": true,
+    "changeOrigin": true,
+    "pathRewrite": {
+      "^/azure-blob": ""
+    },
+    "logLevel": "debug"
+  }
+}

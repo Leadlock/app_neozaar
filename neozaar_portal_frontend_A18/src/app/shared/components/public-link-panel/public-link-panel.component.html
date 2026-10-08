@@ -1,0 +1,196 @@
+<!-- Trigger -->
+<button (click)="openModal()"
+  class="p-2 rounded-lg text-gray-400 hover:bg-sky-50 hover:text-sky-600 transition-colors"
+  title="Public link">
+  <i class="ri-links-line"></i>
+</button>
+
+@if (open) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl w-full max-w-2xl flex flex-col overflow-hidden text-left max-h-[90vh]">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100 shrink-0">
+        <div class="min-w-0">
+          <h2 class="text-lg font-bold text-gray-800">
+            {{ analyticsFor ? 'Link analytics' : 'Public links' }}
+          </h2>
+          <p class="text-xs text-gray-400 truncate">{{ targetTitle }}</p>
+        </div>
+        <button (click)="close()" [disabled]="busy"
+          class="text-gray-400 hover:text-gray-600 disabled:opacity-40"><i class="ri-close-line text-xl"></i></button>
+      </div>
+
+      <!-- ── Analytics sub-view ─────────────────────────────────────────── -->
+      @if (analyticsFor) {
+        <div class="px-5 py-4 overflow-y-auto">
+          <button (click)="closeAnalytics()" class="mb-4 text-sm font-medium text-gray-500 hover:text-gray-700">
+            <i class="ri-arrow-left-line"></i> All links
+          </button>
+
+          <p class="text-sm font-semibold text-gray-700 mb-1">{{ analyticsFor.label || analyticsFor.slug }}</p>
+          <p class="text-xs text-gray-400 break-all mb-4">{{ analyticsFor.url }}</p>
+
+          @if (analyticsLoading) {
+            <p class="text-sm text-gray-400 py-8 text-center">Loading analytics…</p>
+          } @else if (analytics) {
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+              <div class="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
+                <div class="text-lg font-bold text-gray-800">{{ analytics.totals.views }}</div>
+                <div class="text-[11px] uppercase tracking-wide text-gray-400">Views</div>
+              </div>
+              <div class="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
+                <div class="text-lg font-bold text-gray-800">{{ analytics.totals.unique_views }}</div>
+                <div class="text-[11px] uppercase tracking-wide text-gray-400">Unique</div>
+              </div>
+              <div class="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
+                <div class="text-lg font-bold text-gray-800">{{ analytics.totals.cta_clicks }}</div>
+                <div class="text-[11px] uppercase tracking-wide text-gray-400">CTA clicks</div>
+              </div>
+              <div class="rounded-lg border border-gray-100 bg-gray-50 px-3 py-2.5">
+                <div class="text-lg font-bold text-orange-600">{{ pct(analytics.totals.ctr) }}</div>
+                <div class="text-[11px] uppercase tracking-wide text-gray-400">CTR</div>
+              </div>
+            </div>
+
+            <!-- CSS sparkline: views per day over the range -->
+            <div class="mb-5">
+              <div class="text-[11px] uppercase tracking-wide text-gray-400 mb-1.5">
+                Views · last {{ analytics.range_days }} days
+              </div>
+              <div class="flex items-end gap-[2px] h-16 border-b border-gray-100">
+                @for (d of analytics.by_day; track d.date) {
+                  <div class="flex-1 bg-sky-200 hover:bg-sky-400 rounded-t transition-colors"
+                    [style.height.%]="d.views ? (d.views / maxDayViews) * 100 : 2"
+                    [title]="d.date + ' — ' + d.views + ' view' + (d.views === 1 ? '' : 's')"></div>
+                }
+              </div>
+            </div>
+
+            @if (analytics.by_block.length) {
+              <div>
+                <div class="text-[11px] uppercase tracking-wide text-gray-400 mb-1.5">Clicks by listing</div>
+                <table class="w-full text-sm">
+                  <tbody>
+                    @for (b of analytics.by_block; track b.listingId) {
+                      <tr class="border-b border-gray-50">
+                        <td class="py-1.5 text-gray-700">{{ b.name || ('#' + b.listingId) }}</td>
+                        <td class="py-1.5 text-right font-semibold text-gray-800 w-16">{{ b.clicks }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          } @else {
+            <p class="text-sm text-gray-400 py-8 text-center">No analytics available.</p>
+          }
+        </div>
+      }
+
+      <!-- ── List view ─────────────────────────────────────────────────── -->
+      @else {
+        <div class="px-5 py-4 overflow-y-auto">
+          @if (loading) {
+            <p class="text-sm text-gray-400 py-8 text-center">Loading…</p>
+          } @else {
+            @if (links.length) {
+              <table class="w-full text-sm">
+                <thead>
+                  <tr class="text-left text-[11px] uppercase tracking-wide text-gray-400 border-b border-gray-100">
+                    <th class="py-2 font-medium">Label</th>
+                    <th class="py-2 font-medium">Status</th>
+                    <th class="py-2 font-medium text-right">Views</th>
+                    <th class="py-2 font-medium text-right">CTR</th>
+                    <th class="py-2 font-medium text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  @for (link of links; track link.id) {
+                    <tr class="border-b border-gray-50 align-top">
+                      <td class="py-2.5 pr-2">
+                        <div class="font-medium text-gray-800">{{ link.label || '—' }}</div>
+                        <div class="text-[11px] text-gray-400 break-all">{{ link.url }}</div>
+                      </td>
+                      <td class="py-2.5 pr-2">
+                        <span class="px-2 py-0.5 text-[11px] font-semibold rounded-full" [ngClass]="statusLabel(link).cls">
+                          {{ statusLabel(link).text }}
+                        </span>
+                      </td>
+                      <td class="py-2.5 text-right text-gray-600">{{ link.views }}</td>
+                      <td class="py-2.5 text-right text-gray-600">{{ pct(link.ctr) }}</td>
+                      <td class="py-2.5">
+                        <div class="flex items-center justify-end gap-1">
+                          <button (click)="copy(link.url)" title="Copy link"
+                            class="p-1.5 rounded text-gray-400 hover:bg-gray-100 hover:text-gray-700"><i class="ri-file-copy-line"></i></button>
+                          <button (click)="openAnalytics(link)" title="Analytics"
+                            class="p-1.5 rounded text-gray-400 hover:bg-sky-50 hover:text-sky-600"><i class="ri-bar-chart-2-line"></i></button>
+                          @if (link.is_active) {
+                            <button (click)="setActive(link, false)" [disabled]="busy" title="Deactivate"
+                              class="p-1.5 rounded text-gray-400 hover:bg-amber-50 hover:text-amber-600 disabled:opacity-40"><i class="ri-pause-circle-line"></i></button>
+                          } @else {
+                            <button (click)="setActive(link, true)" [disabled]="busy" title="Reactivate"
+                              class="p-1.5 rounded text-gray-400 hover:bg-green-50 hover:text-green-600 disabled:opacity-40"><i class="ri-play-circle-line"></i></button>
+                          }
+                          <button (click)="deleteLink(link)" [disabled]="busy" title="Delete"
+                            class="p-1.5 rounded text-gray-400 hover:bg-red-50 hover:text-red-500 disabled:opacity-40"><i class="ri-delete-bin-line"></i></button>
+                        </div>
+                      </td>
+                    </tr>
+                  }
+                </tbody>
+              </table>
+            } @else {
+              <p class="text-sm text-gray-400 py-6 text-center">No public links yet.</p>
+            }
+
+            <!-- Create -->
+            @if (showCreate) {
+              <div class="mt-4 rounded-lg border border-gray-200 p-4 space-y-3">
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Label (internal — the channel)</label>
+                  <input [(ngModel)]="newLabel" (ngModelChange)="onLabelInput()" type="text" placeholder="LinkedIn, Newsletter, Ravi outreach…"
+                    class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-sky-400" />
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Link name</label>
+                  <div class="flex items-center gap-1 text-sm">
+                    <span class="text-gray-400 shrink-0">/p/</span>
+                    <input [(ngModel)]="newSlug" (ngModelChange)="onSlugInput()" type="text" [placeholder]="slugPreview"
+                      class="flex-1 min-w-0 px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-sky-400" />
+                  </div>
+                  <p class="text-[11px] text-gray-400 mt-1">Auto-fills from the title + label. A clash gets a “-2”.</p>
+                </div>
+                <div class="flex flex-wrap items-center gap-4">
+                  <label class="flex items-center gap-2 text-xs text-gray-600">
+                    <input [(ngModel)]="newUnlisted" type="checkbox" class="rounded border-gray-300" />
+                    Unlisted <span class="text-gray-400">(adds a random suffix so the name can’t be guessed)</span>
+                  </label>
+                </div>
+                <div>
+                  <label class="block text-xs font-medium text-gray-600 mb-1">Auto-expire on <span class="text-gray-400">(optional)</span></label>
+                  <input [(ngModel)]="newExpiry" type="date"
+                    class="px-3 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-sky-400" />
+                </div>
+                <div class="flex justify-end gap-2 pt-1">
+                  <button (click)="toggleCreate()" [disabled]="busy"
+                    class="px-3 py-1.5 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40">Cancel</button>
+                  <button (click)="createLink()" [disabled]="busy"
+                    class="px-4 py-1.5 text-sm font-semibold text-white bg-sky-600 rounded-lg hover:bg-sky-700 disabled:opacity-40">
+                    {{ busy ? 'Creating…' : 'Create link' }}
+                  </button>
+                </div>
+              </div>
+            } @else {
+              <button (click)="toggleCreate()"
+                class="mt-4 flex items-center gap-2 px-3 py-2 text-sm font-semibold text-sky-700 border border-dashed border-sky-300 rounded-lg hover:bg-sky-50 w-full justify-center">
+                <i class="ri-add-line"></i> New link
+              </button>
+            }
+          }
+        </div>
+      }
+
+    </div>
+  </div>
+}

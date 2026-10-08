@@ -1,0 +1,205 @@
+<section class="p-6" *ngIf="product">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div class="flex items-center gap-3">
+      <a routerLink="/bundles" class="btn btn-sm bg-white rounded-full"><i class="ri-arrow-left-line"></i> Back</a>
+      <h1 class="text-xl font-bold text-gray-900">{{ product.name }}</h1>
+      @if(product.bundle_type) {
+        <span class="px-2.5 py-1 text-xs font-semibold rounded-full bg-orange-100 text-orange-600">{{ product.bundle_type }}</span>
+      }
+    </div>
+    <div class="flex items-center gap-2">
+      <a [routerLink]="['/bundles/edit', product.id]" class="btn btn-sm bg-white border border-gray-200">
+        <i class="ri-pencil-line"></i> Edit
+      </a>
+      @if(product.status !== 'Rejected') {
+        @if(product.is_publish == true) {
+          <button class="btn btn-sm btn-outline btn-error bg-white" (click)="openModal()">
+            <span class="w-2 h-2 rounded-full bg-blue-500 inline-block"></span> Un-Publish
+          </button>
+        }
+        @if(product.is_publish == false) {
+          <button class="btn btn-sm btn-outline btn-success bg-white" (click)="publishBundle(true)">
+            <span class="w-2 h-2 rounded-full bg-red-500 inline-block"></span> Publish
+          </button>
+        }
+        @if(product.is_approved == false) {
+          <button class="btn btn-sm btn-success text-white" (click)="acceptBundle(true)" *appHasRole="UserRole.ADMIN">Accept</button>
+          <button class="btn btn-sm btn-outline btn-error bg-white" *appHasRole="UserRole.ADMIN" (click)="openRejectModal()">Reject</button>
+        }
+      }
+    </div>
+  </div>
+
+  <!-- Bundle Info -->
+  <div class="bg-white border border-gray-100 rounded-xl p-6 shadow-sm mb-4">
+    <div class="flex items-start gap-6">
+      <img [src]="product.bundle_logo" class="w-24 h-24 rounded-xl object-cover border border-gray-100 flex-shrink-0" alt="Bundle logo" />
+      <div class="flex-1 min-w-0">
+        <h2 class="text-lg font-semibold text-gray-800 mb-1">{{ product.name }}</h2>
+        @if(product.short_description) {
+          <p class="text-sm text-gray-600 mb-3">{{ product.short_description }}</p>
+        }
+        <div class="flex flex-wrap gap-2">
+          @if(product.bundle_type) {
+            <span class="text-xs bg-orange-50 text-orange-600 px-2.5 py-1 rounded-full">{{ product.bundle_type }}</span>
+          }
+          @if(product.bundle_pricing_model) {
+            <span class="text-xs bg-blue-50 text-blue-600 px-2.5 py-1 rounded-full">{{ product.bundle_pricing_model }}</span>
+          }
+          @if(product.delivery_mode) {
+            <span class="text-xs bg-gray-100 text-gray-600 px-2.5 py-1 rounded-full">{{ product.delivery_mode }}</span>
+          }
+          @if(product.engagement_duration) {
+            <span class="text-xs bg-purple-50 text-purple-600 px-2.5 py-1 rounded-full">{{ product.engagement_duration }}</span>
+          }
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Included Products - Full Width -->
+  @if(product.isv_products_details?.length) {
+    <div class="bg-white border border-gray-100 rounded-xl shadow-sm mb-4">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-base font-semibold text-gray-800">Included Products <span class="text-sm font-normal text-gray-400 ml-1">({{ product.isv_products_details.length }})</span></h2>
+      </div>
+      <div class="divide-y divide-gray-50">
+        @for(p of product.isv_products_details; track p.id) {
+          <div class="p-6">
+            <div class="flex items-start gap-4">
+              <img [src]="p.product_logo" class="w-14 h-14 rounded-xl object-cover border border-gray-100 flex-shrink-0" alt="" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <p class="font-semibold text-gray-900">{{ p.name }}</p>
+                  <span class="text-xs text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">{{ p.action_type }}</span>
+                  @if(p.brand_name) {
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ p.brand_name }}</span>
+                  }
+                  @if(p.starting_price) {
+                    <span class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">₹{{ p.starting_price }}</span>
+                  }
+                </div>
+                @if(p.short_description) {
+                  <div class="text-sm text-gray-600 mb-2" [innerHTML]="sanitize(p.short_description)"></div>
+                }
+                @if(p.long_description) {
+                  <div class="text-sm text-gray-500 mb-2" [innerHTML]="sanitize(p.long_description)"></div>
+                }
+                @if(p.category_subcategory?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(cat of p.category_subcategory; track cat) {
+                      <span class="text-xs bg-orange-50 text-orange-600 px-2 py-0.5 rounded-md">{{ cat }}</span>
+                    }
+                  </div>
+                }
+                @if(p.cloud_provider_support?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(c of p.cloud_provider_support; track c) {
+                      <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{{ c }}</span>
+                    }
+                  </div>
+                }
+                @if(p.target_audience?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(t of p.target_audience; track t) {
+                      <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{{ t }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Included Services - Full Width -->
+  @if(product.services_details?.length) {
+    <div class="bg-white border border-gray-100 rounded-xl shadow-sm mb-4">
+      <div class="px-6 py-4 border-b border-gray-100">
+        <h2 class="text-base font-semibold text-gray-800">Included Services <span class="text-sm font-normal text-gray-400 ml-1">({{ product.services_details.length }})</span></h2>
+      </div>
+      <div class="divide-y divide-gray-50">
+        @for(s of product.services_details; track s.id) {
+          <div class="p-6">
+            <div class="flex items-start gap-4">
+              <img [src]="s.product_logo" class="w-14 h-14 rounded-xl object-cover border border-gray-100 flex-shrink-0" alt="" />
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap mb-1">
+                  <p class="font-semibold text-gray-900">{{ s.name }}</p>
+                  <span class="text-xs text-green-500 bg-green-50 px-2 py-0.5 rounded-full">{{ s.action_type }}</span>
+                  @if(s.brand_name) {
+                    <span class="text-xs text-gray-500 bg-gray-100 px-2 py-0.5 rounded-full">{{ s.brand_name }}</span>
+                  }
+                  @if(s.starting_price) {
+                    <span class="text-xs text-green-600 bg-green-50 px-2 py-0.5 rounded-full">₹{{ s.starting_price }}</span>
+                  }
+                </div>
+                @if(s.short_description) {
+                  <div class="text-sm text-gray-600 mb-2" [innerHTML]="sanitize(s.short_description)"></div>
+                }
+                @if(s.long_description) {
+                  <div class="text-sm text-gray-500 mb-2" [innerHTML]="sanitize(s.long_description)"></div>
+                }
+                @if(s.category_subcategory?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(cat of s.category_subcategory; track cat) {
+                      <span class="text-xs bg-purple-50 text-purple-600 px-2 py-0.5 rounded-md">{{ cat }}</span>
+                    }
+                  </div>
+                }
+                @if(s.cloud_provider_support?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(c of s.cloud_provider_support; track c) {
+                      <span class="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-md">{{ c }}</span>
+                    }
+                  </div>
+                }
+                @if(s.target_audience?.length) {
+                  <div class="flex flex-wrap gap-1 mt-2">
+                    @for(t of s.target_audience; track t) {
+                      <span class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md">{{ t }}</span>
+                    }
+                  </div>
+                }
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+  }
+
+</section>
+
+<!-- Unpublish Modal -->
+<dialog id="unpublishModal" class="modal" [open]="isModalOpen">
+  <div class="modal-box">
+    <form (ngSubmit)="onSubmit()" #remarkForm="ngForm">
+      <div class="form-control">
+        <label class="label"><span class="label-text font-semibold">Remark <span class="text-red-500">*</span></span></label>
+        <textarea [(ngModel)]="remark" name="remark" required placeholder="Enter reason for unpublishing..."
+          class="textarea textarea-bordered w-full h-28"></textarea>
+      </div>
+      <div class="modal-action">
+        <button type="submit" class="btn btn-error text-white" [disabled]="!remarkForm.valid">Submit</button>
+        <button type="button" class="btn" (click)="closeModal()">Cancel</button>
+      </div>
+    </form>
+  </div>
+</dialog>
+
+<!-- Reject Modal -->
+<div *ngIf="isRejectModalOpen" class="modal modal-open">
+  <div class="modal-box">
+    <h3 class="font-bold text-lg">Reject Bundle</h3>
+    <textarea [(ngModel)]="rejectRemark" placeholder="Enter remark" class="textarea textarea-bordered w-full mt-4"></textarea>
+    <div class="modal-action">
+      <button class="btn btn-error" (click)="onRejectSubmit()">Submit</button>
+      <button class="btn" (click)="closeRejectModal()">Cancel</button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Connecting...</title>
+    <script>
+        window.onload = function() {
+            if (!navigator.onLine) {
+                // Definitely offline, no need to retry
+                sessionStorage.removeItem('error_retries');
+                window.location.replace('offline.html');
+                return;
+            }
+
+            // Online but load failed. Let's try to reconnect a few times
+            // before assuming the site is under maintenance.
+            let retries = parseInt(sessionStorage.getItem('error_retries') || '0');
+
+            if (retries < 3) {
+                sessionStorage.setItem('error_retries', (retries + 1).toString());
+
+                // Wait 2 seconds before trying again to let the connection stabilize
+                setTimeout(function() {
+                    window.location.replace('https://www.neozaar.com/');
+                }, 2000);
+            } else {
+                // After 3 retries, it's likely real maintenance or a severe server issue
+                sessionStorage.removeItem('error_retries');
+                window.location.replace('maintenance.html');
+            }
+        };
+    </script>
+</head>
+<body style="background-color: #0a0a0a; color: white; display: flex; align-items: center; justify-content: center; height: 100vh; font-family: sans-serif;">
+    <div style="text-align: center;">
+        <p>Connecting to NeoZaar...</p>
+    </div>
+</body>
+</html>

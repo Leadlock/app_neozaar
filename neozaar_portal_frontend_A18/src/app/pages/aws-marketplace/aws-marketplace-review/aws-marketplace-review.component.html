@@ -1,0 +1,885 @@
+<section class="min-h-screen bg-slate-50 p-4 md:p-8" *ngIf="request; else loading">
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Back + Header -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <button (click)="goBack()" class="btn btn-ghost btn-sm gap-1 rounded-xl border border-slate-200 bg-white shadow-sm">
+        <i class="ri-arrow-left-line"></i> Back
+      </button>
+      <div class="flex-1">
+        <h1 class="text-2xl font-black text-slate-900">AWS Marketplace Review</h1>
+        <p class="text-slate-500 text-sm">Request #{{ request.id }} &bull; {{ request.product_name }}</p>
+      </div>
+      <span [class]="'px-3 py-1 rounded-full text-sm font-bold border ' + statusClass(request.status)">
+        {{ request.status | titlecase }}
+      </span>
+    </div>
+
+    <!-- Success Banner -->
+    @if (submitSuccess) {
+      <div class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+        <i class="ri-checkbox-circle-fill text-green-500 text-xl"></i>
+        <span class="text-green-800 font-medium">Request approved and submitted to AWS Marketplace successfully.</span>
+      </div>
+    }
+
+    <!-- ====== STATUS TIMELINE ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6">
+      <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-5">Submission Timeline</h2>
+      <div class="flex items-center gap-0">
+        @for (step of timeline; track $index) {
+          <div class="flex-1 flex flex-col items-center relative min-w-0">
+            @if ($index > 0) {
+              <div [class]="'absolute left-0 top-4 w-1/2 h-0.5 ' + (step.status === 'done' ? 'bg-green-400' : step.status === 'failed' ? 'bg-red-300' : 'bg-slate-200')"></div>
+            }
+            @if ($index < timeline.length - 1) {
+              <div [class]="'absolute right-0 top-4 w-1/2 h-0.5 ' + (step.status === 'done' ? 'bg-green-400' : 'bg-slate-200')"></div>
+            }
+            <div [ngClass]="{
+              'bg-green-500 text-white': step.status === 'done',
+              'bg-amber-500 text-white ring-4 ring-amber-100': step.status === 'active',
+              'bg-red-500 text-white': step.status === 'failed',
+              'bg-white border-2 border-slate-200 text-slate-300': step.status === 'pending'
+            }" class="w-8 h-8 rounded-full flex items-center justify-center z-10 relative text-xs">
+              @if (step.status === 'done') { <i class="ri-check-line"></i> }
+              @else if (step.status === 'active') { <i class="ri-time-line"></i> }
+              @else if (step.status === 'failed') { <i class="ri-close-line"></i> }
+              @else { <i class="ri-circle-line"></i> }
+            </div>
+            <div class="mt-2 text-center px-1">
+              <div class="text-xs font-semibold text-slate-700">{{ step.label }}</div>
+              @if (step.timestamp) {
+                <div class="text-[10px] text-slate-400">{{ step.timestamp | date:'MMM d, y' }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ====== ACTION BUTTONS ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-wrap gap-3 items-center">
+      <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest w-full mb-1">Admin Actions</h2>
+
+      @if (request.status === 'PENDING_REVIEW' || request.status === 'FAILED') {
+        <button
+          (click)="openSubmitConfirm()"
+          [disabled]="isSubmitting"
+          class="btn btn-success text-white rounded-xl gap-2"
+        >
+          <i class="ri-send-plane-line"></i> Approve &amp; Submit to AWS
+        </button>
+
+        <button
+          (click)="openRejectModal()"
+          [disabled]="isSubmitting"
+          class="btn btn-outline btn-error rounded-xl gap-2"
+        >
+          <i class="ri-close-circle-line"></i> Reject
+        </button>
+      }
+
+      @if (request.status === 'FAILED') {
+        <button
+          (click)="retry()"
+          [disabled]="isSubmitting"
+          class="btn btn-warning text-white rounded-xl gap-2"
+        >
+          <i class="ri-refresh-line"></i> Retry Submission
+        </button>
+      }
+
+      @if (request.status === 'SUBMITTED' || request.status === 'VALIDATING') {
+        <button
+          (click)="pollStatus()"
+          [disabled]="isPolling"
+          class="btn btn-outline btn-info rounded-xl gap-2"
+        >
+          <i [class]="isPolling ? 'ri-loader-4-line animate-spin' : 'ri-refresh-line'"></i>
+          {{ isPolling ? 'Checking...' : 'Check Change Set Status' }}
+        </button>
+      }
+
+      @if (request.status === 'PUBLISHED') {
+        <span class="text-green-600 font-semibold flex items-center gap-2">
+          <i class="ri-checkbox-circle-fill"></i>
+          Listing created on AWS Marketplace{{ request.visibility ? ' (' + request.visibility + ')' : '' }}
+        </span>
+      }
+
+      @if (request.status === 'REJECTED') {
+        <div class="bg-slate-50 rounded-xl p-3 text-slate-600 text-sm border border-slate-200">
+          <span class="font-semibold">Rejection reason: </span>{{ request.rejection_reason || 'No reason provided.' }}
+        </div>
+      }
+    </div>
+
+    <!-- ====== FAILURE DETAILS ====== -->
+    @if (request.status === 'FAILED' && request.aws_response) {
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-2">
+        <h3 class="font-bold text-red-700 flex items-center gap-2">
+          <i class="ri-error-warning-line"></i> AWS Submission Error
+        </h3>
+        @if (request.aws_change_set_id) {
+          <div class="text-sm text-red-600">Change Set ID: <span class="font-mono">{{ request.aws_change_set_id }}</span></div>
+        }
+        @if (request.failed_at) {
+          <div class="text-sm text-red-600">Failed at: {{ request.failed_at | date:'medium' }}</div>
+        }
+        <pre class="text-xs bg-red-100 rounded-lg p-3 overflow-x-auto text-red-800">{{ jsonStr(request.aws_response) }}</pre>
+        @if (request.validation_errors) {
+          <div class="text-sm font-semibold text-red-700 mt-2">Change Set Errors:</div>
+          <pre class="text-xs bg-red-100 rounded-lg p-3 overflow-x-auto text-red-800">{{ jsonStr(request.validation_errors) }}</pre>
+        }
+      </div>
+    }
+
+    <!-- ====== PRODUCT INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-box-3-line text-amber-500"></i> Product Information
+          <span class="text-xs font-normal text-slate-400 ml-1">— from NeoZaar</span>
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Product Name</div>
+          <div class="font-semibold text-slate-800">{{ request.product_name || '—' }}
+            <span *ngIf="!request.product_name" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Type</div>
+          <div class="text-slate-700">{{ request.product_type || '—' }}</div>
+        </div>
+        <div class="space-y-1 md:col-span-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Short Description</div>
+          @if (editingField === 'short_description') {
+            <div class="space-y-2">
+              <textarea [(ngModel)]="editValue" rows="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"></textarea>
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="text-slate-700 whitespace-pre-line">{{ request.short_description || '—' }}
+              <span *ngIf="!request.short_description" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+              @if (canEditProductFields) {
+              <button type="button" (click)="startEditField('short_description')" class="ml-2 text-amber-600 hover:underline text-xs font-semibold">{{ request.short_description ? 'Edit' : 'Add' }}</button>
+            }
+            </div>
+          }
+        </div>
+        <div class="space-y-1 md:col-span-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Long Description</div>
+          @if (editingField === 'long_description') {
+            <div class="space-y-2">
+              <textarea [(ngModel)]="editValue" rows="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200"></textarea>
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="text-slate-700 whitespace-pre-line">{{ request.long_description || '—' }}
+              <span *ngIf="!request.long_description" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+              @if (canEditProductFields) {
+              <button type="button" (click)="startEditField('long_description')" class="ml-2 text-amber-600 hover:underline text-xs font-semibold">{{ request.long_description ? 'Edit' : 'Add' }}</button>
+            }
+            </div>
+          }
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Category</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.category && request.category.length > 0) {
+              @for (c of request.category; track $index) {
+                <span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">{{ c }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Industry</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.industry && request.industry.length > 0) {
+              @for (ind of request.industry; track $index) {
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs">{{ ind }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Privacy Policy URL</div>
+          <div>
+            @if (editingField === 'privacy_policy_url') {
+            <div class="space-y-2">
+              <input type="url" [(ngModel)]="editValue" placeholder="https://" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200" />
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+            @else {
+              @if (request.privacy_policy_url) {
+                <a [href]="request.privacy_policy_url" target="_blank" class="text-amber-600 hover:underline text-xs">{{ request.privacy_policy_url }}</a>
+              } @else { <span class="text-slate-400 text-xs">—</span> }
+              @if (canEditProductFields) {
+              <button type="button" (click)="startEditField('privacy_policy_url')" class="ml-2 text-amber-600 hover:underline text-xs font-semibold">{{ request.privacy_policy_url ? 'Edit' : 'Add' }}</button>
+            }
+            }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Terms of Use URL</div>
+          <div>
+            @if (editingField === 'terms_of_use_url') {
+            <div class="space-y-2">
+              <input type="url" [(ngModel)]="editValue" placeholder="https://" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-200" />
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-amber-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+            @else {
+              @if (request.terms_of_use_url) {
+                <a [href]="request.terms_of_use_url" target="_blank" class="text-amber-600 hover:underline text-xs">{{ request.terms_of_use_url }}</a>
+              } @else { <span class="text-slate-400">—</span> }
+              @if (canEditProductFields) {
+              <button type="button" (click)="startEditField('terms_of_use_url')" class="ml-2 text-amber-600 hover:underline text-xs font-semibold">{{ request.terms_of_use_url ? 'Edit' : 'Add' }}</button>
+            }
+            }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">SKU ID</div>
+          <div class="font-mono text-slate-600 text-xs">{{ request.sku_id || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Brand</div>
+          <div class="text-slate-700">{{ request.brand_name || '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== ISV INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-user-star-line text-indigo-500"></i> ISV / Vendor Information
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">ISV Name</div>
+          <div class="font-semibold text-slate-800">{{ request.isv_name || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">ISV Email</div>
+          <div class="text-slate-700">{{ request.isv_email || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Requested By</div>
+          <div class="text-slate-700">{{ request.requested_by_name || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Request Date</div>
+          <div class="text-slate-700">{{ request.created_at | date:'medium' }}</div>
+        </div>
+        @if (request.reviewed_by_name) {
+          <div class="space-y-1">
+            <div class="text-xs text-slate-400 uppercase tracking-wide">Reviewed By</div>
+            <div class="text-slate-700">{{ request.reviewed_by_name }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ====== COMMERCIAL INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-money-dollar-circle-line text-green-500"></i> Commercial Information
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Pricing Model</div>
+          <div class="text-slate-700">{{ request.pricing_model || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">License Model</div>
+          <div class="text-slate-700">{{ request.license_model || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Billing Dimension</div>
+          <div class="text-slate-700">{{ request.billing_dimension || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Free Trial</div>
+          <div [class]="request.free_trial_available ? 'text-green-600 font-semibold' : 'text-slate-500'">
+            {{ request.free_trial_available ? 'Available' : 'Not available' }}
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Starting Price</div>
+          <div class="text-slate-700">{{ request.starting_price ? ('$' + request.starting_price) : '—' }}</div>
+        </div>
+        <div class="space-y-1 md:col-span-3">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Regions Supported</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.regions_supported && request.regions_supported.length > 0) {
+              @for (r of request.regions_supported; track $index) {
+                <span class="px-2 py-0.5 bg-amber-50 text-amber-700 rounded text-xs">{{ r }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== AWS MARKETPLACE CONFIGURATION FORM ====== -->
+    <div class="bg-white rounded-2xl border border-amber-200 overflow-hidden">
+      <div class="px-6 py-4 bg-amber-50 border-b border-amber-100 flex items-center justify-between flex-wrap gap-3">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-amazon-fill text-amber-600"></i> AWS Marketplace Configuration
+          <span class="text-xs font-normal text-amber-600 ml-1">— fill in before submitting to AWS</span>
+        </h2>
+        <div class="text-xs text-slate-500 space-x-3">
+          @if (request.aws_entity_id) {
+            <span>Entity: <span class="font-mono text-slate-700">{{ request.aws_entity_id }}</span></span>
+          }
+          @if (request.aws_change_set_id) {
+            <span>Change Set: <span class="font-mono text-slate-700">{{ request.aws_change_set_id }}</span></span>
+          }
+        </div>
+      </div>
+
+      <!-- NeoZaar missing fields / warnings banner -->
+      @if (request.aws_payload?._missingFields?.length > 0 || request.aws_payload?._warnings?.length > 0) {
+        <div class="px-6 pt-5 space-y-3">
+          @if (request.aws_payload._missingFields?.length > 0) {
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div class="font-semibold text-amber-700 mb-1 flex items-center gap-1 text-sm">
+                <i class="ri-alert-line"></i> NeoZaar fields missing (pulled from product)
+              </div>
+              <ul class="list-disc pl-5 text-amber-700 text-xs space-y-0.5">
+                @for (f of request.aws_payload._missingFields; track $index) { <li>{{ f }}</li> }
+              </ul>
+            </div>
+          }
+          @if (request.aws_payload._warnings?.length > 0) {
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+              <div class="font-semibold text-yellow-700 mb-1 flex items-center gap-1 text-sm">
+                <i class="ri-information-line"></i> Warnings
+              </div>
+              <ul class="list-disc pl-5 text-yellow-700 text-xs space-y-0.5">
+                @for (w of request.aws_payload._warnings; track $index) { <li>{{ w }}</li> }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── THE FORM ── -->
+      <div class="p-6 space-y-7">
+
+        @if (configSaved) {
+          <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm flex items-center gap-2">
+            <i class="ri-checkbox-circle-fill"></i> AWS configuration saved successfully.
+          </div>
+        }
+        @if (configError) {
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">{{ configError }}</div>
+        }
+
+        <!-- SECTION 1: Product Identity -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Product Identity</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">
+                Product Type <span class="text-red-500">*</span>
+                @if (isServiceListing) { <span class="badge badge-info badge-sm ml-1 align-middle">Service</span> }
+              </label>
+              <select [(ngModel)]="awsConfig.productType" [disabled]="true"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-slate-50 text-slate-500">
+                @for (t of productTypes; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">
+                @if (isServiceListing) {
+                  This is a NeoZaar service and is listed as a professional-services product only.
+                } @else {
+                  v1 supports SaaS products. AMI / Container support is planned.
+                }
+              </p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">AWS Entity ID</label>
+              <input type="text" [value]="request.aws_entity_id || 'assigned by AWS after first submit'" disabled
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono bg-slate-50 text-slate-500" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 2: Listing -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Listing</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Logo <span class="text-red-500">*</span></label>
+              <p class="text-[11px] text-slate-400 mb-2">
+                AWS Marketplace only accepts logos hosted in Amazon S3. Upload an image and it is
+                converted to PNG and stored in S3 automatically. Best results: square, 110–640&nbsp;px, transparent or white background.
+              </p>
+
+              <div class="flex items-start gap-4 flex-wrap">
+                <!-- Preview -->
+                <div class="w-24 h-24 rounded-xl border border-slate-200 bg-slate-50 flex items-center justify-center overflow-hidden shrink-0">
+                  @if (awsConfig.logoUrl) {
+                    <img [src]="awsConfig.logoUrl" alt="Logo preview" class="max-w-full max-h-full object-contain" />
+                  } @else {
+                    <i class="ri-image-line text-2xl text-slate-300"></i>
+                  }
+                </div>
+
+                <div class="flex-1 min-w-[200px] space-y-2">
+                  @if (canEditConfig()) {
+                    <label class="btn btn-sm btn-outline rounded-xl gap-2 border-amber-300 text-amber-700 hover:bg-amber-50 cursor-pointer"
+                      [class.pointer-events-none]="isUploadingLogo" [class.opacity-60]="isUploadingLogo">
+                      <i [class]="isUploadingLogo ? 'ri-loader-4-line animate-spin' : 'ri-upload-2-line'"></i>
+                      {{ isUploadingLogo ? 'Uploading...' : (awsConfig.logoUrl ? 'Replace logo' : 'Upload logo') }}
+                      <input type="file" accept="image/png,image/jpeg,image/webp,image/gif"
+                        class="hidden" (change)="onLogoSelected($event)" [disabled]="isUploadingLogo" />
+                    </label>
+                  }
+
+                  @if (logoUploadError) {
+                    <div class="text-xs text-red-600">{{ logoUploadError }}</div>
+                  }
+
+                  @if (awsConfig.logoUrl) {
+                    <div class="text-[11px] text-slate-400 break-all">
+                      <i class="ri-checkbox-circle-fill text-green-500"></i>
+                      <a [href]="awsConfig.logoUrl" target="_blank" class="hover:underline">{{ awsConfig.logoUrl }}</a>
+                    </div>
+                  }
+
+                  <button type="button" (click)="showManualLogoUrl = !showManualLogoUrl"
+                    class="text-[11px] text-slate-400 hover:text-slate-600 underline">
+                    {{ showManualLogoUrl ? 'Hide manual URL' : 'Or paste an S3 URL manually' }}
+                  </button>
+                  @if (showManualLogoUrl) {
+                    <input type="url" [(ngModel)]="awsConfig.logoUrl" [disabled]="!canEditConfig()"
+                      placeholder="https://your-bucket.s3.us-east-1.amazonaws.com/…/logo.png"
+                      class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+                  }
+                </div>
+              </div>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Highlights (one per line, max 3)</label>
+              <textarea [(ngModel)]="highlightsText" [disabled]="!canEditConfig()" rows="3"
+                placeholder="Key selling point&#10;Another highlight"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"></textarea>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Search Keywords (comma-separated)</label>
+              <input type="text" [(ngModel)]="keywordsText" [disabled]="!canEditConfig()"
+                placeholder="analytics, reporting, saas"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">
+                AWS Categories <span class="text-red-500">*</span>
+                <span class="font-normal text-slate-400">(pick 1–{{ maxCategories }})</span>
+              </label>
+
+              <div class="border border-slate-200 rounded-lg px-3 py-2 min-h-[42px] flex flex-wrap items-center gap-1.5">
+                @for (c of selectedCategories; track c) {
+                  <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-md px-2 py-0.5 text-xs">
+                    {{ c }}
+                    @if (canEditConfig()) {
+                      <button type="button" (click)="removeCategory(c)" class="hover:text-amber-950">
+                        <i class="ri-close-line"></i>
+                      </button>
+                    }
+                  </span>
+                }
+                @if (selectedCategories.length === 0) {
+                  <span class="text-sm text-slate-400">No categories selected</span>
+                }
+                @if (canEditConfig()) {
+                  <button type="button" (click)="openCategoryModal()"
+                    class="ml-auto text-xs font-semibold text-amber-700 hover:text-amber-900 inline-flex items-center gap-1">
+                    <i class="ri-list-check-2"></i> Choose
+                  </button>
+                }
+              </div>
+              <p class="text-[11px] text-slate-400 mt-1">From AWS's fixed taxonomy. Required before a Public submission.</p>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 3: SaaS Delivery -->
+        <fieldset class="border border-amber-200 rounded-xl p-5 space-y-4 bg-amber-50/30">
+          <legend class="text-xs font-bold text-amber-600 uppercase tracking-widest px-2">SaaS Delivery</legend>
+          <div>
+            <label class="block text-xs font-semibold text-slate-600 mb-1">Fulfillment URL <span class="text-red-500">*</span></label>
+            <input type="url" [(ngModel)]="awsConfig.fulfillmentUrl" [disabled]="!canEditConfig()"
+              placeholder="https://yourapp.com/aws-marketplace/landing"
+              class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            <p class="text-[11px] text-slate-400 mt-1">AWS redirects buyers here after purchase. Must handle the <code>x-amzn-marketplace-token</code> POST and call <code>ResolveCustomer</code>. Must be HTTPS.</p>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 4: Usage Dimensions -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Usage Dimensions <span class="text-red-500">*</span></legend>
+          <p class="text-xs text-slate-500">At least one dimension is required. A single free dimension is used by default so a listing can be created; set real pricing before going Public.</p>
+
+          @for (dim of awsConfig.dimensions; track $index) {
+            <div class="grid grid-cols-1 md:grid-cols-12 gap-3 items-start border border-slate-100 rounded-lg p-3 bg-slate-50/50">
+              <div class="md:col-span-3">
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Name</label>
+                <input type="text" [(ngModel)]="dim.name" [disabled]="!canEditConfig()"
+                  class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Key</label>
+                <input type="text" [(ngModel)]="dim.key" [disabled]="!canEditConfig()"
+                  placeholder="e.g. api_calls"
+                  class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+              <div class="md:col-span-2">
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Unit</label>
+                <input type="text" [(ngModel)]="dim.unit" [disabled]="!canEditConfig()"
+                  class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+              <div class="md:col-span-3">
+                <label class="block text-[11px] font-semibold text-slate-500 mb-1">Description</label>
+                <input type="text" [(ngModel)]="dim.description" [disabled]="!canEditConfig()"
+                  class="w-full border border-slate-200 rounded-lg px-2 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+              <div class="md:col-span-1 flex md:justify-center">
+                <button type="button" (click)="removeDimension($index)" [disabled]="!canEditConfig()"
+                  class="btn btn-ghost btn-xs text-red-500 mt-5" title="Remove dimension">
+                  <i class="ri-delete-bin-line"></i>
+                </button>
+              </div>
+            </div>
+          }
+
+          @if (canEditConfig()) {
+            <button type="button" (click)="addDimension()" class="btn btn-sm btn-outline rounded-xl gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+              <i class="ri-add-line"></i> Add dimension
+            </button>
+          }
+        </fieldset>
+
+        <!-- SECTION 5: Pricing -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Pricing</legend>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Pricing Model</label>
+              <select [(ngModel)]="awsConfig.pricingModel" [disabled]="!canEditConfig()"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-300">
+                @for (m of pricingModels; track m) { <option [value]="m">{{ m | titlecase }}</option> }
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">Usage = metered per dimension. Contract = upfront commitment.</p>
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Currency</label>
+              <input type="text" [(ngModel)]="awsConfig.currencyCode" [disabled]="!canEditConfig()"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+            </div>
+            <label class="flex items-center gap-3 cursor-pointer mt-6">
+              <input type="checkbox" [(ngModel)]="awsConfig.freeTrial" [disabled]="!canEditConfig()"
+                class="checkbox checkbox-sm checkbox-warning" />
+              <span class="text-sm font-medium text-slate-700">Offer a free trial</span>
+            </label>
+          </div>
+          <p class="text-[11px] text-slate-400">Per-dimension rates are set on the offer and only applied when publishing to Public.</p>
+        </fieldset>
+
+        <!-- SECTION 6: Legal & Support -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Legal &amp; Support</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">EULA</label>
+              <select [(ngModel)]="awsConfig.eulaType" [disabled]="!canEditConfig()"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-2 focus:ring-amber-300">
+                <option value="StandardEula">AWS Standard Contract for Marketplace</option>
+                <option value="CustomEula">Custom EULA (URL)</option>
+              </select>
+            </div>
+            @if (awsConfig.eulaType === 'CustomEula') {
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Custom EULA URL <span class="text-red-500">*</span></label>
+                <input type="url" [(ngModel)]="awsConfig.eulaUrl" [disabled]="!canEditConfig()"
+                  placeholder="https://.../eula.pdf"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+              </div>
+            }
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Refund Policy <span class="text-red-500">*</span></label>
+              <textarea [(ngModel)]="awsConfig.refundPolicy" [disabled]="!canEditConfig()" rows="2"
+                placeholder="e.g. Contact us within 30 days for a full refund, or 'NA'."
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"></textarea>
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Support Description <span class="text-red-500">*</span></label>
+              <textarea [(ngModel)]="awsConfig.supportDescription" [disabled]="!canEditConfig()" rows="2"
+                placeholder="How buyers get support (channels, hours, SLAs)..."
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-amber-300 resize-none"></textarea>
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 7: Visibility (read-only) -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-2">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Visibility</legend>
+          <div class="text-sm text-slate-700">
+            Target: <span class="font-semibold">{{ request.aws_payload?.visibilityTarget || request.visibility || 'Restricted' }}</span>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Controlled server-side by <code>AWS_MP_PUBLISH_TARGET</code>. <strong>Restricted</strong> creates the listing without releasing it (no AWS review).
+            <strong>Public</strong> also releases the offer and triggers an AWS listing review that can take several business days.
+          </p>
+        </fieldset>
+
+        <!-- Save / update controls -->
+        @if (canEditConfig()) {
+          <div class="flex flex-wrap justify-end gap-3 items-center">
+            @if (updateListingError) {
+              <div class="text-sm text-red-600 flex-1">{{ updateListingError }}</div>
+            }
+            <button
+              (click)="saveConfig()"
+              [disabled]="isSavingConfig"
+              class="btn rounded-xl gap-2 px-6 bg-amber-600 hover:bg-amber-700 text-white border-none"
+            >
+              <i [class]="isSavingConfig ? 'ri-loader-4-line animate-spin' : 'ri-save-line'"></i>
+              {{ isSavingConfig ? 'Saving...' : 'Save AWS Configuration' }}
+            </button>
+            @if (request.status === 'PUBLISHED') {
+              <button
+                (click)="submitListingUpdate()"
+                [disabled]="isUpdatingListing || isSavingConfig"
+                class="btn btn-success text-white rounded-xl gap-2 px-6"
+              >
+                <i [class]="isUpdatingListing ? 'ri-loader-4-line animate-spin' : 'ri-upload-cloud-2-line'"></i>
+                {{ isUpdatingListing ? 'Pushing...' : 'Push update to AWS' }}
+              </button>
+            }
+          </div>
+        } @else if (request.status === 'PUBLISHED') {
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-600 flex items-center justify-between gap-3 flex-wrap">
+            <span class="flex items-center gap-2">
+              <i class="ri-checkbox-circle-line text-green-500"></i>
+              Listing is live on AWS. Edit the fields above, then push the changes to AWS Marketplace.
+            </span>
+            <button (click)="startEditListing()" class="btn btn-sm btn-outline rounded-xl gap-1 border-amber-300 text-amber-700 hover:bg-amber-50">
+              <i class="ri-edit-line"></i> Edit listing details
+            </button>
+          </div>
+        } @else {
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-500 flex items-center gap-2">
+            <i class="ri-lock-line"></i> Configuration is locked while the request is <strong>{{ request.status | titlecase }}</strong>.
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- ====== AUDIT HISTORY ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-history-line text-slate-500"></i> Audit History
+        </h2>
+      </div>
+      <div class="divide-y divide-slate-100">
+        @if (!request.audit || request.audit.length === 0) {
+          <div class="p-6 text-center text-slate-400 text-sm">No audit entries yet.</div>
+        } @else {
+          @for (entry of request.audit; track entry.id) {
+            <div class="px-6 py-4 flex items-start gap-4">
+              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs shrink-0">
+                <i class="ri-shield-check-line"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-semibold text-slate-800 text-sm">{{ entry.action | titlecase }}</span>
+                  @if (entry.previous_status) {
+                    <span class="text-xs text-slate-400">{{ entry.previous_status }}</span>
+                    <i class="ri-arrow-right-line text-slate-300 text-xs"></i>
+                  }
+                  @if (entry.new_status) {
+                    <span class="text-xs font-semibold text-amber-600">{{ entry.new_status }}</span>
+                  }
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">
+                  {{ entry.actor_name || 'System' }} &bull; {{ entry.created_at | date:'medium' }}
+                </div>
+                @if (entry.error_info) {
+                  <pre class="text-xs bg-red-50 text-red-700 rounded p-2 mt-2 overflow-x-auto">{{ jsonStr(entry.error_info) }}</pre>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Loading skeleton -->
+<ng-template #loading>
+  <div class="p-12 flex justify-center items-center min-h-screen">
+    @if (isFetching) {
+      <span class="loading loading-spinner text-amber-500"></span>
+    } @else {
+      <div class="text-slate-400">Request not found.</div>
+    }
+  </div>
+</ng-template>
+
+<!-- ====== REJECT MODAL ====== -->
+@if (showRejectModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+      <h3 class="text-lg font-bold text-slate-800">Reject Request</h3>
+      <p class="text-sm text-slate-500">Optionally provide a rejection reason for the ISV.</p>
+      <textarea
+        [(ngModel)]="rejectionReason"
+        rows="3"
+        placeholder="Rejection reason (optional)..."
+        class="w-full border border-slate-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+      ></textarea>
+      <div class="flex gap-3 justify-end">
+        <button (click)="closeRejectModal()" class="btn btn-ghost rounded-xl">Cancel</button>
+        <button (click)="confirmReject()" [disabled]="isSubmitting" class="btn btn-error text-white rounded-xl">
+          {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ====== APPROVE & SUBMIT CONFIRM MODAL ====== -->
+@if (showSubmitConfirm) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+      <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <i class="ri-amazon-fill text-amber-600 text-2xl"></i>
+        Confirm AWS Submission
+      </h3>
+      <p class="text-sm text-slate-600">
+        This will approve the request and submit the product to <strong>AWS Marketplace</strong> via the Catalog API
+        (<code>StartChangeSet</code>). Publishing to <strong>Public</strong> triggers an AWS listing review that can take
+        several business days.
+      </p>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+        <strong>Note:</strong> NeoZaar product data will not be modified. AWS-specific fields that are not populated will
+        need to be set before a successful submission.
+      </div>
+
+      @if (submitError) {
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm">
+          <div class="font-bold text-red-700">{{ submitError.message }}</div>
+          @if (submitError.missingFields && submitError.missingFields.length > 0) {
+            <ul class="mt-2 list-disc pl-5 text-red-600 text-xs space-y-1">
+              @for (f of submitError.missingFields; track $index) {
+                <li>{{ f }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <div class="flex gap-3 justify-end">
+        <button (click)="closeSubmitConfirm()" [disabled]="isSubmitting" class="btn btn-ghost rounded-xl">Cancel</button>
+        <button (click)="confirmApproveSubmit()" [disabled]="isSubmitting" class="btn btn-success text-white rounded-xl gap-2">
+          <i class="ri-send-plane-line"></i>
+          {{ isSubmitting ? 'Submitting...' : 'Approve & Submit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ====== AWS CATEGORY PICKER MODAL ====== -->
+@if (showCategoryModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4" (click)="closeCategoryModal()">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[85vh] flex flex-col" (click)="$event.stopPropagation()">
+      <div class="p-5 border-b border-slate-100">
+        <div class="flex items-center justify-between gap-4">
+          <h3 class="text-lg font-bold text-slate-800">AWS Marketplace Categories</h3>
+          <span class="text-sm font-semibold"
+            [class]="selectedCategories.length >= maxCategories ? 'text-amber-600' : 'text-slate-400'">
+            {{ selectedCategories.length }} / {{ maxCategories }} selected
+          </span>
+        </div>
+        <div class="relative mt-3">
+          <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+          <input type="text" [(ngModel)]="categorySearch" placeholder="Search categories..."
+            class="w-full pl-9 pr-3 py-2 border border-slate-200 rounded-xl text-sm focus:outline-none focus:ring-2 focus:ring-amber-300" />
+        </div>
+      </div>
+
+      <div class="overflow-y-auto p-5 space-y-5 flex-1">
+        @for (grp of filteredCategoryGroups; track grp.group) {
+          <div>
+            <div class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-2">{{ grp.group }}</div>
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1.5">
+              @for (name of grp.items; track name) {
+                <label
+                  class="flex items-center gap-2 px-2.5 py-1.5 rounded-lg text-sm cursor-pointer border"
+                  [class]="isCategorySelected(name)
+                    ? 'bg-amber-50 border-amber-200 text-amber-900'
+                    : (selectedCategories.length >= maxCategories
+                        ? 'border-transparent text-slate-300 cursor-not-allowed'
+                        : 'border-transparent text-slate-700 hover:bg-slate-50')">
+                  <input type="checkbox" class="checkbox checkbox-xs checkbox-warning"
+                    [checked]="isCategorySelected(name)"
+                    [disabled]="!isCategorySelected(name) && selectedCategories.length >= maxCategories"
+                    (change)="toggleCategory(name)" />
+                  {{ name }}
+                </label>
+              }
+            </div>
+          </div>
+        }
+        @if (filteredCategoryGroups.length === 0) {
+          <div class="text-center text-slate-400 text-sm py-8">No categories match "{{ categorySearch }}".</div>
+        }
+      </div>
+
+      <div class="p-4 border-t border-slate-100 flex items-center justify-between gap-3">
+        <div class="flex flex-wrap gap-1.5 flex-1 min-w-0">
+          @for (c of selectedCategories; track c) {
+            <span class="inline-flex items-center gap-1 bg-amber-50 text-amber-800 border border-amber-200 rounded-md px-2 py-0.5 text-xs">
+              {{ c }}
+              <button type="button" (click)="removeCategory(c)"><i class="ri-close-line"></i></button>
+            </span>
+          }
+        </div>
+        <button (click)="closeCategoryModal()" class="btn btn-sm bg-amber-600 hover:bg-amber-700 text-white border-none rounded-xl px-6">Done</button>
+      </div>
+    </div>
+  </div>
+}

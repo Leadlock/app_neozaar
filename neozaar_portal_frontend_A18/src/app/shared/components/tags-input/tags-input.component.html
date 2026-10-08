@@ -1,0 +1,24 @@
+<div class="tags-input" [class.is-disabled]="disabled">
+  <span class="tag-chip" *ngFor="let tag of tags; let i = index">
+    <span class="tag-chip__label">{{ tag }}</span>
+    <button
+      type="button"
+      class="tag-chip__remove"
+      aria-label="Remove tag"
+      [disabled]="disabled"
+      (click)="removeAt(i)"
+    >
+      &times;
+    </button>
+  </span>
+
+  <input
+    type="text"
+    class="tags-input__field"
+    [placeholder]="tags.length ? '' : placeholder"
+    [(ngModel)]="inputValue"
+    [disabled]="disabled"
+    (keydown)="onKeyDown($event)"
+    (blur)="onBlur()"
+  />
+</div>

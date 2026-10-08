@@ -1,0 +1,374 @@
+> Building...
+
+🌼   daisyUI 4.12.24
+├─ ✔︎ 2 themes added		https://daisyui.com/docs/themes
+╰─ ❤︎ Support daisyUI project:	https://opencollective.com/daisyui
+
+√ Building...
+Initial chunk files                            | Names                              |  Raw size
+main.js                                        | main                               |   1.88 MB | 
+styles.css                                     | styles                             | 285.12 kB | 
+chunk-UGVVJOXA.js                              | -                                  |  92.10 kB | 
+polyfills.js                                   | polyfills                          |  90.20 kB | 
+chunk-O5H5443I.js                              | -                                  |  38.81 kB | 
+chunk-TTOPRD26.js                              | -                                  |  26.77 kB | 
+chunk-W2Y3YYP3.js                              | -                                  |  22.16 kB | 
+chunk-63XYWYM3.js                              | -                                  |  12.37 kB | 
+chunk-ZAJOLHGQ.js                              | -                                  |   9.39 kB | 
+chunk-G43CVADB.js                              | -                                  |   7.81 kB | 
+chunk-APQMKVBS.js                              | -                                  |   3.59 kB | 
+chunk-2EHLTK3W.js                              | -                                  |   3.23 kB | 
+chunk-KKSDJFQ5.js                              | -                                  |   2.77 kB | 
+chunk-BOGFJQ7P.js                              | -                                  |   1.84 kB | 
+chunk-UAUNS5GR.js                              | -                                  |   1.18 kB | 
+
+                                               | Initial total                      |   2.47 MB
+
+Lazy chunk files                               | Names                              |  Raw size
+crm-opportunities.component-GJVBMUXR.js        | crm-opportunities-component        | 134.72 kB | 
+aws-marketplace-review.component-MPPJO2FQ.js   | aws-marketplace-review-component   | 125.39 kB | 
+crm-dashboard-2.component-ESWYUBT5.js          | crm-dashboard-2-component          | 113.74 kB | 
+seller-dashboard.component-TO43DO6R.js         | seller-dashboard-component         |  98.83 kB | 
+azure-marketplace-review.component-FMRTAEGC.js | azure-marketplace-review-component |  94.71 kB | 
+consent-audit.component-MTTKIWXB.js            | consent-audit-component            |  71.21 kB | 
+campaign-create.component-4PQDGGCT.js          | campaign-create-component          |  70.51 kB | 
+crm-shell.component-ZTTTX3M4.js                | crm-shell-component                |  49.62 kB | 
+crm-leads.component-LZOP6V5Q.js                | crm-leads-component                |  49.47 kB | 
+whatsapp-conversations.component-5J6AEKQO.js   | whatsapp-conversations-component   |  48.95 kB | 
+sellerlist.component-7KLNWKK4.js               | sellerlist-component               |  46.53 kB | 
+partners.component-E7UELL7Y.js                 | partners-component                 |  43.86 kB | 
+crm-dashboard.component-V6QQQGZN.js            | crm-dashboard-component            |  43.68 kB | 
+affiliate-management.component-LU6VDU25.js     | affiliate-management-component     |  40.05 kB | 
+crm-customer-scoring.component-XDUIPGHP.js     | crm-customer-scoring-component     |  34.67 kB | 
+...and 37 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [21.321 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://localhost:4200/app
+  ➜  press h + enter to show help
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [14.805 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [0.854 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Application bundle generation failed. [0.726 seconds]
+
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                            | Names                              |  Raw size
+main.js                                        | main                               |   1.88 MB | 
+styles.css                                     | styles                             | 285.12 kB | 
+chunk-UGVVJOXA.js                              | -                                  |  92.10 kB | 
+polyfills.js                                   | polyfills                          |  90.20 kB | 
+chunk-O5H5443I.js                              | -                                  |  38.81 kB | 
+chunk-TTOPRD26.js                              | -                                  |  26.77 kB | 
+chunk-W2Y3YYP3.js                              | -                                  |  22.16 kB | 
+chunk-63XYWYM3.js                              | -                                  |  12.37 kB | 
+chunk-ZAJOLHGQ.js                              | -                                  |   9.39 kB | 
+chunk-G43CVADB.js                              | -                                  |   7.81 kB | 
+chunk-APQMKVBS.js                              | -                                  |   3.59 kB | 
+chunk-2EHLTK3W.js                              | -                                  |   3.23 kB | 
+chunk-KKSDJFQ5.js                              | -                                  |   2.77 kB | 
+chunk-BOGFJQ7P.js                              | -                                  |   1.84 kB | 
+chunk-UAUNS5GR.js                              | -                                  |   1.18 kB | 
+
+                                               | Initial total                      |   2.47 MB
+
+Lazy chunk files                               | Names                              |  Raw size
+crm-opportunities.component-GJVBMUXR.js        | crm-opportunities-component        | 134.72 kB | 
+aws-marketplace-review.component-MPPJO2FQ.js   | aws-marketplace-review-component   | 125.39 kB | 
+crm-dashboard-2.component-ESWYUBT5.js          | crm-dashboard-2-component          | 113.74 kB | 
+seller-dashboard.component-TO43DO6R.js         | seller-dashboard-component         |  98.83 kB | 
+azure-marketplace-review.component-FMRTAEGC.js | azure-marketplace-review-component |  94.71 kB | 
+consent-audit.component-MTTKIWXB.js            | consent-audit-component            |  71.21 kB | 
+campaign-create.component-4PQDGGCT.js          | campaign-create-component          |  70.51 kB | 
+crm-shell.component-ZTTTX3M4.js                | crm-shell-component                |  49.62 kB | 
+crm-leads.component-LZOP6V5Q.js                | crm-leads-component                |  49.47 kB | 
+whatsapp-conversations.component-5J6AEKQO.js   | whatsapp-conversations-component   |  48.95 kB | 
+sellerlist.component-7KLNWKK4.js               | sellerlist-component               |  46.53 kB | 
+partners.component-E7UELL7Y.js                 | partners-component                 |  43.86 kB | 
+crm-dashboard.component-V6QQQGZN.js            | crm-dashboard-component            |  43.68 kB | 
+affiliate-management.component-LU6VDU25.js     | affiliate-management-component     |  40.05 kB | 
+crm-customer-scoring.component-XDUIPGHP.js     | crm-customer-scoring-component     |  34.67 kB | 
+...and 37 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [1.086 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [1.134 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [0.890 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   |   1.88 MB | 
+styles.css          | styles | 285.15 kB | 
+
+Application bundle generation complete. [1.124 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [1.046 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [1.284 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [1.124 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.88 MB | 
+chunk-5I57UJC4.js                     | -                         | 27.00 kB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-create.component-QJTLCVZY.js | campaign-create-component | 70.51 kB | 
+
+Application bundle generation complete. [5.290 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [4.030 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.88 MB | 
+
+Application bundle generation complete. [2.186 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.625 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.002 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [1.982 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.359 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.526 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names  |  Raw size
+main.js             | main   |   1.89 MB | 
+styles.css          | styles | 285.21 kB | 
+
+Application bundle generation complete. [2.142 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.89 MB | 
+chunk-JUZTERT4.js                     | -                         | 27.24 kB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-create.component-YNYT6UJ2.js | campaign-create-component | 70.51 kB | 
+
+Application bundle generation complete. [4.528 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.404 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [1.973 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.087 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [1.962 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.063 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.018 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [1.902 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.89 MB | 
+chunk-C42E46PP.js                     | -                         | 27.47 kB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-create.component-OHWZX6DY.js | campaign-create-component | 70.51 kB | 
+
+Application bundle generation complete. [3.677 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.700 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.381 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.464 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.285 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.456 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.89 MB | 
+
+Application bundle generation complete. [2.260 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files | Names | Raw size
+main.js             | main  |  1.90 MB | 
+
+Application bundle generation complete. [2.198 seconds]
+
+Page reload sent to client(s).

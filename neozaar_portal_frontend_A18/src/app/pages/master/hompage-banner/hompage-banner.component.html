@@ -1,0 +1,317 @@
+<div class="min-h-screen bg-zinc-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900">Homepage Text</h1>
+      <p class="text-sm text-zinc-500">Manage hero section title and subtitle</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search banners..."
+               class="pl-9 pr-4 py-2.5 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-300 w-52 bg-white transition">
+      </div>
+      <button (click)="openCreate()"
+              class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg active:scale-95">
+        + New Entry
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 text-xs uppercase font-bold">
+          <tr>
+            <th class="px-6 py-4">#</th>
+            <th class="px-6 py-4">Title / Color / Subtitle</th>
+            <th class="px-6 py-4">Preview</th>
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          <tr *ngFor="let banner of filteredBanners; let i = index" class="hover:bg-zinc-50/50 transition">
+            <td class="px-6 py-4 text-sm font-medium text-zinc-500">
+              {{ ((paginationData.page - 1) * paginationData.limit) + i + 1 }}
+            </td>
+            <td class="px-6 py-4">
+              <div class="font-bold text-zinc-900">{{ banner.title }}</div>
+              <div class="text-sm text-orange-600" *ngIf="banner.color_title">{{ banner.color_title }}</div>
+              <div class="text-xs text-zinc-500">{{ banner.subtitle }}</div>
+            </td>
+            <td class="px-6 py-4">
+              <div class="relative w-80 h-36 rounded-xl overflow-hidden bg-black flex flex-col items-center justify-center text-center px-4"
+                   style="background-image: radial-gradient(ellipse at center, rgba(249,115,22,0.18) 0%, rgba(0,0,0,0) 65%), #000;">
+                <div class="text-base font-bold leading-tight"
+                     [ngStyle]="getTextStyle(banner.title_color_type, banner.title_color, banner.title_color_end, banner.title_color_direction)">
+                  {{ banner.title }}
+                </div>
+                <div *ngIf="banner.color_title" class="text-base font-bold leading-tight"
+                     [ngStyle]="getTextStyle(banner.color_title_color_type, banner.color_title_color, banner.color_title_color_end, banner.color_title_color_direction)">
+                  {{ banner.color_title }}
+                </div>
+                <div class="text-[11px] mt-2 leading-snug line-clamp-2 max-w-[85%]"
+                     [ngStyle]="getTextStyle(banner.subtitle_color_type, banner.subtitle_color, banner.subtitle_color_end, banner.subtitle_color_direction)">
+                  {{ banner.subtitle }}
+                </div>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button (click)="openEdit(banner)" class="p-2 text-zinc-400 hover:text-blue-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/>
+                  </svg>
+                </button>
+                <button (click)="deleteData(banner.id)" class="p-2 text-zinc-400 hover:text-red-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="paginationData && paginationData.total_pages > 0" 
+         class="bg-zinc-50 px-6 py-4 border-t border-zinc-200 flex items-center justify-between">
+      <div class="text-sm text-zinc-500">
+        Page <span class="font-bold text-zinc-900">{{ paginationData.page }}</span> of 
+        <span class="font-bold text-zinc-900">{{ paginationData.total_pages }}</span> 
+        (<span class="italic">{{ paginationData.total }} total</span>)
+      </div>
+      <div class="flex gap-2">
+        <button [disabled]="!paginationData.has_prev" (click)="changePage(paginationData.page - 1)"
+                class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40">
+          Previous
+        </button>
+        <button [disabled]="!paginationData.has_next" (click)="changePage(paginationData.page + 1)"
+                class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40">
+          Next
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal Form -->
+    <div *ngIf="showForm" class="fixed inset-0 z-50 flex justify-end">
+      <div class="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" (click)="showForm = false"></div>
+      
+      <div class="relative w-full max-w-md bg-white h-full shadow-2xl p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
+        <div class="flex justify-between items-center mb-6">
+          <h2 class="text-xl font-bold text-zinc-800">{{ isEditMode ? 'Edit' : 'Create' }} Banner</h2>
+          <button (click)="showForm = false" class="text-zinc-400 hover:text-zinc-900 text-2xl">&times;</button>
+        </div>
+
+        <div class="space-y-0 divide-y divide-zinc-100">
+
+          <!-- ── TITLE ── -->
+          <div class="py-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Title</span>
+              <div class="flex items-center bg-zinc-100 rounded-full p-0.5 gap-0.5">
+                <button type="button" (click)="formData.title_color_type = 'solid'"
+                        [class]="formData.title_color_type === 'solid' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Solid
+                </button>
+                <button type="button" (click)="formData.title_color_type = 'gradient'"
+                        [class]="formData.title_color_type === 'gradient' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Gradient
+                </button>
+              </div>
+            </div>
+            <input [(ngModel)]="formData.title" type="text" placeholder="Main heading"
+                   class="w-full border border-zinc-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            <!-- Solid -->
+            <ng-container *ngIf="formData.title_color_type === 'solid'">
+              <div class="flex items-center gap-2 bg-zinc-50 rounded-xl p-2">
+                <label class="relative cursor-pointer">
+                  <div class="w-9 h-9 rounded-lg border-2 border-white shadow-md ring-1 ring-zinc-200 overflow-hidden"
+                       [style.background]="formData.title_color"></div>
+                  <input type="color" [(ngModel)]="formData.title_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                </label>
+                <input type="text" [(ngModel)]="formData.title_color"
+                       class="flex-1 bg-transparent text-sm font-mono text-zinc-700 outline-none">
+              </div>
+            </ng-container>
+            <!-- Gradient -->
+            <ng-container *ngIf="formData.title_color_type === 'gradient'">
+              <div class="rounded-xl overflow-hidden h-6 w-full"
+                   [style.background]="'linear-gradient(' + formData.title_color_direction + ', ' + formData.title_color + ', ' + formData.title_color_end + ')'"></div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">Start</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.title_color"></div>
+                      <input type="color" [(ngModel)]="formData.title_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.title_color" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">End</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.title_color_end"></div>
+                      <input type="color" [(ngModel)]="formData.title_color_end" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.title_color_end" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+              </div>
+              <select [(ngModel)]="formData.title_color_direction"
+                      class="w-full border border-zinc-200 rounded-xl p-2.5 text-xs text-zinc-600 bg-white outline-none focus:ring-2 focus:ring-orange-500">
+                <option value="to right">→ Left to Right</option>
+                <option value="to left">← Right to Left</option>
+                <option value="to bottom">↓ Top to Bottom</option>
+                <option value="to top">↑ Bottom to Top</option>
+                <option value="135deg">↘ Diagonal</option>
+              </select>
+            </ng-container>
+          </div>
+
+          <!-- ── COLOR TITLE ── -->
+          <div class="py-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Color Title <span class="normal-case font-normal text-zinc-300">(optional)</span></span>
+              <div class="flex items-center bg-zinc-100 rounded-full p-0.5 gap-0.5">
+                <button type="button" (click)="formData.color_title_color_type = 'solid'"
+                        [class]="formData.color_title_color_type === 'solid' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Solid
+                </button>
+                <button type="button" (click)="formData.color_title_color_type = 'gradient'"
+                        [class]="formData.color_title_color_type === 'gradient' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Gradient
+                </button>
+              </div>
+            </div>
+            <input [(ngModel)]="formData.color_title" type="text" placeholder="Highlighted line"
+                   class="w-full border border-zinc-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            <ng-container *ngIf="formData.color_title_color_type === 'solid'">
+              <div class="flex items-center gap-2 bg-zinc-50 rounded-xl p-2">
+                <label class="relative cursor-pointer">
+                  <div class="w-9 h-9 rounded-lg border-2 border-white shadow-md ring-1 ring-zinc-200 overflow-hidden"
+                       [style.background]="formData.color_title_color"></div>
+                  <input type="color" [(ngModel)]="formData.color_title_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                </label>
+                <input type="text" [(ngModel)]="formData.color_title_color"
+                       class="flex-1 bg-transparent text-sm font-mono text-zinc-700 outline-none">
+              </div>
+            </ng-container>
+            <ng-container *ngIf="formData.color_title_color_type === 'gradient'">
+              <div class="rounded-xl overflow-hidden h-6 w-full"
+                   [style.background]="'linear-gradient(' + formData.color_title_color_direction + ', ' + formData.color_title_color + ', ' + formData.color_title_color_end + ')'"></div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">Start</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.color_title_color"></div>
+                      <input type="color" [(ngModel)]="formData.color_title_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.color_title_color" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">End</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.color_title_color_end"></div>
+                      <input type="color" [(ngModel)]="formData.color_title_color_end" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.color_title_color_end" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+              </div>
+              <select [(ngModel)]="formData.color_title_color_direction"
+                      class="w-full border border-zinc-200 rounded-xl p-2.5 text-xs text-zinc-600 bg-white outline-none focus:ring-2 focus:ring-orange-500">
+                <option value="to right">→ Left to Right</option>
+                <option value="to left">← Right to Left</option>
+                <option value="to bottom">↓ Top to Bottom</option>
+                <option value="to top">↑ Bottom to Top</option>
+                <option value="135deg">↘ Diagonal</option>
+              </select>
+            </ng-container>
+          </div>
+
+          <!-- ── SUBTITLE ── -->
+          <div class="py-5 space-y-3">
+            <div class="flex items-center justify-between">
+              <span class="text-xs font-bold uppercase tracking-widest text-zinc-400">Subtitle</span>
+              <div class="flex items-center bg-zinc-100 rounded-full p-0.5 gap-0.5">
+                <button type="button" (click)="formData.subtitle_color_type = 'solid'"
+                        [class]="formData.subtitle_color_type === 'solid' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Solid
+                </button>
+                <button type="button" (click)="formData.subtitle_color_type = 'gradient'"
+                        [class]="formData.subtitle_color_type === 'gradient' ? 'px-3 py-1 rounded-full text-xs font-semibold bg-white text-zinc-800 shadow-sm' : 'px-3 py-1 rounded-full text-xs font-semibold text-zinc-400'">
+                  Gradient
+                </button>
+              </div>
+            </div>
+            <input [(ngModel)]="formData.subtitle" type="text" placeholder="Supporting text"
+                   class="w-full border border-zinc-200 rounded-xl p-3 text-sm focus:ring-2 focus:ring-orange-500 focus:border-transparent outline-none">
+            <ng-container *ngIf="formData.subtitle_color_type === 'solid'">
+              <div class="flex items-center gap-2 bg-zinc-50 rounded-xl p-2">
+                <label class="relative cursor-pointer">
+                  <div class="w-9 h-9 rounded-lg border-2 border-white shadow-md ring-1 ring-zinc-200 overflow-hidden"
+                       [style.background]="formData.subtitle_color"></div>
+                  <input type="color" [(ngModel)]="formData.subtitle_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                </label>
+                <input type="text" [(ngModel)]="formData.subtitle_color"
+                       class="flex-1 bg-transparent text-sm font-mono text-zinc-700 outline-none">
+              </div>
+            </ng-container>
+            <ng-container *ngIf="formData.subtitle_color_type === 'gradient'">
+              <div class="rounded-xl overflow-hidden h-6 w-full"
+                   [style.background]="'linear-gradient(' + formData.subtitle_color_direction + ', ' + formData.subtitle_color + ', ' + formData.subtitle_color_end + ')'"></div>
+              <div class="grid grid-cols-2 gap-2">
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">Start</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.subtitle_color"></div>
+                      <input type="color" [(ngModel)]="formData.subtitle_color" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.subtitle_color" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+                <div class="bg-zinc-50 rounded-xl p-2">
+                  <p class="text-[10px] font-semibold text-zinc-400 uppercase mb-1.5">End</p>
+                  <div class="flex items-center gap-2">
+                    <label class="relative cursor-pointer">
+                      <div class="w-7 h-7 rounded-md border-2 border-white shadow ring-1 ring-zinc-200" [style.background]="formData.subtitle_color_end"></div>
+                      <input type="color" [(ngModel)]="formData.subtitle_color_end" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                    </label>
+                    <input type="text" [(ngModel)]="formData.subtitle_color_end" class="w-full bg-transparent text-xs font-mono text-zinc-700 outline-none">
+                  </div>
+                </div>
+              </div>
+              <select [(ngModel)]="formData.subtitle_color_direction"
+                      class="w-full border border-zinc-200 rounded-xl p-2.5 text-xs text-zinc-600 bg-white outline-none focus:ring-2 focus:ring-orange-500">
+                <option value="to right">→ Left to Right</option>
+                <option value="to left">← Right to Left</option>
+                <option value="to bottom">↓ Top to Bottom</option>
+                <option value="to top">↑ Bottom to Top</option>
+                <option value="135deg">↘ Diagonal</option>
+              </select>
+            </ng-container>
+          </div>
+
+          <div class="flex gap-3 pt-5">
+            <button (click)="saveData()" class="flex-1 bg-orange-600 text-white py-3.5 rounded-xl font-bold shadow-md hover:bg-orange-700">
+              {{ isEditMode ? 'Update' : 'Save' }}
+            </button>
+            <button (click)="showForm = false" class="flex-1 bg-zinc-100 text-zinc-600 py-3.5 rounded-xl font-bold hover:bg-zinc-200">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

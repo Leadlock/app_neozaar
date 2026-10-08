@@ -1,0 +1,232 @@
+<div class="min-h-screen bg-zinc-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900">Instructions</h1>
+      <p class="text-sm text-zinc-500">Manage system prompts and feature instructions</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search instructions..."
+               class="pl-9 pr-4 py-2.5 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-300 w-52 bg-white transition">
+      </div>
+      <button (click)="openCreate()"
+              class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg active:scale-95 flex items-center gap-2">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+        </svg>
+        New Instruction
+      </button>
+    </div>
+  </div>
+
+  <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <!-- Loading -->
+      <div *ngIf="isLoading" class="p-20 text-center">
+        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-orange-600 mx-auto"></div>
+        <p class="mt-4 text-zinc-500 font-medium">Loading Instructions...</p>
+      </div>
+
+      <!-- Empty state -->
+      <div *ngIf="!isLoading && instructionsList.length === 0" class="text-center py-12">
+        <p class="text-zinc-400">No instructions found. Create your first instruction!</p>
+      </div>
+
+      <!-- Data table -->
+      <table *ngIf="!isLoading && instructionsList.length > 0" class="w-full text-left border-collapse">
+        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 text-xs uppercase font-bold">
+          <tr>
+            <th class="px-6 py-4 w-24">S.No.</th>
+            <th class="px-6 py-4">System Prompt</th>
+            <th class="px-6 py-4">Instructions</th>
+            <th class="px-6 py-4 w-32">Is Feature</th>
+            <th class="px-6 py-4 text-right w-28">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          <tr *ngFor="let instruction of filteredInstructions; let i = index" class="hover:bg-zinc-50/50 transition">
+            <td class="px-6 py-4 text-sm font-medium text-zinc-500">
+              {{ (currentPage - 1) * itemsPerPage + i + 1 }}
+            </td>
+            <td class="px-6 py-4">
+              <div class="flex items-center gap-3">
+                <div
+                  class="w-9 h-9 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center font-bold border border-orange-100"
+                >
+                  {{ instruction.system_prompt?.charAt(0) || 'S' }}
+                </div>
+                <span class="font-medium text-zinc-900 truncate max-w-xs">
+                  {{ instruction.system_prompt }}
+                </span>
+              </div>
+            </td>
+            <td class="px-6 py-4 text-zinc-600 truncate max-w-sm">
+                <div class="text-sm text-zinc-400 mb-1 w-9"> {{ instruction.instruction}} </div>
+      </td>
+            <td class="px-6 py-4">
+              <span
+                [class]="
+                  instruction.is_featured
+
+                    ? 'bg-green-100 text-green-700 px-2 py-1 rounded-full text-xs font-semibold'
+                    : 'bg-gray-100 text-gray-600 px-2 py-1 rounded-full text-xs font-semibold'
+                "
+              >
+                {{ instruction.is_featured ? 'Yes' : 'No' }}
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button
+                  (click)="editInstruction(instruction)"
+                  class="p-2 text-zinc-400 hover:text-blue-600 transition"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"
+                    />
+                  </svg>
+                </button>
+                <button
+                  (click)="deleteInstruction(instruction.id)"
+                  class="p-2 text-zinc-400 hover:text-red-600 transition"
+                >
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div
+      *ngIf="totalPages > 0"
+      class="bg-zinc-50 px-6 py-4 border-t border-zinc-200 flex items-center justify-between"
+    >
+      <div class="text-sm text-zinc-500">
+        Showing page <span class="font-bold text-zinc-900">{{ currentPage }}</span> of
+        {{ totalPages }}
+      </div>
+
+      <div class="flex items-center gap-2">
+        <button
+          [disabled]="!hasPrev"
+          (click)="prevPage()"
+          class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+          </svg>
+        </button>
+
+        <div class="flex gap-1">
+          <button
+            *ngFor="let p of getPageNumbers()"
+            (click)="p !== '...' ? goToPage(+p) : null"
+            [ngClass]="{
+              'bg-orange-600 text-white border-orange-600 shadow-md': p === currentPage,
+              'bg-white text-zinc-700 border-zinc-300 hover:border-orange-500 hover:text-orange-600':
+                p !== currentPage && p !== '...'
+            }"
+            class="w-9 h-9 flex items-center justify-center text-sm font-bold border rounded-lg transition"
+          >
+            {{ p }}
+          </button>
+        </div>
+
+        <button
+          [disabled]="!hasNext"
+          (click)="nextPage()"
+          class="px-3 py-2 text-sm font-medium bg-white border border-zinc-300 rounded-lg hover:bg-zinc-100 disabled:opacity-40 transition"
+        >
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+          </svg>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Slide-in Form -->
+  <div *ngIf="showForm" class="fixed inset-0 z-50 flex justify-end">
+    <div class="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" (click)="closeForm()"></div>
+
+    <div
+      class="relative w-full max-w-md bg-white h-full shadow-2xl p-8 overflow-y-auto animate-in slide-in-from-right duration-300"
+    >
+      <div class="flex justify-between items-center mb-8">
+        <div>
+          <h2 class="text-xl font-bold text-zinc-800">{{ editId ? 'Edit' : 'Create' }} Instruction</h2>
+          <p class="text-xs text-zinc-400 mt-1">Fill in the details below</p>
+        </div>
+        <button (click)="closeForm()" class="text-zinc-400 hover:text-zinc-900 text-2xl p-2">&times;</button>
+      </div>
+
+      <div class="space-y-6">
+        <!-- System Prompt -->
+        <div>
+          <label class="block text-sm font-bold text-zinc-700 mb-2">System Prompt</label>
+          <textarea
+            rows="3"
+            [(ngModel)]="system_prompt"
+            placeholder="e.g. You are a helpful assistant specialized in marketing..."
+            class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition shadow-sm resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Instructions -->
+        <div>
+          <label class="block text-sm font-bold text-zinc-700 mb-2">Instructions</label>
+          <textarea
+            rows="4"
+            [(ngModel)]="instruction"
+            placeholder="Detailed instructions for the model..."
+            class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition shadow-sm resize-none"
+          ></textarea>
+        </div>
+
+        <!-- Is Feature (checkbox) -->
+        <div class="flex items-center gap-3">
+          <input
+            type="checkbox"
+            [(ngModel)]="isFeatures"
+            id="isFeatures"
+            class="w-5 h-5 rounded border-zinc-300 text-orange-600 focus:ring-orange-500"
+          />
+          <label for="isFeatures" class="text-sm font-medium text-zinc-700">Is this a feature instruction?</label>
+        </div>
+
+        <div class="flex gap-3 pt-6 border-t border-zinc-100">
+          <button
+            (click)="saveInstruction()"
+            [disabled]="!system_prompt.trim() || !instruction.trim() || isLoading"
+            class="flex-1 bg-orange-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-700 active:scale-95 transition disabled:opacity-50"
+          >
+            {{ editId ? 'Update' : 'Save' }} Instruction
+          </button>
+          <button
+            (click)="closeForm()"
+            class="flex-1 bg-zinc-100 text-zinc-600 py-3.5 rounded-xl font-bold hover:bg-zinc-200 transition"
+          >
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

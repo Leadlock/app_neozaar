@@ -1,0 +1,152 @@
+/* Shared CoSell360 sub-menu — one definition so it looks identical on every page.
+   The generated per-page stylesheets each carried slightly different nav rules
+   (gap, blur, brand mark, button size, mobile breakpoint); these win by specificity. */
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  background: rgba(255, 255, 255, 0.94);
+  backdrop-filter: blur(16px);
+  border-bottom: 1px solid rgba(223, 230, 240, 0.85);
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-inner {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 22px;
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .brand-mark {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  background: var(--ink);
+  display: grid;
+  place-items: center;
+  box-shadow: none;
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .brand-mark svg {
+  width: 22px;
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links {
+  display: flex;
+  align-items: center;
+  gap: 22px;
+  font-weight: 600;
+  font-size: 0.92rem;
+  color: #38465d;
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links a:hover,
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links .active {
+  color: var(--blue);
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 6px 12px;
+  font-size: 0.85rem;
+  font-weight: 700;
+  border-radius: 8px;
+  box-shadow: 0 6px 16px rgba(255, 107, 53, 0.22);
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .mobile-toggle {
+  display: none;
+  border: 0;
+  background: none;
+  font-size: 1.5rem;
+}
+
+/* One collapse point for every page (the originals used 900 / 940 / 950 / 980). */
+@media (max-width: 1000px) {
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links {
+    position: absolute;
+    top: 60px;
+    left: 0;
+    right: 0;
+    background: white;
+    border-bottom: 1px solid var(--line);
+    padding: 20px;
+    display: none;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 22px;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links.open {
+    display: flex;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-cta {
+    display: none;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .mobile-toggle {
+    display: block;
+  }
+}
+@media (max-width: 620px) {
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-inner {
+    height: 54px;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links {
+    top: 54px;
+  }
+}
+
+/* Same container width and line-height on every page, so the brand, links and
+   "Join as ISV" button sit in the exact same spot (Calculator used a 1240px wrap). */
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav {
+  line-height: 1.6;
+}
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .wrap {
+  width: min(1180px, calc(100% - 40px));
+  margin: auto;
+}
+@media (max-width: 620px) {
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .wrap {
+    width: min(1180px, calc(100% - 28px));
+  }
+}
+
+/* Section anchors: land below the sticky sub-menu, and glide instead of jumping. */
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) [id] {
+  scroll-margin-top: 76px;
+}
+html:has(:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery)) {
+  scroll-behavior: smooth;
+}
+
+/* No brand block in the sub-menu: links sit at the left, the "Join as ISV" button (or the
+   mobile menu toggle) at the right. */
+:is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-inner {
+  justify-content: space-between;
+}
+@media (max-width: 1000px) {
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-inner {
+    justify-content: flex-end;
+  }
+}
+
+/* Desktop: lay the links and CTA out in normal flow so they never overlap.
+   (Previously the links were absolutely centred over the whole bar, which let a
+   long CTA label like "Join as Delivery Partner" grow leftward under them.)
+   The links group is centred within the space left of the CTA, and the CTA
+   stays pinned to the right. */
+@media (min-width: 1001px) {
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-inner {
+    position: relative;
+    justify-content: center;
+    gap: 22px;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-links {
+    position: static;
+    transform: none;
+    flex: 1 1 auto;
+    justify-content: center;
+    flex-wrap: wrap;
+    white-space: nowrap;
+  }
+  :is(.cs-home, .cs-services, .cs-pricing, .cs-calculator, .cs-assessment, .cs-advisors, .cs-delivery) header.nav .nav-cta {
+    flex: 0 0 auto;
+    white-space: nowrap;
+  }
+}

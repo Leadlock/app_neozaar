@@ -1,0 +1,423 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      name="description"
+      content="Build a transparent estimate for a modular cloud landing zone implementation."
+    />
+    <meta name="theme-color" content="#0b1220" />
+    <title>Cloud Landing Zone Pricing Calculator</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1220'/%3E%3Cpath d='M18 22h28M22 32h20M26 42h12' stroke='%23ffb454' stroke-width='6' stroke-linecap='round'/%3E%3C/svg%3E"
+    />
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <header class="topbar">
+      <a class="brand" href="#calculator" aria-label="Landing Zone Estimator home">
+        <span class="brand-mark" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </span>
+        <span>Landing Zone Estimator</span>
+      </a>
+      <div class="rate-note" aria-label="Hourly rates">
+        <span class="rate-dot" aria-hidden="true"></span>
+        <span>$65/hr</span>
+        <span class="rate-separator">·</span>
+        <span>₹6,200/hr</span>
+      </div>
+    </header>
+
+    <main id="calculator">
+      <section class="intro" aria-labelledby="page-title">
+        <div>
+          <p class="eyebrow">Cloud implementation pricing</p>
+          <h1 id="page-title">Build your landing zone estimate.</h1>
+        </div>
+        <div class="intro-side">
+          <div class="platform-control" role="group" aria-label="Cloud platform">
+            <span>Cloud platform</span>
+            <div class="platform-toggle">
+              <button class="active" type="button" data-platform="AWS" aria-pressed="true">
+                <span class="aws-mark" aria-hidden="true">AWS</span> Amazon Web Services
+              </button>
+              <button type="button" data-platform="Azure" aria-pressed="false">
+                <span class="azure-mark" aria-hidden="true">A</span> Microsoft Azure
+              </button>
+            </div>
+          </div>
+          <p class="intro-copy">
+            Compare a provider-aligned foundation, required well-architected controls, and optional workload capabilities.
+          </p>
+        </div>
+      </section>
+
+      <section class="workspace" aria-label="Pricing calculator">
+        <div class="catalog-panel">
+          <div class="section-heading">
+            <div>
+              <p class="step-label">01 / Foundation</p>
+              <h2>Core platform foundation</h2>
+            </div>
+            <span class="included-pill">Required</span>
+          </div>
+
+          <article class="base-card">
+            <div class="base-card-top">
+              <div class="icon-wrap base-icon" aria-hidden="true">
+                <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 4.5 7.2v9.6L12 21l7.5-4.2V7.2L12 3Z"/><path d="m4.8 7.4 7.2 4 7.2-4M12 11.5V21"/></svg>
+              </div>
+              <div class="base-title">
+                <h3 id="base-title">AWS Multi-Account Landing Zone</h3>
+                <p id="base-description">The organization, shared security accounts, and first workload environment.</p>
+              </div>
+              <div class="base-price">
+                <strong data-base-price>$2,600</strong>
+                <span>40 hours</span>
+              </div>
+            </div>
+            <ul class="deliverables-grid">
+              <li><span class="check" aria-hidden="true">✓</span><span data-base-deliverable="0">AWS Organizations, Control Tower &amp; OU hierarchy</span></li>
+              <li><span class="check" aria-hidden="true">✓</span><span data-base-deliverable="1">Management, Log Archive &amp; Audit accounts</span></li>
+              <li><span class="check" aria-hidden="true">✓</span><span data-base-deliverable="2">1 workload account with VPC &amp; DNS baseline</span></li>
+              <li><span class="check" aria-hidden="true">✓</span><span data-base-deliverable="3">Naming, tagging &amp; ownership conventions</span></li>
+            </ul>
+          </article>
+
+          <div class="guidance-note">
+            <div>
+              <strong>Aligned to provider guidance</strong>
+              <p>“Baseline” marks the domains required for a well-architected landing-zone foundation. Exact controls still depend on risk, scale, and regulatory needs.</p>
+            </div>
+            <div class="guidance-links">
+              <a href="https://docs.aws.amazon.com/prescriptive-guidance/latest/migration-aws-environment/welcome.html" target="_blank" rel="noreferrer">AWS guidance ↗</a>
+              <a href="https://learn.microsoft.com/azure/cloud-adoption-framework/ready/landing-zone/design-areas" target="_blank" rel="noreferrer">Azure guidance ↗</a>
+            </div>
+          </div>
+
+          <div class="section-heading addons-heading">
+            <div>
+              <p class="step-label">02 / Configure</p>
+              <h2>Architecture capabilities</h2>
+            </div>
+            <button class="text-button" type="button" id="clear-addons">Reset selection</button>
+          </div>
+
+          <div class="tier-legend" aria-label="Scope classification">
+            <span><i class="legend-dot baseline-dot"></i>Baseline · required</span>
+            <span><i class="legend-dot recommended-dot"></i>Recommended at scale</span>
+            <span><i class="legend-dot optional-dot"></i>Optional scope</span>
+          </div>
+
+          <div class="addon-list" id="addon-list">
+            <label class="addon-card" for="identity" data-tier="baseline">
+              <input class="addon-checkbox" type="checkbox" id="identity" data-addon="identity" checked />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5"/><path d="M5.5 20c.5-4 2.7-6 6.5-6s6 2 6.5 6"/></svg>
+                  </span>
+                  <span>
+                    <strong>Identity &amp; Privileged Access <em class="tier-badge baseline">Baseline</em></strong>
+                    <small data-service="identity">IAM Identity Center, corporate IdP, and permission sets</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="identity">$975</strong><small>+15 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="pipeline" data-tier="baseline">
+              <input class="addon-checkbox" type="checkbox" id="pipeline" data-addon="pipeline" checked />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="6" cy="6" r="2"/><circle cx="18" cy="18" r="2"/><path d="M8 6h4a4 4 0 0 1 4 4v6M6 8v8a2 2 0 0 0 2 2h8"/></svg>
+                  </span>
+                  <span>
+                    <strong>Platform Automation &amp; IaC <em class="tier-badge baseline">Baseline</em></strong>
+                    <small data-service="pipeline">Terraform / CloudFormation pipeline with S3 remote state</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="pipeline">$1,625</strong><small>+25 hours</small></span>
+              </span>
+            </label>
+
+            <div class="addon-card spoke-card" data-tier="optional">
+              <input class="addon-checkbox" type="checkbox" id="network" data-addon="network" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <label class="addon-content" for="network">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="5" r="2.5"/><circle cx="5" cy="18" r="2.5"/><circle cx="19" cy="18" r="2.5"/><path d="M12 7.5v4M7.2 16.3l3.3-3M16.8 16.3l-3.3-3"/></svg>
+                  </span>
+                  <span>
+                    <strong><span id="network-title">Additional VPC Spoke</span> <em class="tier-badge optional">Optional</em></strong>
+                    <small data-service="network">VPC, Transit Gateway routing, route tables, and NACLs</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="network">$650</strong><small>+10 hours each</small></span>
+              </label>
+              <div class="quantity" aria-label="Network spoke quantity">
+                <button type="button" id="spoke-minus" aria-label="Decrease network spokes">−</button>
+                <output id="spoke-count" aria-live="polite">1</output>
+                <button type="button" id="spoke-plus" aria-label="Increase network spokes">+</button>
+              </div>
+            </div>
+
+            <label class="addon-card" for="monitoring" data-tier="baseline">
+              <input class="addon-checkbox" type="checkbox" id="monitoring" data-addon="monitoring" checked />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 19V9M10 19V5M16 19v-7M22 19H2"/><path d="m3 8 6-4 6 6 6-5"/></svg>
+                  </span>
+                  <span>
+                    <strong>Centralized Operations &amp; Observability <em class="tier-badge baseline">Baseline</em></strong>
+                    <small data-service="monitoring">CloudWatch dashboards, alarms, and SNS notifications</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="monitoring">$975</strong><small>+15 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="compliance" data-tier="baseline">
+              <input class="addon-checkbox" type="checkbox" id="compliance" data-addon="compliance" checked />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 6v5c0 4.6 2.6 8 7 10 4.4-2 7-5.4 7-10V6l-7-3Z"/><path d="m9 12 2 2 4-4"/></svg>
+                  </span>
+                  <span>
+                    <strong>Governance &amp; Security Guardrails <em class="tier-badge baseline">Baseline</em></strong>
+                    <small data-service="compliance">Security Hub, AWS Config rules, SCPs, and CIS controls</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="compliance">$1,300</strong><small>+20 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="cost" data-tier="baseline">
+              <input class="addon-checkbox" type="checkbox" id="cost" data-addon="cost" checked />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="8"/><path d="M15 8.5c-.7-.7-1.7-1-3-1-1.7 0-3 .9-3 2s1 1.8 3 2.1 3 1 3 2.3-1.3 2.2-3 2.2c-1.2 0-2.4-.4-3.2-1.2M12 5v2.5M12 16.1V19"/></svg>
+                  </span>
+                  <span>
+                    <strong>Cost Management &amp; Resource Standards <em class="tier-badge baseline">Baseline</em></strong>
+                    <small data-service="cost">Cost Explorer, budgets, allocation tags, and account ownership</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="cost">$650</strong><small>+10 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="vending" data-tier="recommended">
+              <input class="addon-checkbox" type="checkbox" id="vending" data-addon="vending" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M4 5h16v5H4zM6 10v9h12v-9M9 14h6"/></svg>
+                  </span>
+                  <span>
+                    <strong>Account / Subscription Vending <em class="tier-badge recommended">At scale</em></strong>
+                    <small data-service="vending">Account Factory workflow with approved blueprints and controls</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="vending">$1,300</strong><small>+20 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="security" data-tier="recommended">
+              <input class="addon-checkbox" type="checkbox" id="security" data-addon="security" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M12 3 5 6v5c0 4.6 2.6 8 7 10 4.4-2 7-5.4 7-10V6l-7-3Z"/><circle cx="12" cy="11" r="2.5"/><path d="M12 7V5M12 17v-2.5M16 11h2M6 11h2"/></svg>
+                  </span>
+                  <span>
+                    <strong>Threat Detection &amp; SIEM Integration <em class="tier-badge recommended">At scale</em></strong>
+                    <small data-service="security">GuardDuty, Security Hub delegation, and SIEM integration</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="security">$1,300</strong><small>+20 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="backup" data-tier="recommended">
+              <input class="addon-checkbox" type="checkbox" id="backup" data-addon="backup" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M5 8a8 8 0 1 1-1 8M5 8V3M5 8h5"/><path d="M12 8v5l3 2"/></svg>
+                  </span>
+                  <span>
+                    <strong>Backup &amp; Recovery Foundation <em class="tier-badge recommended">At scale</em></strong>
+                    <small data-service="backup">Organization-wide backup policies, vaults, and restore testing</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="backup">$975</strong><small>+15 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="hybrid" data-tier="optional">
+              <input class="addon-checkbox" type="checkbox" id="hybrid" data-addon="hybrid" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><path d="M7 7h10v10H7zM3 12h4M17 12h4M12 3v4M12 17v4"/><path d="m5 10-2 2 2 2M19 10l2 2-2 2"/></svg>
+                  </span>
+                  <span>
+                    <strong>Hybrid Connectivity <em class="tier-badge optional">Optional</em></strong>
+                    <small data-service="hybrid">Site-to-Site VPN / Direct Connect with routing and DNS</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="hybrid">$1,625</strong><small>+25 hours</small></span>
+              </span>
+            </label>
+
+            <label class="addon-card" for="database" data-tier="optional">
+              <input class="addon-checkbox" type="checkbox" id="database" data-addon="database" />
+              <span class="custom-check" aria-hidden="true"></span>
+              <span class="addon-content">
+                <span class="addon-title-row">
+                  <span class="icon-wrap" aria-hidden="true">
+                    <svg viewBox="0 0 24 24" fill="none"><ellipse cx="12" cy="5.5" rx="7" ry="3"/><path d="M5 5.5v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6M5 11.5v6c0 1.7 3.1 3 7 3s7-1.3 7-3v-6"/></svg>
+                  </span>
+                  <span>
+                    <strong>Database Setup &amp; Configuration <em class="tier-badge optional">Workload</em></strong>
+                    <small data-service="database">RDS / Aurora, private access, KMS encryption, and backups</small>
+                  </span>
+                </span>
+                <span class="addon-meta"><strong data-price="database">$1,300</strong><small>+20 hours</small></span>
+              </span>
+            </label>
+          </div>
+        </div>
+
+        <aside class="summary-panel" aria-labelledby="estimate-title">
+          <div class="summary-header">
+            <div>
+              <p class="step-label light">03 / Estimate</p>
+              <h2 id="estimate-title">Your configuration</h2>
+            </div>
+            <div class="currency-toggle" role="group" aria-label="Display currency">
+              <button class="active" type="button" data-currency="USD" aria-pressed="true">USD</button>
+              <button type="button" data-currency="INR" aria-pressed="false">INR</button>
+            </div>
+          </div>
+
+          <div class="total-block" aria-live="polite">
+            <span>Estimated investment</span>
+            <strong id="total-price">$2,600</strong>
+            <small id="rate-caption">at $65 per hour</small>
+          </div>
+
+          <div class="hours-block">
+            <span>Calculated engineering effort</span>
+            <strong><span id="total-hours">40</span> <small>hours</small></strong>
+          </div>
+
+          <div class="planning-block" aria-live="polite">
+            <div>
+              <span>Planning range</span>
+              <strong id="planning-hours">115–145 hours</strong>
+            </div>
+            <div>
+              <span>Estimated duration</span>
+              <strong id="calendar-weeks">3–5 weeks</strong>
+            </div>
+          </div>
+
+          <div class="coverage-block" id="coverage-block">
+            <span>Well-architected baseline</span>
+            <strong id="coverage-status">6 / 6 covered</strong>
+          </div>
+
+          <div class="summary-rule"></div>
+          <div class="line-items" id="line-items">
+            <div class="line-item base-line"><span>Base landing zone</span><strong data-line-base>$2,600</strong></div>
+          </div>
+
+          <div class="summary-actions">
+            <button class="primary-button" type="button" id="baseline-preset">
+              <span>Apply well-architected baseline</span>
+              <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><path d="M4 10h12M11 5l5 5-5 5"/></svg>
+            </button>
+            <p>Core foundation + all six baseline domains · 125 hours</p>
+          </div>
+
+          <div class="estimate-note">
+            <svg viewBox="0 0 20 20" fill="none" aria-hidden="true"><circle cx="10" cy="10" r="8"/><path d="M10 9v5M10 6.3v.2"/></svg>
+            <p>The calculated hours are a transparent scope subtotal, not a fixed delivery commitment. Final effort is confirmed after discovery and solution design.</p>
+          </div>
+        </aside>
+      </section>
+
+      <section class="sow-disclaimer" aria-labelledby="planning-title">
+        <div class="disclaimer-heading">
+          <p class="step-label">Estimate guidance</p>
+          <h2 id="planning-title">Plan with a range, contract against the final SoW.</h2>
+          <p>The default 125-hour baseline typically plans at 115–145 hours and 3–5 calendar weeks for one consultant. Line items show engineering effort; shared work, discovery, validation, and handover affect the final commitment.</p>
+        </div>
+        <div class="disclaimer-grid">
+          <article>
+            <span class="disclaimer-number">01</span>
+            <h3>Range calculation</h3>
+            <p>Line-item subtotal, less overlap between related controls, plus discovery, testing, remediation, documentation, and knowledge transfer.</p>
+          </article>
+          <article>
+            <span class="disclaimer-number">02</span>
+            <h3>Baseline assumptions</h3>
+            <ul>
+              <li>One cloud provider and primary region</li>
+              <li>Greenfield or low-remediation environment</li>
+              <li>Required access, owners, and IdP are ready</li>
+              <li>Timely design decisions and approvals</li>
+            </ul>
+          </article>
+          <article>
+            <span class="disclaimer-number">03</span>
+            <h3>Complexity drivers</h3>
+            <ul>
+              <li>Brownfield remediation or migrations</li>
+              <li>Multi-region or hybrid connectivity</li>
+              <li>Regulatory evidence and custom controls</li>
+              <li>Extended reviews or change windows</li>
+            </ul>
+          </article>
+          <article>
+            <span class="disclaimer-number">04</span>
+            <h3>Not included</h3>
+            <p>Cloud consumption, third-party licenses, workload migration, application remediation, managed operations, and taxes unless explicitly included in the signed SoW.</p>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <span>Transparent scope. Modular pricing.</span>
+      <span>Rates: $65/hr · ₹6,200/hr</span>
+    </footer>
+    <script src="./app.js"></script>
+  </body>
+</html>

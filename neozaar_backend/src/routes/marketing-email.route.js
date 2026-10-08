@@ -1,0 +1,34 @@
+const router = require('express').Router();
+const controller = require('../controllers/marketing-email.controller');
+const verify = require('../middlewares/auth');
+const { requireMarketingManager } = require('../middlewares/marketing.middleware');
+const { requireServerTrackingKey } = require('../middlewares/marketing-tracking.middleware');
+const { validate } = require('../middlewares/validator');
+const rules = require('../validations/marketing.validation');
+const { rateLimit } = require('../middlewares/rateLimit.middleware');
+
+router.get('/track/:token/open.gif', rateLimit({ max: 120 }), controller.open);
+router.get('/track/:token/click', rateLimit({ max: 120 }), controller.click);
+router.get('/unsubscribe/:token', rateLimit({ max: 20 }), controller.unsubscribeConfirm);
+router.post('/unsubscribe/:token', rateLimit({ max: 20 }), controller.unsubscribe);
+router.get('/confirm/:token', rateLimit({ max: 20 }), validate(rules.emailConfirmToken), controller.confirm);
+router.post('/events/:token', rateLimit({ max: 120 }), requireServerTrackingKey, validate(rules.emailProviderEvent), controller.providerEvent);
+router.use(verify, requireMarketingManager);
+router.get('/analytics', controller.analytics);
+router.get('/templates', controller.list);
+router.post('/templates/validate', validate(rules.emailTemplateValidation), controller.validateTemplate);
+router.get('/templates/:id/versions', validate(rules.id), controller.versions);
+router.post('/templates/:id/test', validate(rules.emailTest), controller.testSend);
+router.post('/templates', validate(rules.emailTemplate), controller.create);
+router.put('/templates/:id', validate(rules.updateEmailTemplate), controller.update);
+router.post('/send', validate(rules.emailSend), controller.send);
+router.get('/senders', controller.listSenders);
+router.post('/senders', validate(rules.senderProfile), controller.createSender);
+router.put('/senders/:id', validate(rules.updateSenderProfile), controller.updateSender);
+router.delete('/senders/:id', validate(rules.id), controller.deleteSender);
+router.get('/subscription-types', controller.listSubscriptionTypes);
+router.post('/subscription-types', validate(rules.subscriptionType), controller.createSubscriptionType);
+router.put('/subscription-types/:id', validate(rules.updateSubscriptionType), controller.updateSubscriptionType);
+router.delete('/subscription-types/:id', validate(rules.id), controller.deleteSubscriptionType);
+
+module.exports = router;

@@ -1,0 +1,30 @@
+const journeys=require('../services/marketing/journey-attribution.service'),channels=require('../services/marketing/channels.service'),admin=require('../services/marketing/admin.service'),health=require('../services/marketing/health.service');
+const fail=(res,e,m)=>res.status(e.statusCode||500).json({status:'fail',message:e.statusCode?e.message:m});const ok=(res,data,status=200)=>res.status(status).json({status:'success',data});
+module.exports={
+  listJourneys:async(req,res)=>{try{return ok(res,await journeys.listJourneys());}catch(e){return fail(res,e,'Failed to fetch journeys');}},
+  saveJourney:async(req,res)=>{try{return ok(res,await journeys.saveJourney(req.body,req.user.id,req.params.id));}catch(e){return fail(res,e,'Failed to save journey');}},
+  enterJourney:async(req,res)=>{try{return ok(res,await journeys.enterJourney(req.params.id,req.body.contactId,req.body.idempotencyKey),202);}catch(e){return fail(res,e,'Failed to enter journey');}},
+  listExperiments:async(req,res)=>{try{return ok(res,await journeys.listExperiments());}catch(e){return fail(res,e,'Failed to fetch experiments');}},
+  saveExperiment:async(req,res)=>{try{return ok(res,await journeys.saveExperiment(req.body,req.user.id));}catch(e){return fail(res,e,'Failed to save experiment');}},
+  updateExperiment:async(req,res)=>{try{return ok(res,await journeys.updateExperiment(req.params.id,req.body));}catch(e){return fail(res,e,'Failed to update experiment');}},
+  deleteExperiment:async(req,res)=>{try{return ok(res,await journeys.deleteExperiment(req.params.id));}catch(e){return fail(res,e,'Failed to delete experiment');}},
+  assignVariant:async(req,res)=>{try{return ok(res,await journeys.assignVariant(req.params.id,req.body.subjectKey));}catch(e){return fail(res,e,'Failed to assign variant');}},
+  experimentMetrics:async(req,res)=>{try{return ok(res,await journeys.experimentMetrics(req.params.id));}catch(e){return fail(res,e,'Failed to fetch metrics');}},
+  experimentEvent:async(req,res)=>{try{return ok(res,await journeys.recordExperimentEvent(req.params.id,req.body),201);}catch(e){return fail(res,e,'Failed to record experiment event');}},
+  attribution:async(req,res)=>{try{return ok(res,await journeys.attribution(req.params.id,req.query.model||'linear'));}catch(e){return fail(res,e,'Failed to calculate attribution');}},
+  whatsapp:async(req,res)=>{try{return ok(res,await channels.sendWhatsApp(req.body),202);}catch(e){return fail(res,e,'WhatsApp action failed');}},
+  sms:async(req,res)=>{try{return ok(res,await channels.sendSms(req.body),202);}catch(e){return fail(res,e,'SMS action failed');}},
+  channelTemplates:async(req,res)=>{try{return ok(res,await channels.listTemplates(req.query.channel));}catch(e){return fail(res,e,'Failed to load channel templates');}},
+  saveChannelTemplate:async(req,res)=>{try{return ok(res,await channels.saveTemplate(req.body,req.user.id,req.params.id),req.params.id?200:201);}catch(e){return fail(res,e,'Failed to save channel template');}},
+  deleteChannelTemplate:async(req,res)=>{try{return ok(res,await channels.deleteTemplate(req.params.id));}catch(e){return fail(res,e,'Failed to delete channel template');}},
+  channelPolicies:async(req,res)=>{try{return ok(res,await channels.listPolicies());}catch(e){return fail(res,e,'Failed to load channel policies');}},
+  saveChannelPolicy:async(req,res)=>{try{return ok(res,await channels.savePolicy(req.params.channel,req.body));}catch(e){return fail(res,e,'Failed to save channel policy');}},
+  outboundAudit:async(req,res)=>{try{return ok(res,await channels.outboundAudit(req.query));}catch(e){return fail(res,e,'Failed to load outbound audit');}},
+  handoff:async(req,res)=>{try{return ok(res,await channels.requestCrmHandoff(req.body),202);}catch(e){return fail(res,e,'CRM handoff failed');}},
+  analytics:async(req,res)=>{try{return ok(res,await admin.analytics());}catch(e){return fail(res,e,'Failed to load analytics');}},
+  logs:async(req,res)=>{try{return ok(res,await admin.executionLogs(req.query));}catch(e){return fail(res,e,'Failed to load logs');}},
+  settings:async(req,res)=>{try{return ok(res,await admin.settings());}catch(e){return fail(res,e,'Failed to load settings');}},
+  saveSetting:async(req,res)=>{try{return ok(res,await admin.saveSetting(req.params.key,req.body.value,req.user.id,!!req.body.isSecret));}catch(e){return fail(res,e,'Failed to save setting');}},
+  retention:async(req,res)=>{try{return ok(res,await admin.queueRetention(req.body),202);}catch(e){return fail(res,e,'Retention scheduling failed');}},
+  health:async(req,res)=>{try{return ok(res,await health.getHealth());}catch(e){return fail(res,e,'Failed to load worker health');}}
+};

@@ -1,0 +1,501 @@
+<section class="min-h-screen bg-slate-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+  
+    <!-- Left Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <button (click)="goBack()" class="btn btn-ghost gap-2 hover:bg-white shadow-sm border border-gray-200 rounded-xl">
+        <i class="ri-arrow-left-line"></i> Back
+      </button>
+
+      <div class="sticky top-8 space-y-6">
+        
+        <!-- Product Logo -->
+        @if (product.product_logo) {
+          <div class="card bg-white p-4 shadow-xl shadow-slate-200/50 border border-slate-100 rounded-3xl overflow-hidden group cursor-zoom-in"
+               (click)="openLightbox(product.product_logo)">
+            <img [src]="product.product_logo" [alt]="product.name" 
+                 class="w-full h-auto aspect-square object-contain transition-transform duration-500 group-hover:scale-110">
+            <div class="mt-4 text-center">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Product Logo</span>
+            </div>
+          </div>
+        }
+
+        <!-- Gallery -->
+        @if (product.screenshots && product.screenshots.length > 0) {
+          <div class="card bg-white p-6 shadow-sm border border-slate-200 rounded-3xl">
+            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="ri-image-line text-blue-500"></i> Gallery
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              @for (screenshot of product.screenshots; track $index) {
+                <div class="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
+                     (click)="openLightbox(screenshot)">
+                  <img [src]="screenshot" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                  <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <i class="ri-zoom-in-line text-white"></i>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Terms of Use -->
+        @if (product.terms_of_use_url) {
+          <div class="card bg-white p-4 shadow-sm border border-slate-200 rounded-2xl">
+            <a [href]="product.terms_of_use_url" target="_blank" class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-slate-700">Terms of Use</span>
+              <i class="ri-external-link-line text-slate-400"></i>
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:col-span-3 space-y-6">
+      <div class="card bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden">
+        <!-- Header -->
+        <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-white to-slate-50">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <!-- Status Badge -->
+              @if (product.status) {
+                <span class="badge" [ngClass]="{
+                  'badge-warning': product.status === 'pending',
+                  'badge-success': product.status === 'approved',
+                  'badge-error': product.status === 'rejected'
+                }">{{product.status}}</span>
+              }
+              <!-- SKU -->
+              @if (product.sku_id) {
+                <span class="text-slate-400 text-sm">ID: #{{product.sku_id}}</span>
+              }
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 capitalize leading-tight">{{product.name}}</h1>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-2">
+        @if(product.is_drapt && !product.is_approved){
+  <button
+    class="btn btn-success text-white rounded-2xl px-6"
+    (click)="acceptProduct(true)"
+    *appHasRole="[role.SUPERADMIN, role.MANAGER]">
+    Approve
+  </button>
+
+  <button
+    class="btn btn-outline btn-error rounded-2xl"
+    (click)="openRejectModal()"
+    *appHasRole="[role.SUPERADMIN, role.MANAGER]">
+    Reject
+  </button>
+}
+            @if(product.is_approved && !product.is_publish){
+              <button class="btn btn-primary text-white rounded-2xl px-8 shadow-lg shadow-blue-200" (click)="publishProduct(true)">Publish to Marketplace</button>
+            }
+            @if(product.is_approved && product.is_publish){
+              <button class="btn btn-outline btn-error rounded-2xl" (click)="openModal()">Unpublish</button>
+            }
+
+            <!-- Azure Marketplace Button — only for published products -->
+            @if (product.is_approved && product.is_publish) {
+              @if (!azureRequestStatus || azureRequestStatus.status === 'REJECTED' || azureRequestStatus.status === 'FAILED') {
+                <button
+                  class="btn btn-outline rounded-2xl gap-2 border-blue-300 text-blue-700 hover:bg-blue-50"
+                  (click)="publishToAzureMarketplace()"
+                  [disabled]="isAzureSubmitting"
+                >
+                  <i class="ri-microsoft-fill"></i>
+                  {{ isAzureSubmitting ? 'Submitting...' : 'Publish to Azure Marketplace' }}
+                </button>
+              } @else {
+                <button
+                  class="btn btn-outline rounded-2xl gap-2 border-blue-300 text-blue-600 hover:bg-blue-50"
+                  (click)="viewAzureRequest()"
+                >
+                  <i class="ri-microsoft-fill"></i>
+                  Azure: {{ azureRequestStatus.status | titlecase }}
+                </button>
+              }
+            }
+
+            <!-- AWS Marketplace Button — only for published products -->
+            @if (product.is_approved && product.is_publish) {
+              @if (!awsRequestStatus || awsRequestStatus.status === 'REJECTED' || awsRequestStatus.status === 'FAILED') {
+                <button
+                  class="btn btn-outline rounded-2xl gap-2 border-amber-300 text-amber-700 hover:bg-amber-50"
+                  (click)="publishToAwsMarketplace()"
+                  [disabled]="isAwsSubmitting"
+                >
+                  <i class="ri-amazon-fill"></i>
+                  {{ isAwsSubmitting ? 'Submitting...' : 'Publish to AWS Marketplace' }}
+                </button>
+              } @else {
+                <button
+                  class="btn btn-outline rounded-2xl gap-2 border-amber-300 text-amber-600 hover:bg-amber-50"
+                  (click)="viewAwsRequest()"
+                >
+                  <i class="ri-amazon-fill"></i>
+                  AWS: {{ awsRequestStatus.status | titlecase }}
+                </button>
+              }
+            }
+          </div>
+        </div>
+
+        <div class="p-8 border-t border-slate-100 grid gap-10">
+          <!-- Executive Summary -->
+          @if (product.short_description || product.long_description) {
+            <section>
+              <h2 class="text-xl font-bold text-slate-800 mb-4">Executive Summary</h2>
+              @if (product.short_description) {
+                <p class="text-slate-600 text-lg leading-relaxed">{{product.short_description}}</p>
+              }
+              @if (product.long_description) {
+                <div class="mt-6 p-6 bg-slate-50 rounded-2xl border border-slate-100 italic text-slate-700">
+                  "{{product.long_description}}"
+                </div>
+              }
+            </section>
+          }
+
+          <!-- Features & Metadata Grid -->
+          <section class="grid gap-8">
+            <!-- Features -->
+            @if (features && features.length > 0) {
+              <div class="space-y-4">
+                <h3 class="font-bold text-slate-400 uppercase text-xs tracking-widest">Features & Capabilities</h3>
+                <ul class="grid gap-3">
+                  @for (item of features; track $index) {
+                    <li class="flex items-center gap-3 p-3 bg-white border border-slate-100 rounded-xl shadow-sm">
+                      <i class="ri-checkbox-circle-fill text-emerald-500 text-xl"></i>
+                      <span class="text-slate-700 font-medium">{{ item }}</span>
+                    </li>
+                  }
+                </ul>
+              </div>
+            }
+
+            <!-- Metadata -->
+            <div class="space-y-4">
+              <h3 class="font-bold text-slate-400 uppercase text-xs tracking-widest">Metadata</h3>
+              <div class="bg-white border border-slate-100 rounded-2xl p-4 divide-y divide-slate-100">
+                
+                <!-- Cloud Provider Support -->
+                @if (product.cloud_provider_support && product.cloud_provider_support.length > 0) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">Platform</span>
+                    <div class="flex gap-1">
+                      @for (cps of product.cloud_provider_support; track $index) {
+                        <span class="badge badge-ghost font-bold text-blue-600">{{cps}}</span>
+                      }
+                    </div>
+                  </div>
+                }
+
+                <!-- Free Trial -->
+                @if (product.free_trial_available !== null && product.free_trial_available !== undefined) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">Free Trial</span>
+                    <span [class]="!product.free_trial_available ? 'text-error font-bold' : 'text-success font-bold'">
+                      {{ product.free_trial_available ? 'Available' : 'Unavailable' }}
+                    </span>
+                  </div>
+                }
+
+                <!-- Pricing Model -->
+                @if (product.pricing_model) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">Pricing Model</span>
+                    <span class="text-slate-900 font-semibold">{{product.pricing_model}}</span>
+                  </div>
+                }
+
+                <!-- License Model -->
+                @if (product.license_model) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">License Model</span>
+                    <span class="text-slate-900">{{product.license_model}}</span>
+                  </div>
+                }
+
+                <!-- Billing Dimension -->
+                @if (product.billing_dimension) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">Billing Dimension</span>
+                    <span class="text-slate-900">{{product.billing_dimension}}</span>
+                  </div>
+                }
+
+                <!-- API Endpoint -->
+                @if (product.api_metering_endpoint) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">API Endpoint</span>
+                    <span class="text-xs font-mono text-blue-600 bg-blue-50 px-2 py-1 rounded">{{product.api_metering_endpoint}}</span>
+                  </div>
+                }
+
+                <!-- Regions Supported -->
+                @if (product.regions_supported && product.regions_supported.length > 0) {
+                  <div class="py-3 flex justify-between">
+                    <span class="text-slate-500">Regions</span>
+                    <span class="text-slate-900">{{product.regions_supported.join(', ')}}</span>
+                  </div>
+                }
+              </div>
+            </div>
+          </section>
+
+          <!-- Primary Use Cases -->
+          @if (product.primary_use_cases) {
+            <section class="p-6 bg-blue-50 rounded-3xl border border-blue-100">
+              <h3 class="text-lg font-bold text-blue-900 mb-4 flex items-center gap-2">
+                <i class="ri-lightbulb-flash-line text-blue-600"></i> Primary Use Cases
+              </h3>
+              <div class="whitespace-pre-line text-blue-800 opacity-90 leading-relaxed  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" [innerHTML]="product.primary_use_cases">
+           
+              </div>
+            </section>
+          }
+
+          <!-- Target Segments & Audience -->
+          <div class="grid grid-cols-1  gap-6">
+            <!-- Target Segments -->
+            @if (product.industry && product.industry.length > 0) {
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Industry</h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (segment of product.industry; track $index) {
+                    <span class="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-lg border border-slate-200">{{segment}}</span>
+                  }
+                </div>
+              </div>
+            }
+            @if (product.target_segments && product.target_segments.length > 0) {
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Target Segments</h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (segment of product.target_segments; track $index) {
+                    <span class="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-lg border border-slate-200">{{segment}}</span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Target Audience -->
+            @if (product.target_audience && product.target_audience.length > 0) {
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Target Audience</h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (audience of product.target_audience; track $index) {
+                    <span class="px-3 py-1 bg-indigo-50 text-indigo-700 text-sm rounded-lg border border-indigo-200">{{audience}}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Category/Subcategory -->
+          @if (product.category && product.category.length > 0) {
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Categories</h4>
+              <div class="flex flex-wrap gap-2">
+                @for (category of product.category; track $index) {
+                  <span class="px-3 py-1 bg-purple-50 text-purple-700 text-sm rounded-lg border border-purple-200">{{category}}</span>
+                }
+              </div>
+            </div>
+          }
+          @if (product.category_subcategory && product.category_subcategory.length > 0) {
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Subcategories</h4>
+              <div class="flex flex-wrap gap-2">
+                @for (category of product.category_subcategory; track $index) {
+                  <span class="px-3 py-1 bg-purple-50 text-purple-700 text-sm rounded-lg border border-purple-200">{{category}}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- CTA Model -->
+          @if (product.cta_model && product.cta_model.length > 0) {
+            <div class="space-y-2">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Call to Action</h4>
+              <div class="flex flex-wrap gap-2">
+                @for (cta of product.cta_model; track $index) {
+                  <span class="px-3 py-1 bg-green-50 text-green-700 text-sm rounded-lg border border-green-200">{{cta}}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Technical Prerequisites -->
+          @if (product.technical_prerequisites) {
+            <section class="p-6 bg-indigo-900 rounded-3xl text-white">
+              <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="ri-terminal-box-line"></i> Technical Prerequisites
+              </h3>
+              <div class="prose prose-invert max-w-none opacity-90 whitespace-pre-line  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" [innerHTML]="product.technical_prerequisites">
+           
+              </div>
+            </section>
+          }
+
+          <!-- Compliance Certifications -->
+          @if (product.compliance_certifications && product.compliance_certifications.length > 0) {
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Compliance Certifications</h4>
+              <div class="flex flex-wrap gap-2">
+                @for (cert of product.compliance_certifications; track $index) {
+                  <span class="px-3 py-1 bg-amber-50 text-amber-700 text-sm rounded-lg border border-amber-200">{{cert}}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Starting Price -->
+          @if (product.starting_price && product.starting_price !== '0.00') {
+            <div class="p-4 bg-green-50 rounded-2xl border border-green-200">
+              <span class="text-sm text-green-600 font-semibold">Starting Price</span>
+              <p class="text-2xl font-black text-green-700">{{product.starting_price}}</p>
+            </div>
+          }
+
+          <!-- Solution Differentiator -->
+          @if (product.solution_differentiator) {
+            <section class="p-6 bg-gradient-to-br from-slate-50 to-white rounded-3xl border border-slate-200">
+              <h3 class="text-lg font-bold text-slate-800 mb-3">Solution Differentiator</h3>
+              <p class="text-slate-600">{{product.solution_differentiator}}</p>
+            </section>
+          }
+
+          <!-- Risks Addressed -->
+          @if (product.risks_addressed) {
+            <section class="p-6 bg-rose-50 rounded-3xl border border-rose-200">
+              <h3 class="text-lg font-bold text-rose-800 mb-3 flex items-center gap-2">
+                <i class="ri-shield-flash-line"></i> Risks Addressed
+              </h3>
+              <p class="text-rose-700">{{product.risks_addressed}}</p>
+            </section>
+          }
+
+          <!-- Documents & Resources -->
+          @if ((product.brochures && product.brochures.length > 0) || 
+               (product.customer_case_studies && product.customer_case_studies.length > 0) ||
+               (product.sla_documents && product.sla_documents.length > 0) ||
+               product.demo_video_link ||
+               product.privacy_policy_url) {
+            <section class="border-t border-slate-100 pt-6">
+              <h3 class="text-sm font-bold text-slate-800 mb-4">Resources & Documents</h3>
+              <div class="flex flex-wrap gap-3">
+                <!-- Brochures -->
+                @for (doc of product.brochures; track $index) {
+                  <a [href]="doc" target="_blank" class="btn btn-outline rounded-xl gap-2">
+                    <i class="ri-file-pdf-line text-red-500"></i> Brochure {{$index + 1}}
+                  </a>
+                }
+                
+                <!-- Case Studies -->
+                @for (study of product.customer_case_studies; track $index) {
+                  <a [href]="study" target="_blank" class="btn btn-outline btn-primary rounded-xl gap-2">
+                    <i class="ri-external-link-line"></i> Case Study {{$index + 1}}
+                  </a>
+                }
+
+                <!-- SLA Documents -->
+                @for (sla of product.sla_documents; track $index) {
+                  <a [href]="sla" target="_blank" class="btn btn-outline rounded-xl gap-2">
+                    <i class="ri-file-text-line"></i> SLA Document {{$index + 1}}
+                  </a>
+                }
+
+                <!-- Demo Video -->
+                @if (product.demo_video_link) {
+                  <a [href]="product.demo_video_link" target="_blank" class="btn btn-outline btn-secondary rounded-xl gap-2">
+                    <i class="ri-video-line"></i> Demo Video
+                  </a>
+                }
+
+                <!-- Privacy Policy -->
+                @if (product.privacy_policy_url) {
+                  <a [href]="product.privacy_policy_url" target="_blank" class="btn btn-outline rounded-xl gap-2">
+                    <i class="ri-privacy-line"></i> Privacy Policy
+                  </a>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Export Control Info -->
+          @if (product.export_control_info) {
+            <div class="text-xs text-slate-400 border-t border-slate-100 pt-4">
+              <span class="font-semibold">Export Control:</span> {{product.export_control_info}}
+            </div>
+          }
+        </div>
+      </div>
+
+      <!-- Feature Status Card (Admin/SuperAdmin only) -->
+      <div *appHasRole="[role.SUPERADMIN, role.ADMIN]">
+        <app-vendor-feature
+          [vendorId]="product.id"
+          [initialStatus]="product.is_feature">
+        </app-vendor-feature>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  @if (selectedImage) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
+      <div class="absolute inset-0 bg-slate-900/95 backdrop-blur-md" (click)="closeLightbox()"></div>
+      
+      <button (click)="closeLightbox()" class="absolute top-6 right-6 btn btn-circle btn-ghost text-white text-2xl z-[110]">
+        <i class="ri-close-line"></i>
+      </button>
+
+      <div class="relative z-[110] max-w-5xl w-full h-full flex items-center justify-center">
+        <img [src]="selectedImage" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300">
+      </div>
+    </div>
+  }
+
+  <!-- Unpublish Modal -->
+  <dialog class="modal" [class.modal-open]="isModalOpen">
+    <div class="modal-box rounded-3xl shadow-2xl">
+      <h3 class="font-black text-2xl text-slate-900 mb-4">Unpublish Product</h3>
+      <form (ngSubmit)="onSubmit()" #remarkForm="ngForm">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold text-slate-600">Why are you unpublishing this? <span class="text-red-500">*</span></span>
+          </label>
+          <textarea [(ngModel)]="remark" name="remark" required placeholder="Reasoning..." class="textarea textarea-bordered h-32 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+        </div>
+        <div class="modal-action">
+          <button type="submit" class="btn btn-error text-white rounded-xl px-8" [disabled]="!remarkForm.valid">Confirm Unpublish</button>
+          <button type="button" class="btn btn-ghost rounded-xl" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+  <dialog class="modal" [class.modal-open]="isRejectModalOpen">
+    <div class="modal-box rounded-3xl shadow-2xl">
+      <h3 class="font-black text-2xl text-slate-900 mb-4">Reject Product</h3>
+      <form (ngSubmit)="onRejectSubmit()" #rejectForm="ngForm">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold text-slate-600">Why are you Reject this? <span class="text-red-500">*</span></span>
+          </label>
+          <textarea [(ngModel)]="rejectRemark" name="rejectRemark" required placeholder="Reasoning..." class="textarea textarea-bordered h-32 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+        </div>
+        <div class="modal-action">
+          <button type="submit" class="btn btn-error text-white rounded-xl px-8" [disabled]="!rejectForm.valid">Confirm Reject</button>
+          <button type="button" class="btn btn-ghost rounded-xl" (click)="closeRejectModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</section>

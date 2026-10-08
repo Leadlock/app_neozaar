@@ -1,0 +1,127 @@
+api.service.ts
+
+import { HttpClient, HttpParams } from '@angular/common/http';
+import { Injectable } from '@angular/core';
+import { Observable } from 'rxjs';
+
+@Injectable({ providedIn: 'root' })
+export class ApiService {
+  constructor(private http: HttpClient) {}
+
+  searchOptions(slug: string, query: string): Observable<string[]> {
+    const params = new HttpParams()
+      .set('slug', slug)
+      .set('q', query);
+
+    return this.http.get<string[]>('/api/search-options', { params });
+  }
+}
+
+
+****************************product.component.ts **********************************
+
+import { Component, OnInit } from '@angular/core';
+import { FormBuilder, FormControl, FormGroup } from '@angular/forms';
+import { debounceTime, distinctUntilChanged, switchMap } from 'rxjs/operators';
+import { ApiService } from './api.service'; // Adjust path as needed
+
+@Component({
+  selector: 'app-product',
+  templateUrl: './product.component.html',
+})
+export class ProductComponent implements OnInit {
+  productForm!: FormGroup;
+  selectedFields = [
+    { slug: 'color' }, // options now come from backend
+    { slug: 'size' }
+  ];
+
+  searchControls: { [key: string]: FormControl } = {};
+  filteredOptions: { [key: string]: string[] } = {};
+
+  constructor(private fb: FormBuilder, private api: ApiService) {}
+
+  ngOnInit() {
+    this.productForm = this.fb.group({
+      taxonomy_data: this.fb.group({})
+    });
+
+    const taxonomyGroup = this.productForm.get('taxonomy_data') as FormGroup;
+
+    this.selectedFields.forEach(field => {
+      taxonomyGroup.addControl(field.slug, this.fb.control([]));
+      this.initBackendSearch(field.slug);
+    });
+  }
+
+  initBackendSearch(fieldSlug: string) {
+    const control = new FormControl('');
+    this.searchControls[fieldSlug] = control;
+
+    control.valueChanges.pipe(
+      debounceTime(300),
+      distinctUntilChanged(),
+      switchMap((searchText: string) => {
+        if (!searchText?.trim()) return [];
+        return this.api.searchOptions(fieldSlug, searchText);
+      })
+    ).subscribe((options: string[]) => {
+      const selected = this.taxonomy_data.get(fieldSlug)?.value || [];
+      this.filteredOptions[fieldSlug] = options.filter(opt => !selected.includes(opt));
+    });
+  }
+
+  get taxonomy_data() {
+    return this.productForm.get('taxonomy_data') as FormGroup;
+  }
+
+  toggleChip(fieldSlug: string, option: string) {
+    const current = this.taxonomy_data.get(fieldSlug)?.value || [];
+    const updated = current.includes(option)
+      ? current.filter((val: string) => val !== option)
+      : [...current, option];
+    this.taxonomy_data.get(fieldSlug)?.setValue(updated);
+  }
+
+  removeTag(fieldSlug: string, tag: string) {
+    const current = this.taxonomy_data.get(fieldSlug)?.value || [];
+    this.taxonomy_data.get(fieldSlug)?.setValue(current.filter(val => val !== tag));
+  }
+
+  addNewOption(fieldSlug: string) {
+    const inputValue = this.searchControls[fieldSlug]?.value?.trim();
+    if (!inputValue) return;
+
+    const current = this.taxonomy_data.get(fieldSlug)?.value || [];
+    this.taxonomy_data.get(fieldSlug)?.setValue([...current, inputValue]);
+
+    this.searchControls[fieldSlug].setValue('');
+  }
+
+  shouldShowAddButton(fieldSlug: string): boolean {
+    const inputValue = this.searchControls[fieldSlug]?.value?.trim();
+    if (!inputValue) return false;
+
+    const selected = this.taxonomy_data.get(fieldSlug)?.value || [];
+    const options = this.filteredOptions[fieldSlug] || [];
+
+    return !options.includes(inputValue) && !selected.includes(inputValue);
+  }
+
+  submit() {
+    const formData = new FormData();
+    const taxonomy = this.taxonomy_data.value;
+
+    for (const slug of Object.keys(taxonomy)) {
+      const value = taxonomy[slug];
+      formData.append(slug, JSON.stringify(value));
+    }
+
+    for (const [key, value] of (formData as any).entries()) {
+      console.log(`${key}: ${value}`);
+    }
+
+    // Example post
+    // this.api.submitForm(formData).subscribe(...)
+  }
+}

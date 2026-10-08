@@ -1,0 +1,70 @@
+<div [formGroup]="form" class="space-y-6">
+  
+  <div formArrayName="selections" class="space-y-4">
+    @for (group of selectionControls; track group; let i = $index) {
+      <div [formGroupName]="i" 
+           class="relative bg-white p-6 rounded-3xl border border-gray-100 shadow-sm transition-all hover:border-orange-200">
+        
+        <div>
+          
+          <div >
+            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest mb-2">Category</label>
+            <div class="relative">
+              <select formControlName="categoryId" 
+                class="w-full h-12 pl-4 pr-10 rounded-xl bg-gray-100 border-none font-bold text-xs text-gray-700 focus:ring-2 focus:ring-orange-100 outline-none appearance-none cursor-pointer transition-all">
+                <option value="">Select Category...</option>
+                @for (cat of categories(); track cat.id) {
+                  <option [value]="cat.id">{{ cat.name }}</option>
+                }
+              </select>
+              <div class="absolute right-3 top-1/2 -translate-y-1/2 pointer-events-none text-gray-400">
+                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M19 9l-7 7-7-7" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+              </div>
+            </div>
+          </div>
+
+          <div >
+            <label class="block text-[10px] font-black text-gray-400 uppercase tracking-widest my-2">Subcategories</label>
+            
+            @if (group.get('categoryId')?.value) {
+              <div class="flex flex-wrap gap-2 max-h-32 overflow-y-auto pr-2 custom-scrollbar">
+                @for (sub of getSubcategories(group.get('categoryId')?.value); track sub.id) {
+                  <label class="relative cursor-pointer select-none">
+                    <input type="checkbox" 
+                           [checked]="isSubSelected(i, sub.id)"
+                           (change)="onCheckChange(i, sub.id, $event)" 
+                           class="peer sr-only">
+                    <div class="px-3 py-2 rounded-lg bg-gray-100 border border-transparent text-gray-600 font-bold text-[11px] transition-all
+                                peer-checked:bg-orange-600 peer-checked:text-white peer-checked:shadow-md">
+                      {{ sub.name }}
+                    </div>
+                  </label>
+                }
+              </div>
+            } @else {
+              <div class="h-12 flex items-center justify-center bg-gray-50 rounded-xl border-2 border-dashed border-gray-100 text-[10px] font-bold text-gray-300 uppercase tracking-widest">
+                Select a category first
+              </div>
+            }
+          </div>
+        </div>
+
+        @if (selectionArray.length > 1) {
+          <button type="button" (click)="removeSelection(i)" 
+                  class="absolute -top-2 -right-2 w-8 h-8 bg-white rounded-lg shadow-md flex items-center justify-center text-gray-300 hover:text-red-500 border border-gray-100 transition-all">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path d="M6 18L18 6M6 6l12 12" stroke-width="2" stroke-linecap="round"/></svg>
+          </button>
+        }
+      </div>
+    }
+  </div>
+
+  <div class="flex justify-center">
+    <button type="button" (click)="addSelection()" 
+            class="group flex items-center gap-3 px-6 h-12 bg-gray-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black hover:scale-105 transition-all active:scale-95 shadow-lg">
+      <span class="text-xl font-light group-hover:rotate-90 transition-transform duration-300">+</span>
+      Add Mapping Group
+    </button>
+  </div>
+
+</div>

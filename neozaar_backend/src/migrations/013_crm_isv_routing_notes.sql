@@ -1,0 +1,33 @@
+-- ============================================================
+-- Migration: 013_crm_isv_routing_notes.sql
+-- Date: 2025
+-- Description: CRM ISV routing fix — frontend only, no DB changes
+-- ============================================================
+--
+-- Changes made in this session were purely frontend (Angular):
+--
+-- 1. Added ISV routes under /crm path in app.routes.ts:
+--      /crm/isv          → CrmIsvComponent (new dedicated component)
+--      /crm/isv-approved → IsvapprovedComponent
+--      /crm/verify/:id   → AprovalIsvComponent
+--      /crm/display-isv/:id → DisplayIsvComponent
+--
+-- 2. Created new CrmIsvComponent at:
+--      src/app/pages/crm/crm-isv/crm-isv.component.ts
+--      src/app/pages/crm/crm-isv/crm-isv.component.html
+--    (CRM neumorphic design, separate from the /isv dashboard component)
+--
+-- 3. Fixed ISV nav paths in CrmShellComponent navItems:
+--      /isv        → /crm/isv
+--      /isv-approved → /crm/isv-approved
+--      /verify     → /crm/verify
+--
+-- 4. Fixed routerLinks in view-isv-component, isvapproved,
+--    and post-submit navigation in aproval-isv to use /crm/* paths.
+--
+-- 5. Restored original Tailwind design for /isv (dashboard route)
+--    so it is unaffected by CRM styling.
+--
+-- NO database schema changes required for these fixes.
+-- Last DB migration remains: 012_backfill_contact_company.sql
+-- ============================================================

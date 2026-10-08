@@ -1,0 +1,13 @@
+X [ERROR] NG9: Property 'goToLogin' does not exist on type 'LoginByTokenComponent'. [plugin angular-compiler]
+
+    src/app/pages/auth/login-by-token/login-by-token.component.html:12:52:
+      12 │ ... class="btn btn-ghost " (click)="goToLogin()">Login again</button>
+         ╵                                     ~~~~~~~~~
+
+  Error occurs in the template of component LoginByTokenComponent.
+
+    src/app/pages/auth/login-by-token/login-by-token.component.ts:11:15:
+      11 │   templateUrl: './login-by-token.component.html',
+         ╵                ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+

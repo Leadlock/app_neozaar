@@ -1,0 +1,124 @@
+<aside [class]="mode === 'fixed' ? 'h-screen w-64 bg-black p-4 flex flex-col justify-between fixed left-0 top-0 z-40 overflow-visible' : 'h-screen w-64 bg-black p-4 flex flex-col justify-between overflow-visible'">
+  <div>
+    <div class="mb-8 px-4">
+      <img src="assets/Logo.png" alt="Logo" class="h-10" />
+    </div>
+
+    <ul class="space-y-1">
+      @for (i of menus; track $index) {
+
+        @if (i.items.length > 0) {
+          <li *appHasRole="i.permissions" class="list-none relative group" (mouseenter)="onTriggerEnter($event)">
+            <button
+              type="button"
+              (click)="toggleMenu($index, $event)"
+              class="text-lg w-full px-5 h-12 flex items-center justify-between rounded-lg hover:bg-white/10 group-hover:bg-white/10 text-white/50 hover:text-white group-hover:text-white transition-all"
+              [ngClass]="{ 'bg-white/10 !text-white': openMenuIndex === $index }"
+            >
+              <span>{{ i.label }}</span>
+              <i class="ri-arrow-right-s-line"></i>
+            </button>
+
+            <!-- Floating flyout: opens to the right on hover or click. Position/size
+                 is computed in TS and clamped to the viewport (see positionFlyout) so
+                 it's always fully visible and its own scrollbar is the real overflow
+                 boundary, regardless of how low this trigger sits in the sidebar. -->
+            <div
+              class="z-50 group-hover:block"
+              [ngClass]="openMenuIndex === $index ? 'block' : 'hidden'"
+            >
+              <ul
+                class="fixed min-w-56 overflow-y-auto bg-neutral-900 rounded-xl p-2 shadow-2xl ring-1 ring-white/10 flex flex-col"
+                [ngStyle]="flyoutStyle"
+              >
+                <li class="px-3 pt-1 pb-2 text-xs font-semibold uppercase tracking-wider text-white/30">{{ i.label }}</li>
+                @for (j of i.items; track j.label) {
+                  <li>
+                    <a
+                      [routerLink]="'/' + j.url"
+                      routerLinkActive="!text-white bg-white/10"
+                      (click)="openMenuIndex = null"
+                      class="text-[15px] px-3 py-2 rounded-lg text-white/50 hover:text-white hover:bg-white/5 flex w-full transition-all"
+                    >
+                      {{ j.label }}
+                    </a>
+                  </li>
+                }
+              </ul>
+            </div>
+          </li>
+        }
+
+        @else {
+          <li *appHasRole="i.permissions" class="list-none">
+            <a
+              [routerLink]="['/', i.url]"
+              routerLinkActive="bg-white/10 text-white shadow-sm"
+              class="text-lg w-full px-5 h-12 flex items-center rounded-lg hover:bg-white/10 text-white/50 hover:text-white transition-all capitalize"
+            >
+              {{ i.label }}
+            </a>
+          </li>
+        }
+
+      }
+    </ul>
+
+    <ul class="mt-4 pt-4 border-t border-white/5">
+      <li *appHasRole="[userRole.ADMIN]">
+        <a
+          href="{{baseUrl}}"
+          target="_blank"
+          class="text-lg w-full px-5 h-12 flex items-center rounded-lg hover:bg-indigo-600/20 text-indigo-400 hover:text-indigo-300 transition-colors"
+        >
+          <i class="ri-external-link-line mr-2"></i>
+          Market Place
+        </a>
+      </li>
+    </ul>
+  </div>
+
+  <div class="mt-auto pt-4 space-y-2">
+    <!-- AWS Marketplace — ADMIN / SUPERADMIN -->
+    <a
+      *appHasRole="[userRole.SUPERADMIN, userRole.ADMIN]"
+      routerLink="/aws-marketplace"
+      routerLinkActive="bg-amber-500/20 text-amber-300"
+      class="flex items-center gap-3 px-5 py-3 bg-amber-500/10 hover:bg-amber-500/20 text-amber-400 rounded-lg w-full transition-all group"
+    >
+      <i class="ri-amazon-fill group-hover:scale-110 transition-transform"></i>
+      <span class="font-medium">AWS Marketplace</span>
+    </a>
+
+    <!-- Azure Marketplace — ADMIN / SUPERADMIN -->
+    <a
+      *appHasRole="[userRole.SUPERADMIN, userRole.ADMIN]"
+      routerLink="/azure-marketplace"
+      routerLinkActive="bg-sky-500/20 text-sky-300"
+      class="flex items-center gap-3 px-5 py-3 bg-sky-500/10 hover:bg-sky-500/20 text-sky-400 rounded-lg w-full transition-all group"
+    >
+      <i class="ri-microsoft-fill group-hover:scale-110 transition-transform"></i>
+      <span class="font-medium">Azure Marketplace</span>
+    </a>
+
+    <!-- CRM Access — all CRM roles -->
+    <a
+      *appHasRole="[userRole.SUPERADMIN, userRole.ADMIN, userRole.MANAGER, userRole.AGENT, userRole.M_SELLER, userRole.SELLER, userRole.A_MANAGER]"
+      routerLink="/crm"
+      routerLinkActive="bg-blue-500/20 text-blue-300"
+      class="flex items-center gap-3 px-5 py-3 bg-blue-500/10 hover:bg-blue-500/20 text-blue-400 rounded-lg w-full transition-all group"
+    >
+      <i class="ri-customer-service-2-line group-hover:scale-110 transition-transform"></i>
+      <span class="font-medium">CRM</span>
+    </a>
+
+    <button
+      type="button"
+      (click)="logout()"
+      class="flex items-center gap-3 px-5 py-3 bg-red-500/10 hover:bg-red-500/20 text-red-400 rounded-lg w-full transition-all group"
+    >
+      <i class="ri-logout-box-line group-hover:translate-x-1 transition-transform"></i>
+      <span class="font-medium">Logout</span>
+    </button>
+  </div>
+</aside>

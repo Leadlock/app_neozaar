@@ -1,0 +1,148 @@
+<div class="min-h-screen bg-zinc-50 p-4 md:p-8">
+  <!-- Header -->
+  <div class="max-w-7xl mx-auto flex flex-wrap items-center justify-between gap-4 mb-8">
+    <div>
+      <h1 class="text-2xl font-bold text-zinc-900">Brand Management</h1>
+      <p class="text-sm text-zinc-500">Manage and organize your product brands</p>
+    </div>
+    <div class="flex items-center gap-3">
+      <div class="relative">
+        <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0"/>
+        </svg>
+        <input type="text" [(ngModel)]="searchQuery" (input)="onSearchChange()" placeholder="Search brands..."
+               class="pl-9 pr-4 py-2.5 border border-zinc-200 rounded-xl text-sm outline-none focus:ring-2 focus:ring-orange-500 focus:border-orange-300 w-52 bg-white transition">
+      </div>
+      <button (click)="openCreate()"
+              class="bg-orange-600 hover:bg-orange-700 text-white px-5 py-2.5 rounded-xl font-bold transition shadow-lg active:scale-95">
+        + New Brand
+      </button>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="max-w-7xl mx-auto bg-white rounded-2xl border border-zinc-200 shadow-sm overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-left border-collapse">
+        <thead class="bg-zinc-50 border-b border-zinc-200 text-zinc-400 text-xs uppercase font-bold">
+          <tr>
+            <th class="px-6 py-4 w-16">#</th>
+            <th class="px-6 py-4">Icon</th>
+            <th class="px-6 py-4">Brand Name</th>
+            <th class="px-6 py-4">Status</th>   <!-- Added for design consistency, you can hide if not needed -->
+            <th class="px-6 py-4 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-zinc-100">
+          <tr *ngFor="let brand of filteredBrands; let i = index" class="hover:bg-zinc-50/50 transition">
+            <td class="px-6 py-4 text-sm font-medium text-zinc-500">
+              {{ ((currentPage - 1) * itemsPerPage) + i + 1 }}
+            </td>
+            <td class="px-6 py-4">
+              <img *ngIf="brand.icon" [src]="brand.icon" alt="{{ brand.name }}" 
+                   class="w-10 h-10 object-contain rounded border border-zinc-200">
+              <span *ngIf="!brand.icon" class="text-zinc-400 text-sm">No icon</span>
+            </td>
+            <td class="px-6 py-4 font-bold text-zinc-900">
+              {{ brand.name }}
+            </td>
+            <td class="px-6 py-4">
+              <!-- Placeholder status – you can later add a 'status' field in your data -->
+              <span class="px-3 py-1 text-xs font-bold rounded-full bg-green-100 text-green-700">
+                Active
+              </span>
+            </td>
+            <td class="px-6 py-4 text-right">
+              <div class="flex justify-end gap-2">
+                <button (click)="editBrand(brand)" class="p-2 text-zinc-400 hover:text-blue-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"/></svg>
+                </button>
+                <button (click)="deleteBrand(brand.id)" class="p-2 text-zinc-400 hover:text-red-600 transition">
+                  <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div *ngIf="totalPages > 0" class="bg-zinc-50 px-6 py-4 border-t border-zinc-200 flex items-center justify-between">
+      <div class="text-sm text-zinc-500">
+        Showing page <span class="font-bold text-zinc-900">{{ currentPage }}</span> of {{ totalPages }}
+      </div>
+      <div class="flex gap-2">
+        <button [disabled]="!hasPrev" (click)="prevPage()" 
+                class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-zinc-100 disabled:opacity-40 transition">
+          Previous
+        </button>
+        <div class="flex gap-1">
+          <button *ngFor="let p of getPageNumbers()" 
+                  (click)="p !== '...' ? goToPage(+p) : null"
+                  [ngClass]="{
+                    'bg-orange-600 text-white border-orange-600': p === currentPage,
+                    'bg-white text-zinc-700 border-zinc-300 hover:bg-zinc-50': p !== currentPage && p !== '...'
+                  }"
+                  class="w-9 h-9 flex items-center justify-center text-sm font-bold border rounded-lg transition">
+            {{ p }}
+          </button>
+        </div>
+        <button [disabled]="!hasNext" (click)="nextPage()" 
+                class="px-4 py-2 text-sm font-medium bg-white border rounded-lg hover:bg-zinc-100 disabled:opacity-40 transition">
+          Next
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Drawer Form -->
+  <div *ngIf="showForm" class="fixed inset-0 z-50 flex justify-end">
+    <div class="absolute inset-0 bg-zinc-900/40 backdrop-blur-sm" (click)="closeForm()"></div>
+    <div class="relative w-full max-w-md bg-white h-full shadow-2xl p-8 overflow-y-auto animate-in slide-in-from-right duration-300">
+      <div class="flex justify-between items-center mb-8">
+        <h2 class="text-xl font-bold text-zinc-800">{{ editId ? 'Edit' : 'Create' }} Brand</h2>
+        <button (click)="closeForm()" class="text-zinc-400 hover:text-zinc-900 text-2xl">&times;</button>
+      </div>
+
+      <div class="space-y-6">
+        <!-- Brand Name -->
+        <div>
+          <label class="block text-sm font-bold text-zinc-700 mb-1">Brand Name</label>
+          <input [(ngModel)]="brandName" type="text" placeholder="e.g. Samsung" 
+                 class="w-full border border-zinc-200 rounded-xl p-3 outline-none focus:ring-2 focus:ring-orange-500 transition">
+          <p class="mt-2 text-xs text-zinc-400">Ensure the brand name is unique for better organization.</p>
+        </div>
+
+        <!-- File Upload for Icon -->
+        <div>
+          <label class="block text-sm font-bold text-zinc-700 mb-1">Brand Icon</label>
+          <input type="file" accept="image/*" (change)="onFileSelected($event)" 
+                 class="w-full text-sm text-zinc-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-orange-50 file:text-orange-700 hover:file:bg-orange-100 cursor-pointer">
+          <p class="mt-2 text-xs text-zinc-400">Upload JPG, PNG, SVG, etc.</p>
+
+          <!-- Preview -->
+          <div *ngIf="brandIconPreview" class="mt-3 flex items-center gap-3">
+            <img [src]="brandIconPreview" alt="Icon preview" 
+                 class="w-12 h-12 object-contain rounded border border-zinc-200 p-1">
+            <button (click)="removeIcon()" 
+                    class="text-xs text-red-500 underline hover:text-red-700">Remove</button>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="flex gap-3 pt-6">
+          <button (click)="saveBrand()" 
+                  [disabled]="!brandName.trim()"
+                  class="flex-1 bg-orange-600 text-white py-3.5 rounded-xl font-bold shadow-lg shadow-orange-600/20 hover:bg-orange-700 active:scale-95 transition disabled:opacity-50">
+            {{ editId ? 'Update Brand' : 'Save Brand' }}
+          </button>
+          <button (click)="closeForm()" 
+                  class="flex-1 bg-zinc-100 text-zinc-600 py-3.5 rounded-xl font-bold hover:bg-zinc-200 transition">
+            Cancel
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

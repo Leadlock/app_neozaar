@@ -1,0 +1,28 @@
+<ul class="toaster-wrapper !z-[1100]">
+  @for (i of (toasterBodies$ | async) ?? []; track $index) {
+  <li>
+    <div
+      class="toaster toaster-{{ i.type }} animate-fade-up backdrop-blur-sm flex p-3 gap-3 rounded-lg border items-start">
+      <ng-container [ngSwitch]="i.type">
+        <span *ngSwitchCase="'success'"><i class="text-xl ri-checkbox-circle-line icon"></i></span>
+        <span *ngSwitchCase="'error'"><i class="text-xl ri-close-circle-line icon"></i></span>
+        <span *ngSwitchCase="'warning'"><i class="text-xl ri-alert-line icon"></i></span>
+        <span *ngSwitchCase="'info'"><i class="text-xl ri-information-line icon"></i></span>
+        <span *ngSwitchCase="'request'" class="loading loading-spinner loading-xs text-neutral"></span>
+        <span *ngSwitchDefault><i class="text-xl ri-information-line icon"></i></span>
+      </ng-container>
+
+      <div class=" w-[16rem] lg:w-[18rem]">
+        <p class="text-sm font-semibold title capitalize">{{ i.title }}</p>
+        <p class="leading-4 text-xs mt-1 font-medium">{{ i?.description }}</p>
+      </div>
+
+      <span>
+        <button (click)="closeToaster(i.id)">
+          <i class="ri-close-line text-xl icon"></i>
+        </button>
+      </span>
+    </div>
+  </li>
+  }
+</ul>

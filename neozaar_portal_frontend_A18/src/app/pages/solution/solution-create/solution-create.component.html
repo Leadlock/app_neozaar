@@ -1,0 +1,1022 @@
+  <div class="mb-5">
+
+            <a (click)="goBack()" class="btn btn-sm bg-white rounded-full"><i class="ri-arrow-left-line"></i> Back</a>
+        </div>
+<h2 class="text-xl font-semibold mb-6">Create Solution<h2>
+<div class="relative border-b border-gray-200 py-2 flex space-x-6">
+  <div
+    *ngFor="let tab of steps; let i = index"
+    class="tab-button relative pb-2 text-sm cursor-pointer px-4"
+    [ngClass]="{
+      'text-orange-600 font-semibold': currentStep === i,
+      'text-gray-500 hover:text-gray-800': currentStep !== i
+    }"
+    (click)="setActiveTab(i)"
+  >
+    {{ tab.label }}
+  </div>
+
+  <!-- Progressive underline starting from tab[0] -->
+  <div
+    class="tab-underline absolute bottom-0 left-0 h-[3px] bg-orange-500 transition-all duration-300"
+    style="width: 0;"
+  ></div>
+</div>
+
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-2 min-h-screen max-w-8xl mx-auto">
+
+  <!-- Basic Info Section -->
+  <div [formGroup]="productInfoForm" *ngIf="currentStep === 0" class="my-8">
+    <h3 class="text-lg font-semibold">Solution Detail</h3>
+    <div class="border-t border-dashed border-gray-300 pt-4 space-y-6">
+
+      <!-- Title -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <p class="font-medium req text-base">Solution Name</p>
+        <div>
+          <input type="text" formControlName="name" placeholder="Title"
+            class="input input-bordered w-full sm:w-80 md:w-96"
+            [ngClass]="{'border-red-500': productInfoForm.get('name')?.invalid && productInfoForm.get('name')?.touched}" />
+          @if (productInfoForm.get('name')?.invalid && productInfoForm.get('name')?.touched) {
+            <p class="text-xs text-red-500">Please enter Solutions Name</p>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Short Description </p>        
+        <div>
+          <textarea formControlName="description"
+            class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"
+            [ngClass]="{'border-red-500': productInfoForm.get('description')?.invalid && productInfoForm.get('description')?.touched}"></textarea>
+                  @if (productInfoForm.get('description')?.touched) {
+
+  @if (productInfoForm.get('description')?.errors?.['required']) {
+    <p class="text-xs text-red-500">
+      Short Description is required.
+    </p>
+  }
+
+  @if (productInfoForm.get('description')?.errors?.['minlength']) {
+    <p class="text-xs text-red-500">
+      Short Description must be at least 150 characters.
+    </p>
+  }
+
+  @if (productInfoForm.get('description')?.errors?.['maxlength']) {
+    <p class="text-xs text-red-500">
+      Short Description must not exceed 200 characters.
+    </p>
+  }
+
+}
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Long Description</p>        
+        <div>
+          <textarea formControlName="longdescription" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            [ngClass]="{'border-red-500': productInfoForm.get('longdescription')?.invalid && productInfoForm.get('longdescription')?.touched}" placeholder="Description" rows="5"></textarea>
+                  @if (productInfoForm.get('description')?.touched) {
+
+  @if (productInfoForm.get('longdescription')?.errors?.['required']) {
+    <p class="text-xs text-red-500">
+      Description is required.
+    </p>
+  }
+
+  @if (productInfoForm.get('longdescription')?.errors?.['minlength']) {
+    <p class="text-xs text-red-500">
+      Description must be at least 200 characters.
+    </p>
+  }
+
+
+
+}
+        </div>
+      </div>
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Scope</p>        
+        <div>
+         <app-cleditor formControlName="scope"></app-cleditor>
+          @if (productInfoForm.get('scope')?.invalid && productInfoForm.get('scope')?.touched) {
+            <p class="text-xs text-red-500">Please enter Scope</p>
+          }
+
+        </div>
+      </div>
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium  text-base">Key Features</p>
+        <div>
+          <div formArrayName="keyFeatures">
+            <div *ngFor="let ctrl of keyFeatures.controls; let i = index">
+              <input [formControlName]="i" placeholder="One key feature at a time"
+                class="input input-bordered w-full sm:w-80 md:w-96 resize-none"
+                rows="3"
+                [ngClass]="{'border-red-500': ctrl.invalid && ctrl.touched}" />
+                
+              <div class="text-right sm:w-80 md:w-96">
+                <button type="button" (click)="removeTextarea(i)" *ngIf="keyFeatures.length > 1" class="text-red-500 text-sm">Remove</button>
+              </div>
+              @if (ctrl.invalid && ctrl.touched) {
+                <p class="text-xs text-red-500">Please enter a Key Feature</p>
+              }
+            </div>
+
+            <div class="text-right sm:w-80 md:w-96 mb-3">
+              <button type="button" (click)="addTextarea()" class="px-3 py-1 mt-1 rounded-md text-sm cursor-pointer transition-colors duration-200 bg-orange-100 border text-orange-400 border-orange-400">Add More</button>
+            </div>
+          </div> 
+        </div>
+      </div>
+    
+      
+    
+
+      <!-- Customer Challenges (multi-entry) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Customer Challenges</p>
+        <div>
+          <div formArrayName="customerChallenges">
+            <div *ngFor="let ctrl of customerChallenges.controls; let i = index" class="mb-2">
+              <div class="flex gap-2 items-center">
+                <input [formControlName]="i" placeholder="One challenge at a time"
+                  class="input input-bordered w-full sm:w-80 md:w-96"
+                  [ngClass]="{'border-red-500': ctrl.invalid && ctrl.touched}" />
+                <button type="button" (click)="removeChallenge(i)" *ngIf="customerChallenges.length > 1" class="text-red-500 text-sm">✕</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" (click)="addChallenge()" class="px-3 py-1 mt-1 rounded-md text-sm bg-orange-100 border text-orange-400 border-orange-400">+ Add More</button>
+        </div>
+      </div>
+
+      <!-- Business Outcomes (multi-entry) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Business Outcomes</p>
+        <div>
+          <div formArrayName="businessOutcomes">
+            <div *ngFor="let ctrl of businessOutcomes.controls; let i = index" class="mb-2">
+              <div class="flex gap-2 items-center">
+                <input [formControlName]="i" placeholder="One outcome at a time"
+                  class="input input-bordered w-full sm:w-80 md:w-96"
+                  [ngClass]="{'border-red-500': ctrl.invalid && ctrl.touched}" />
+                <button type="button" (click)="removeOutcome(i)" *ngIf="businessOutcomes.length > 1" class="text-red-500 text-sm">✕</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" (click)="addOutcome()" class="px-3 py-1 mt-1 rounded-md text-sm bg-orange-100 border text-orange-400 border-orange-400">+ Add More</button>
+        </div>
+      </div>
+
+      <!-- Use Cases / Capabilities (multi-entry) -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Use Cases / Capabilities</p>
+        <div>
+          <div formArrayName="useCases">
+            <div *ngFor="let ctrl of useCases.controls; let i = index" class="mb-2">
+              <div class="flex gap-2 items-center">
+                <input [formControlName]="i" placeholder="One use case at a time"
+                  class="input input-bordered w-full sm:w-80 md:w-96"
+                  [ngClass]="{'border-red-500': ctrl.invalid && ctrl.touched}" />
+                <button type="button" (click)="removeUseCase(i)" *ngIf="useCases.length > 1" class="text-red-500 text-sm">✕</button>
+              </div>
+            </div>
+          </div>
+          <button type="button" (click)="addUseCase()" class="px-3 py-1 mt-1 rounded-md text-sm bg-orange-100 border text-orange-400 border-orange-400">+ Add More</button>
+        </div>
+      </div>
+
+      <!-- Products multi-select -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Products</p>
+        <div>
+          <button type="button" (click)="openIsvProductModal()" class="px-3 py-1 rounded-md text-sm bg-orange-100 border text-orange-400 border-orange-400">+ Add Products</button>
+          <div class="mt-3 flex flex-wrap gap-3">
+            <div *ngFor="let group of isvProductsByBrand" class="border border-gray-200 rounded-xl p-3 bg-white shadow-sm min-w-[180px] max-w-[240px]">
+              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                <img *ngIf="group.items[0]?.product_logo" [src]="group.items[0].product_logo" [alt]="group.brand" class="w-7 h-7 object-contain rounded" />
+                <span class="text-xs font-semibold text-gray-600 truncate">{{ group.brand }}</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <div *ngFor="let p of group.items" class="flex items-center justify-between gap-2 bg-gray-50 rounded-lg px-2 py-1">
+                  <span class="text-xs text-gray-700 truncate">{{ p.name }}</span>
+                  <button type="button" (click)="removeIsvProduct(p)" class="text-red-400 hover:text-red-600 flex-shrink-0 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Services multi-select -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Services</p>
+        <div>
+          <button type="button" (click)="openServiceModal()" class="px-3 py-1 rounded-md text-sm bg-orange-100 border text-orange-400 border-orange-400">+ Add Services</button>
+          <div class="mt-3 flex flex-wrap gap-3">
+            <div *ngFor="let group of servicesByBrand" class="border border-gray-200 rounded-xl p-3 bg-white shadow-sm min-w-[180px] max-w-[240px]">
+              <div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                <img *ngIf="group.items[0]?.product_logo" [src]="group.items[0].product_logo" [alt]="group.brand" class="w-7 h-7 object-contain rounded" />
+                <span class="text-xs font-semibold text-gray-600 truncate">{{ group.brand }}</span>
+              </div>
+              <div class="flex flex-col gap-1">
+                <div *ngFor="let s of group.items" class="flex items-center justify-between gap-2 bg-gray-50 rounded-lg px-2 py-1">
+                  <span class="text-xs text-gray-700 truncate">{{ s.name }}</span>
+                  <button type="button" (click)="removeService(s)" class="text-red-400 hover:text-red-600 flex-shrink-0 text-xs">✕</button>
+                </div>
+              </div>
+            </div>
+          </div>
+          <p *ngIf="selectedIsvProducts.length === 0 && selectedSpectrumServices.length === 0" class="text-xs text-gray-400 mt-1">At least one Product or Service is required.</p>
+        </div>
+      </div>
+              <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Coverage</p>        
+        <div>
+         <app-cleditor formControlName="coverage"></app-cleditor>
+          @if (productInfoForm.get('coverage')?.invalid && productInfoForm.get('coverage')?.touched) {
+            <p class="text-xs text-red-500">Please enter coverage</p>
+          }
+
+        </div>
+      </div> -->
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req text-base">industry</p>
+        <div class="flex flex-wrap gap-2 max-w-xl">
+          <div *ngFor="let category of Newcategories.targetSegment"
+            (click)="toggleValue('targetSegment', category)"
+            [ngClass]="{
+              'bg-orange-400 text-white': isSelected('targetSegment', category),
+              'bg-gray-200 text-black': !isSelected('targetSegment', category)
+            }"
+            class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+            {{ category }}
+          </div>
+        </div>
+        @if (productForm.get('targetSegment')?.invalid && productForm.get('targetSegment')?.touched) {
+          <p class="text-xs text-red-500">Please select at least one industry</p>
+        }
+      </div> -->
+
+<!-- Inherited fields — auto-populated from linked Products & Services -->
+<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+  <div>
+    <p class="font-medium text-base">Inherited Fields</p>
+    <p class="text-xs text-gray-400 mt-1">Auto-populated from linked Products &amp; Services</p>
+  </div>
+  <div class="col-span-2 space-y-3">
+
+    <div *ngIf="industryArray.length > 0">
+      <p class="text-sm font-medium text-gray-600 mb-1">Industry</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let v of industryArray.value" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm">{{ v }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="targetSegmentArray.length > 0">
+      <p class="text-sm font-medium text-gray-600 mb-1">Target Segment</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let v of targetSegmentArray.value" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm">{{ v }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="targetAudienceArray.length > 0">
+      <p class="text-sm font-medium text-gray-600 mb-1">Target Audience</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let v of targetAudienceArray.value" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm">{{ v }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="cloudProviderArray.length > 0">
+      <p class="text-sm font-medium text-gray-600 mb-1">Platform</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let v of cloudProviderArray.value" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm">{{ v }}</span>
+      </div>
+    </div>
+
+    <div *ngIf="taxonomy_data.get('color')?.value?.length > 0">
+      <p class="text-sm font-medium text-gray-600 mb-1">Regions Supported</p>
+      <div class="flex flex-wrap gap-2">
+        <span *ngFor="let v of taxonomy_data.get('color')?.value" class="px-3 py-1 bg-blue-50 border border-blue-200 text-blue-700 rounded-full text-sm">{{ v }}</span>
+      </div>
+    </div>
+
+    <p *ngIf="industryArray.length === 0 && targetAudienceArray.length === 0 && cloudProviderArray.length === 0" class="text-sm text-gray-400 italic">Select Products or Services above to auto-populate these fields.</p>
+  </div>
+</div>
+
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3  gap-4 items-center my-5">
+        <label class="font-medium req">Category & Sub-Category</label>
+        <div>
+        <app-category-subcategory (dataChanged)="onCategoryUpdate($event)"  [editData]="existingProductData"></app-category-subcategory>
+         
+        </div>
+      </div>
+
+
+
+
+
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req text-base">Target Audience</p>
+        <div class="flex flex-wrap gap-2 max-w-xl">
+          <div *ngFor="let category of Newcategories.targetAudience"
+            (click)="toggleValue('targetAudience', category)"
+            [ngClass]="{
+              'bg-orange-400 text-white': isSelected('targetAudience', category),
+              'bg-gray-200 text-black': !isSelected('targetAudience', category)
+            }"
+            class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+            {{ category }}
+          </div>
+        </div>
+        @if (productForm.get('targetAudience')?.invalid && productForm.get('targetAudience')?.touched) {
+          <p class="text-xs text-red-500">Please select at least one Target Audience</p>
+        }
+      </div> -->
+
+      <!-- <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req text-base">Category</p>
+        <div class="flex flex-wrap gap-2 max-w-xl">
+          <div *ngFor="let category of Newcategories.platformCategory"
+            (click)="toggleValue('platformCategory', category)"
+            [ngClass]="{
+              'bg-orange-400 text-white': isSelected('platformCategory', category),
+              'bg-gray-200 text-black': !isSelected('platformCategory', category)
+            }"
+            class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+            {{ category }}
+          </div>
+        </div>
+        @if (productForm.get('platformCategory')?.touched && productForm.get('platformCategory')?.hasError('required')) {
+          <p class="text-red-500 text-xs mt-1">Platform Category is required.</p>
+        }
+      </div> -->
+<!-- 
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <p class="font-medium req text-base">Cloud Provider Support</p>
+        <div class="flex flex-wrap gap-2 max-w-xl">
+          <div *ngFor="let category of Newcategories.cloudProvider"
+            (click)="toggleValue('cloudProvider', category)"
+            [ngClass]="{
+              'bg-orange-500 text-white': isSelected('cloudProvider', category),
+              'bg-gray-200 text-black': !isSelected('cloudProvider', category)
+            }"
+            class="px-4 py-2 rounded-full text-sm cursor-pointer transition-colors duration-200">
+            {{ category }}
+          </div>
+             @if (productForm.get('cloudProvider')?.invalid && productForm.get('cloudProvider')?.touched) {
+          <p class="text-xs text-red-500">Please select at least one Cloud Provider Support</p>
+        }
+        </div>
+      </div> -->
+
+
+
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <p class="font-medium req text-base">Starting Price &#8377;</p>
+ <div>
+  <input
+     type="text"
+    min="2"
+    step="1"
+    formControlName="starting_price"
+    placeholder="Starting Price"
+    class="input input-bordered w-full sm:w-80 md:w-96"
+    [ngClass]="{
+      'border-red-500':
+        productInfoForm.get('starting_price')?.invalid &&
+        productInfoForm.get('starting_price')?.touched
+    }"
+    (keydown)="allowOnlyNumbers($event)"
+  />
+
+  @if (productInfoForm.get('starting_price')?.touched) {
+    @if (productInfoForm.get('starting_price')?.errors?.['required']) {
+      <p class="text-xs text-red-500">Starting Price is required</p>
+    }
+  }
+</div>
+
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center my-5">
+        <label class="font-medium req text-base">CTA</label>
+        <div class="flex flex-wrap gap-2 max-w-xl">
+          <div *ngFor="let category of Newcategories.ctaModel"
+            (click)="toggleValue('ctaModel', category)"
+            [ngClass]="{
+              'bg-orange-400 text-white': isSelected('ctaModel', category),
+              'bg-gray-200 text-black': !isSelected('ctaModel', category)
+            }"
+            class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+            {{ category }}
+          </div>  
+        </div>
+        <div class="text-red-500 text-sm mt-1"
+          *ngIf="productForm.get('ctaModel')?.touched && productForm.get('ctaModel')?.invalid">
+          Please select at least one CTA model.
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <label class="font-medium text-base">API / Metering Endpoint</label>
+        <div>
+          <textarea
+            formControlName="meteringEndPoint"
+            class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="https://example.com"
+            rows="4"
+          ></textarea>
+          <div *ngIf="productInfoForm.get('meteringEndPoint')?.touched && productInfoForm.get('meteringEndPoint')?.invalid"
+            class="text-red-500 text-sm">Please fill the field correctly https://example.com</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <label class="font-medium text-base">OEM SKU ID</label>
+        <div>
+          <input
+            formControlName="oem_sku"
+            class="input input-bordered w-full sm:w-80 md:w-96"
+            placeholder="Enter SKU ID"
+          />
+          <div *ngIf="productInfoForm.get('oem_sku')?.touched && productInfoForm.get('oem_sku')?.invalid"
+            class="text-red-500 text-sm">SKU ID is required</div>
+        </div>
+      </div>
+
+      <!-- Tags: free-form, searchable. Editing tags never changes publish status. -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4">
+        <label class="font-medium text-base">
+          Tags
+          <p class="text-xs text-gray-400 font-normal mt-1">Type a tag and press Enter. Used to make this item searchable.</p>
+        </label>
+        <div class="w-full sm:w-80 md:w-96 lg:col-span-2">
+          <app-tags-input [(tags)]="tags" placeholder="e.g. security, ai, finops"></app-tags-input>
+          @if (updateButton) {
+            <button
+              type="button"
+              class="btn btn-sm bg-orange-500 hover:bg-orange-600 text-white border-0 mt-2"
+              [disabled]="savingTags"
+              (click)="saveTags()"
+            >
+              {{ savingTags ? 'Saving…' : 'Save Tags' }}
+            </button>
+            <p class="text-xs text-gray-400 mt-1">Saving tags won’t change this item’s published status.</p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div class="text-sm font-medium text-gray-600">
+          <p class="text-base">Solution Logo</p>
+          <p class="text-xs text-gray-400">JPEG or PNG, Max 200KB<br /></p>
+        </div>
+
+        <div class="w-full sm:w-[10rem] md:w-[13rem] lg:w-[16rem] relative cursor-pointer">
+          @if (customCouponImageUrl) {
+            <label class="w-28 h-9 bg-white absolute rounded-full flex justify-center items-center text-sm z-50 top-28 -right-32" for="brondlogo">
+              <div class="flex">
+                <img src="assets/photo-up.png" alt="Replace" class="mr-1" />
+                Replace
+              </div>
+            </label>
+          }
+          <div
+            class="aspect-square border-2 border-zinc-300 border-dashed rounded-md flex justify-center items-center relative group hover:border-zinc-500 overflow-hidden">
+            @if (customCouponImageUrl) {
+              <div>
+                <img class="w-full h-full object-cover" src="{{customCouponImageUrl}}" alt="">
+                <div
+                  class="flex items-center justify-center gap-2 text-white bg-black/50 backdrop-blur-sm absolute top-0 left-0 w-full h-full opacity-0 transition duration-300 group-hover:opacity-100">
+                  <i class="ri-image-edit-fill text-3xl"></i>
+                  <p class="text-sm border-l border-white pl-2 font-medium">Change Solution Image</p>
+                </div>
+              </div>
+            } @else {
+              <div class="flex items-center gap-2 text-zinc-400">
+                <i class="ri-image-fill text-3xl group-hover:text-zinc-500"></i>
+                <p class="text-sm border-l border-zinc-300 pl-2 font-medium">Upload Solution Image</p>
+              </div>
+            }
+            <input 
+              formControlName="image_url" 
+              id="brondlogo" 
+              type="file" 
+              (change)="addCouponImage($event)"
+              class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" 
+              accept="image/*"
+            />
+          </div>
+
+          @if (productInfoForm.get('image_url')?.invalid && productInfoForm.get('image_url')?.touched) {
+            <span class="text-xs text-red-500">Upload Image</span>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mt-2">
+        <div>
+          <label class="font-medium mt-1 text-base">Solution Gallery</label>
+          <p class="text-sm text-gray-500 leading-snug w-full sm:w-72 md:w-86">JPEG or PNG, MAX 2 MB</p>
+        </div>        
+        <div>
+          <app-image-upload [imageFormArray]="screenshots"></app-image-upload>
+          @if (productInfoForm.get('screenshots')?.touched && productInfoForm.get('screenshots')?.hasError('required')) {
+            <p class="text-red-500 text-xs mt-1">Screenshots are required.</p>
+          }
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div>
+          <label class="font-medium mt-1 text-base">Customer Use Cases</label>
+        </div>        
+        <div>
+          <app-file-upload [attachmentsFormArray]="customerCasestudyUpload" class="text-base"></app-file-upload>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4 mt-2">
+        <p class="font-medium text-base">Demo Video Link</p>        
+        <div>
+          <input formControlName="demovideoLink" class="input input-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="https://example.com"/>
+          <div *ngIf="productInfoForm.get('demovideoLink')?.touched && productInfoForm.get('demovideoLink')?.invalid"
+            class="text-red-500 text-sm mt-1">Please fill correctly eg: https://example.com</div>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mt-3">
+        <div>
+          <label class="font-medium mt-1 text-base">Brochure Upload / Datasheet (PDF)</label>
+        </div>        
+        <div>
+          <app-file-upload [attachmentsFormArray]="broucherUpload" class="text-base"></app-file-upload>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start mb-4 mt-2">
+        <p class="font-medium text-base">Terms of Use URL</p>        
+        <div>
+          <input formControlName="terms_of_use_url" class="input input-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="https://example.com"/>
+          <div *ngIf="productInfoForm.get('terms_of_use_url')?.touched && productInfoForm.get('terms_of_use_url')?.invalid"
+            class="text-red-500 text-sm">Please fill correctly eg: https://example.com</div>
+        </div>
+      </div>
+      
+    </div>
+  </div>
+
+  <!-- Technical Information Section -->
+  <!-- <div [formGroup]="technicalInfoForm" *ngIf="currentStep === 1" class="mb-8">
+    <h3 class="text-lg font-semibold">Technical Information</h3>
+    <div class="border-t border-dashed border-gray-300 pt-4 space-y-6">
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium req text-base">Technical Prerequisites</p>        
+        <div>
+          <textarea formControlName="technicalPrerequsite" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            [ngClass]="{'border-red-500': technicalInfoForm.get('technicalPrerequsite')?.invalid && technicalInfoForm.get('technicalPrerequsite')?.touched}" placeholder="Description" rows="5"></textarea>
+          @if (technicalInfoForm.get('technicalPrerequsite')?.invalid && technicalInfoForm.get('technicalPrerequsite')?.touched) {
+            <p class="text-xs text-red-500">Please Enter Technical Prerequisites</p>
+          }
+        </div>
+       
+      </div>
+    </div>
+  </div> -->
+
+  <!-- Pricing & Licensing Section -->
+  <div [formGroup]="pricingInfoForm" *ngIf="currentStep === 2" class="my-8">
+    <h3 class="text-lg font-semibold mt-6">Pricing & Licensing</h3>
+    <div class="border-t border-dashed border-gray-300 pt-6 space-y-6">
+      <div class="flex justify-center">
+        <div class="w-full">
+          <!-- Pricing content here -->
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <div class="flex justify-end gap-4 mt-8">
+    <button
+      type="button"
+      (click)="onCheckvalidate()"
+      class="px-4 py-2 bg-orange-500 text-white rounded"
+    >
+      Verify the Solution
+    </button>
+  </div>
+
+  <hr>
+  <div class="mt-10 text-center flex justify-end gap-2">
+    <button [disabled]="isreqSending" type="submit" id="submitproduct" class=""></button> 
+  </div>
+
+</form>
+
+@if (isIsvProductModalOpen) {
+<app-selectable-product-list-modal [isOpen]="isIsvProductModalOpen" type="product" [categoryData]="selectedIsvProducts"
+  (closeModalemmit)="closeIsvProductModal($event)"></app-selectable-product-list-modal>
+}
+
+@if (isServiceModalOpen) {
+<app-selectable-product-list-modal [isOpen]="isServiceModalOpen" type="service" [categoryData]="selectedSpectrumServices"
+  (closeModalemmit)="closeServiceModal($event)"></app-selectable-product-list-modal>
+}
+
+@if (isproductSelectModalOpen) {
+<app-selectable-product-list-modal [isOpen]="isproductSelectModalOpen" type="group" [categoryData]="productSelectData"
+  (closeModalemmit)="closedModal($event)"></app-selectable-product-list-modal>
+
+}
+
+<div *ngIf="isreqSending" class="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+<img src="assets/loaderlogo-neozaar.gif" alt="" width="50" height="50" class="">
+</div>
+
+
+
+<input id="assign-modal" type="checkbox" class="modal-toggle" [checked]="ProductModalOpen" />
+
+<!-- Preview Modal -->
+<!-- Product Preview Modal -->
+<div
+  class="modal"
+  role="dialog"
+  [ngClass]="{ 'modal-open': ProductModalOpen }"
+>
+  <div
+    class="modal-box p-0 max-w-6xl rounded-2xl shadow-2xl bg-white max-h-[90vh] overflow-y-auto"
+  >
+    <!-- Header -->
+ <!-- Product Preview Modal -->
+<div
+  class=" inset-0 z-50 flex items-center justify-center"
+  *ngIf="ProductModalOpen"
+>
+  <!-- Backdrop -->
+  <div
+    class="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
+    (click)="closeAssignModal()"
+  ></div>
+
+  <!-- Modal Box -->
+  <div
+    class="relative z-10 bg-white max-w-6xl w-full rounded-2xl shadow-2xl overflow-y-auto max-h-[90vh] border border-gray-200 animate-[fadeIn_0.3s_ease-out_forwards]"
+  >
+    <!-- Header -->
+    <div
+      class="flex justify-between items-center px-6 py-4 border-b bg-gradient-to-r from-indigo-600 to-blue-500 text-white rounded-t-2xl"
+    >
+      <div class="flex items-center gap-3">
+        <i class="ri-information-line text-2xl"></i>
+        <h3 class="font-semibold text-xl">Solutions Preview</h3>
+      </div>
+      <button
+        (click)="closeAssignModal()"
+        class="p-2 rounded-full bg-white/10 hover:bg-white/20 transition"
+      >
+        <i class="ri-close-line text-xl"></i>
+      </button>
+    </div>
+
+    <!-- Content -->
+    <div class="px-8 py-8 space-y-8 bg-gray-50 text-gray-800">
+      <!-- Product Information -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-box-3-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+           Solutions Information
+          </h4>
+        </div>
+        <div class="grid lg:grid-cols-2 gap-4 text-sm">
+          <div><strong>Name:</strong> <p>{{ productForm.value.productInfo.name }}</p></div>
+          <div><strong>CTA Model:</strong> <p *ngFor="let cm of  productForm.value.ctaModel">{{ cm }}</p></div>
+          <div class="pb-5"><strong>Solutions image:</strong> <p>   @if (customCouponImageUrl) { <img class="w-28 h-28 object-cover" src="{{customCouponImageUrl}}" alt="">}</p></div>
+          <div class="col-span-2" *ngIf="productForm.value.productInfo?.screenshots?.length">
+            <strong>Gallery Screenshots:</strong>
+            <div class="flex flex-wrap gap-3 mt-2">
+              <ng-container *ngFor="let img of productForm.value.productInfo.screenshots">
+                <img
+                  *ngIf="getFilePreview(img).type === 'image'"
+                  class="w-28 h-28 object-cover rounded"
+                  [src]="getFilePreview(img).url"
+                  alt="Screenshot"
+                />
+              </ng-container>
+            </div>
+          </div>
+<div class="mt-3" *ngIf="productForm.value.productInfo?.customerCasestudyUpload?.length">
+  <strong>Case Study:</strong>
+
+  <div class="flex flex-col gap-2 mt-2">
+    <ng-container *ngFor="let file of productForm.value.productInfo.customerCasestudyUpload">
+      <button
+        class="text-blue-600 underline flex items-center gap-1"
+        type="button"
+        (click)="openPdf(getFilePreview(file).url)">
+        📄 Open PDF
+      </button>
+    </ng-container>
+  </div>
+</div>
+<div class="mt-3" *ngIf="productForm.value.productInfo?.broucherUpload?.length">
+  <strong>Brochure:</strong>
+
+  <div class="flex flex-col gap-2 mt-2">
+    <ng-container *ngFor="let file of productForm.value.productInfo.broucherUpload">
+      <button
+        class="text-blue-600 underline flex items-center gap-1"
+        type="button"
+        (click)="openPdf(getFilePreview(file).url)">
+        📄 Open PDF
+      </button>
+    </ng-container>
+  </div>
+</div>
+
+          <!-- <div class="pb-5"><strong>Product image:</strong> <p>   @if (customCouponImageUrl) { <img class="w-28 h-28 object-cover" src="{{customCouponImageUrl}}" alt="">}</p></div> -->
+          <!-- <div class="pb-5"><strong>screen shot image:</strong> 
+<div *ngIf="imagePreviews.length > 0" class="grid grid-cols-3 gap-3">
+  <div
+    *ngFor="let preview of imagePreviews; let i = index"
+    class="relative border rounded overflow-hidden shadow-sm"
+  >
+    <img
+      [src]="preview"
+      alt="Selected image preview"
+      class="w-full h-24 object-cover"
+    />
+    <button
+      type="button"
+      class="absolute top-1 right-1 bg-red-600 text-white text-xs rounded-full px-2 py-1"
+      
+    >
+      ✕
+    </button>
+  </div>
+</div>
+
+  
+          </div> -->
+          <div><strong>OEM SKU:</strong> <p>{{ productForm.value.productInfo.oem_sku }}</p></div>
+          <div><strong>Starting Price &#8377;</strong> <p>{{ productForm.value.productInfo.starting_price }}</p></div>
+             <div>
+            <strong>Regional Supported</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              @for (f of productForm.value.taxonomy_data.color; track $index) {
+                      <li>{{ f }}</li>
+                    }
+
+            </ul>
+          </div>
+          <div class="col-span-2"><strong>Description:</strong> <p>{{ productForm.value.productInfo.description }}</p></div>
+          <div class="col-span-2" *ngIf="productForm.value.productInfo?.useCases?.length">
+            <strong>Use Cases / Capabilities:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let uc of productForm.value.productInfo.useCases">{{ uc }}</li>
+            </ul>
+          </div>
+          <div class="col-span-2" *ngIf="productForm.value.productInfo?.customerChallenges?.length">
+            <strong>Customer Challenges:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let ch of productForm.value.productInfo.customerChallenges">{{ ch }}</li>
+            </ul>
+          </div>
+          <div class="col-span-2" *ngIf="productForm.value.productInfo?.businessOutcomes?.length">
+            <strong>Business Outcomes:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let bo of productForm.value.productInfo.businessOutcomes">{{ bo }}</li>
+            </ul>
+          </div>
+          <div class="col-span-2" *ngIf="productForm.value.productInfo?.challenges_addressed"><strong>Challenges Addressed:</strong> <p [innerHTML]="productForm.value.productInfo.challenges_addressed"></p></div>
+          <div class="col-span-2"><strong>Scope:</strong> <p [innerHTML]="productForm.value.productInfo.scope"></p></div>
+          <div class="col-span-2"><strong>Coverage :</strong> <p [innerHTML]="productForm.value.coverage"></p></div>
+          <div class="col-span-2"><strong>Solution Differentiator:</strong> <p [innerHTML]="productForm.value.productInfo.solution_differentiator"></p></div>
+          <div><strong>Technical Prerequisite:</strong> <p [innerHTML]="productForm.value.productInfo.technicalPrerequsite"></p></div>
+        </div>
+      </section>
+
+      <!-- Product Details -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-settings-3-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+            Solutions Details
+          </h4>
+        </div>
+        <div class="space-y-3 text-sm">
+          <div>
+            <strong>Long Description:</strong>
+            <p class="whitespace-pre-wrap text-gray-700 mt-1">
+              {{ productForm.value.productInfo.longdescription }}
+            </p>
+          </div>
+          <div>
+            <strong>Key Features:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              @for (f of productForm.value.productInfo.keyFeatures; track $index) {
+  <li>{{ f }}</li>
+}
+
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Linked Products & Services -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100"
+               *ngIf="isvProductsByBrand.length > 0 || servicesByBrand.length > 0">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-box-3-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">Linked Products & Services</h4>
+        </div>
+        <div class="space-y-4 text-sm">
+          <!-- Products -->
+          <div *ngIf="isvProductsByBrand.length > 0">
+            <strong class="block mb-2">Products:</strong>
+            <div class="flex flex-wrap gap-3">
+              <div *ngFor="let group of isvProductsByBrand"
+                   class="border border-gray-200 rounded-xl p-3 bg-gray-50 min-w-[160px]">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                  <img *ngIf="group.items[0]?.product_logo" [src]="group.items[0].product_logo"
+                       [alt]="group.brand" class="w-6 h-6 object-contain rounded" />
+                  <span class="text-xs font-semibold text-gray-600">{{ group.brand }}</span>
+                </div>
+                <ul class="space-y-1">
+                  <li *ngFor="let item of group.items" class="text-xs text-gray-700">• {{ item.name }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+          <!-- Services -->
+          <div *ngIf="servicesByBrand.length > 0">
+            <strong class="block mb-2">Services:</strong>
+            <div class="flex flex-wrap gap-3">
+              <div *ngFor="let group of servicesByBrand"
+                   class="border border-gray-200 rounded-xl p-3 bg-gray-50 min-w-[160px]">
+                <div class="flex items-center gap-2 mb-2 pb-2 border-b border-gray-100">
+                  <img *ngIf="group.items[0]?.product_logo" [src]="group.items[0].product_logo"
+                       [alt]="group.brand" class="w-6 h-6 object-contain rounded" />
+                  <span class="text-xs font-semibold text-gray-600">{{ group.brand }}</span>
+                </div>
+                <ul class="space-y-1">
+                  <li *ngFor="let item of group.items" class="text-xs text-gray-700">• {{ item.name }}</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Pricing -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-currency-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+            Pricing & Licensing
+          </h4>
+        </div>
+        <div class="text-sm">
+          <strong>Pricing Models:</strong>
+          
+           {{productForm.value.productInfo.pricingModel }}
+       
+          <p class="mt-2"><strong>Metering Endpoint:</strong> {{ productForm.value.productInfo.meteringEndPoint }}</p>
+        </div>
+      </section>
+
+      <!-- Media -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-folder-2-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+            Media & Documentation
+          </h4>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <strong>Demo Video Link:</strong><br />
+            <a
+              [href]="productForm.value.productInfo.demovideoLink"
+              target="_blank"
+              class="text-blue-600 hover:text-blue-800 underline"
+            >
+              {{ productForm.value.productInfo.demovideoLink }}
+            </a>
+              
+          </div>
+          <div>
+            <strong>Terms of Use URL:</strong><br />
+            <a
+              [href]="productForm.value.productInfo.terms_of_use_url"
+              target="_blank"
+              class="text-blue-600 hover:text-blue-800 underline"
+            >
+              {{ productForm.value.productInfo.terms_of_use_url }}
+            </a>
+          </div>
+          <!-- <div class="col-span-2">
+            <strong>Service Level Docs:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let s of productForm.value.productInfo.serviceLevelDocument">{{ s }}</li>
+            </ul>
+          </div> -->
+        </div>
+      </section>
+
+      <!-- Taxonomy -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-cloud-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+            Taxonomy & Platform Info
+          </h4>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <!-- <div><strong>Category </strong><p>{{ productForm.value.categoryType }}</p></div> -->
+          <!-- <div><strong>Whats Included:</strong><p>{{ productForm.value.WhatsIncluded }}</p></div> -->
+          <div>
+            <strong>Platform:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let p of productForm.value.cloudProvider">{{ p }}</li>
+            </ul>
+          </div>
+          
+          <!-- <div class="col-span-2">
+            <strong>Compliance Certifications:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let c of productForm.value.complianceCertification">{{ c }}</li>
+            </ul>
+          </div> -->
+        </div>
+      </section>
+
+      <!-- Audience -->
+      <section class="bg-white p-6 rounded-xl shadow-sm border border-gray-100">
+        <div class="flex items-center gap-2 mb-3">
+          <i class="ri-user-star-line text-indigo-600 text-xl"></i>
+          <h4 class="font-semibold text-lg text-indigo-700">
+            Target Audience & Segments
+          </h4>
+        </div>
+        <div class="grid md:grid-cols-2 gap-4 text-sm">
+          <div>
+            <strong>Target Audience:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let a of productForm.value.targetAudience">{{ a }}</li>
+            </ul>
+          </div>
+          <div>
+            <strong>Industry:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let s of productForm.value.industry">{{ s }}</li>
+            </ul>
+          </div>
+          <div>
+            <strong>Target Segments:</strong>
+            <ul class="list-disc pl-5 mt-1 space-y-1">
+              <li *ngFor="let s of productForm.value.targetSegment">{{ s }}</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+
+      <!-- Footer -->
+      <div class="pt-6 text-right border-t mt-6">
+        <label
+          class="bg-gradient-to-r from-green-600 to-emerald-500 hover:from-green-700 hover:to-emerald-600 text-white px-8 py-2.5 rounded-lg font-medium shadow-md transition-transform hover:scale-105"
+        for="submitproduct">
+          <i class="ri-check-line mr-1"></i> Approve & Continue
+        </label>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Animation -->
+<style>
+@keyframes fadeIn {
+  0% { opacity: 0; transform: scale(0.95); }
+  100% { opacity: 1; transform: scale(1); }
+}
+</style>
+
+
+  <div
+    class="modal-backdrop bg-black bg-opacity-50"
+    (click)="closeAssignModal()"
+  ></div>
+</div>

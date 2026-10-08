@@ -1,0 +1,153 @@
+<dialog #modal class="modal" appPreventEscClose>
+  <div class="modal-box p-0 w-11/12 max-w-5xl overflow-x-hidden">
+    <div class="p-5">
+
+      <!-- Header -->
+      <div class="flex justify-between items-center mb-4">
+        <div class="flex items-center gap-3">
+          <button *ngIf="step === 'products'" type="button" (click)="backToBrands()"
+            class="btn btn-sm btn-ghost btn-circle">
+            <i class="ri-arrow-left-line text-lg"></i>
+          </button>
+          <div>
+            <h1 class="text-xl font-semibold">
+              {{ isService ? 'Services' : 'Products' }}
+              <span *ngIf="step === 'products'" class="text-gray-400 font-normal text-base"> — {{ selectedBrand?.brand_name }}</span>
+            </h1>
+            <p class="text-xs text-gray-400 mt-0.5">
+              {{ step === 'brands' ? 'Select a brand to browse published ' + (isService ? 'services' : 'products') : 'Select items to add to the solution' }}
+            </p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          <button *ngIf="selectedProducts.length > 0" type="button"
+            class="btn btn-sm btn-success text-white"
+            (click)="confirm()">
+            <i class="ri-check-line"></i> Add {{ isService ? 'Services' : 'Products' }} ({{ selectedProducts.length }})
+          </button>
+          <button type="button" class="btn btn-sm btn-circle btn-ghost" (click)="close()">
+            <i class="ri-close-line"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 1: Brand Grid ── -->
+      <div *ngIf="step === 'brands'">
+
+        <!-- Brand search -->
+        <div class="mb-4">
+          <label class="input input-sm input-bordered flex items-center gap-2 w-full max-w-xs">
+            <i class="ri-search-line"></i>
+            <input type="text" class="grow" placeholder="Search brands..."
+              [(ngModel)]="brandSearch" />
+          </label>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isFetchingBrands" class="flex justify-center py-12">
+          <span class="loading loading-spinner loading-md text-orange-500"></span>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!isFetchingBrands && filteredBrands.length === 0"
+          class="text-center py-12 text-gray-400">
+          No published brands found.
+        </div>
+
+        <!-- Brand cards -->
+        <div *ngIf="!isFetchingBrands && filteredBrands.length > 0"
+          class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3">
+          <button *ngFor="let brand of filteredBrands" type="button"
+            (click)="selectBrand(brand)"
+            class="flex flex-col items-center justify-center gap-2 p-4 border rounded-xl hover:border-orange-400 hover:bg-orange-50 transition cursor-pointer text-center">
+            <div class="w-12 h-12 rounded-full bg-gray-100 flex items-center justify-center overflow-hidden">
+              <img *ngIf="brand.logo" [src]="brand.logo" [alt]="brand.brand_name"
+                class="w-full h-full object-cover" />
+              <i *ngIf="!brand.logo" class="ri-building-2-line text-2xl text-gray-400"></i>
+            </div>
+            <span class="text-sm font-medium text-gray-700 leading-tight">{{ brand.brand_name }}</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── STEP 2: Product Table ── -->
+      <div *ngIf="step === 'products'">
+
+        <!-- Search -->
+        <div class="mb-4">
+          <label class="input input-sm input-bordered flex items-center gap-2 w-full max-w-xs">
+            <i class="ri-search-line"></i>
+            <input type="text" class="grow" placeholder="Search..."
+              [(ngModel)]="searchTerm" (ngModelChange)="onSearchChange()" />
+          </label>
+        </div>
+
+        <!-- Loading -->
+        <div *ngIf="isFetchingProducts" class="flex justify-center py-12">
+          <span class="loading loading-spinner loading-md text-orange-500"></span>
+        </div>
+
+        <!-- Empty -->
+        <div *ngIf="!isFetchingProducts && productList.length === 0"
+          class="text-center py-12 text-gray-400">
+          No published {{ isService ? 'services' : 'products' }} found for this brand.
+        </div>
+
+        <!-- Table -->
+        <div *ngIf="!isFetchingProducts && productList.length > 0"
+          class="border rounded-lg overflow-hidden">
+          <table class="table table-auto w-full">
+            <thead class="bg-gray-50">
+              <tr>
+                <th class="w-10"></th>
+                <th>Name</th>
+                <th>Category</th>
+                <th>Status</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of productList" class="hover:bg-orange-50 transition">
+                <td>
+                  <input type="checkbox" class="checkbox checkbox-sm"
+                    [checked]="isSelected(item.id)"
+                    (change)="toggleProduct($event, item)" />
+                </td>
+                <td>
+                  <div class="flex items-center gap-2">
+                    <img [src]="item.product_logo || item.logo" [alt]="item.name"
+                      class="w-9 h-9 rounded object-cover bg-gray-100"
+                      onerror="this.style.display='none'" />
+                    <span class="font-medium text-sm">{{ item.name }}</span>
+                  </div>
+                </td>
+                <td class="text-sm text-gray-500">{{ item.category }}</td>
+                <td>
+                  <span class="badge badge-sm badge-success text-white">{{ item.status }}</span>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        <div class="flex items-center justify-between mt-3" *ngIf="totalPages > 1">
+          <span class="text-xs text-gray-500">{{ totalProducts }} total</span>
+          <div class="flex items-center gap-2">
+            <button class="btn btn-xs" (click)="prevPage()" [disabled]="currentPage === 1">Prev</button>
+            <span class="text-xs">{{ currentPage }} / {{ totalPages }}</span>
+            <button class="btn btn-xs" (click)="nextPage()" [disabled]="currentPage === totalPages">Next</button>
+          </div>
+        </div>
+
+        <!-- Pick another brand -->
+        <div class="mt-4 pt-4 border-t">
+          <button type="button" (click)="backToBrands()"
+            class="btn btn-sm btn-outline btn-neutral">
+            <i class="ri-arrow-left-line"></i> Pick another brand
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</dialog>

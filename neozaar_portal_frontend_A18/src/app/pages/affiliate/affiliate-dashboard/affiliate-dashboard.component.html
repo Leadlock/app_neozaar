@@ -1,0 +1,152 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Affiliate Dashboard</h1>
+      <p class="crm-subtitle">Your affiliate performance at a glance</p>
+    </div>
+    <button class="neo-btn" (click)="load()">Refresh</button>
+  </div>
+
+  @if (loading) {
+    <div class="neo-card" style="text-align:center;padding:3rem;color:var(--crm-text-secondary)">Loading dashboard…</div>
+  } @else if (error) {
+    <div class="neo-card" style="text-align:center;padding:2rem;color:var(--crm-text-secondary)">{{ error }}</div>
+  } @else if (data) {
+
+    <!-- ── Affiliate own view ─────────────────────────────── -->
+    @if (isAffiliate) {
+      <!-- Overview stat cards -->
+      <div class="crm-grid-4" style="margin-bottom:2rem;">
+        <div class="neo-stat">
+          <span class="neo-stat-label">Total Customers</span>
+          <span class="neo-stat-value">{{ fmt(data.customers?.total) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">+{{ fmt(data.customers?.new_this_month) }} this month</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Active Opportunities</span>
+          <span class="neo-stat-value">{{ fmt(data.opportunities?.active) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Won</span>
+          <span class="neo-stat-value accent">{{ fmt(data.opportunities?.won) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Pipeline Value</span>
+          <span class="neo-stat-value">{{ fmtCurrency(data.opportunities?.pipeline_value) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Conversion Rate</span>
+          <span class="neo-stat-value">{{ fmtPct(data.opportunities?.conversion_rate) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Avg Customer Score</span>
+          <span class="neo-stat-value">{{ data.scoring?.avg_customer_score }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Campaign Emails Sent</span>
+          <span class="neo-stat-value">{{ fmt(data.campaigns?.emails_sent) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">{{ fmt(data.campaigns?.registrations) }} registrations</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Database Contacts</span>
+          <span class="neo-stat-value">{{ fmt(data.database?.total_contacts) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">{{ fmt(data.database?.registered) }} registered</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Link Clicks</span>
+          <span class="neo-stat-value">{{ fmt(data.links?.total_clicks) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">across {{ fmt(data.links?.total) }} links</span>
+        </div>
+      </div>
+
+    }
+
+    <!-- ── Manager / SuperAdmin view ─────────────────────── -->
+    @if (isManager) {
+      <!-- Global KPIs -->
+      <div class="crm-grid-4" style="margin-bottom:2rem;">
+        <div class="neo-stat">
+          <span class="neo-stat-label">Total Affiliates</span>
+          <span class="neo-stat-value">{{ fmt(data.overview?.total_affiliates) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">{{ fmt(data.overview?.active_affiliates) }} active</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Total Customers</span>
+          <span class="neo-stat-value">{{ fmt(data.overview?.total_customers) }}</span>
+          <span style="font-size:0.72rem;color:var(--crm-text-secondary);margin-top:0.1rem">+{{ fmt(data.overview?.customers_this_month) }} this month</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Open Opportunities</span>
+          <span class="neo-stat-value">{{ fmt(data.overview?.open_opps) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Won</span>
+          <span class="neo-stat-value accent">{{ fmt(data.overview?.won_opps) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Lost</span>
+          <span class="neo-stat-value">{{ fmt(data.overview?.lost_opps) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Pipeline Value</span>
+          <span class="neo-stat-value">{{ fmtCurrency(data.overview?.pipeline_value) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Won Revenue</span>
+          <span class="neo-stat-value" style="color:var(--crm-primary)">{{ fmtCurrency(data.overview?.won_revenue) }}</span>
+        </div>
+        <div class="neo-stat">
+          <span class="neo-stat-label">Avg Customer Score</span>
+          <span class="neo-stat-value">{{ data.overview?.avg_customer_score }}</span>
+        </div>
+      </div>
+
+      <!-- Affiliate performance table -->
+      @if (data.affiliates?.length) {
+        <div class="neo-card" style="padding:0;overflow:hidden;margin-bottom:1.5rem;">
+          <div style="padding:1.1rem 1.5rem;border-bottom:1px solid rgba(16,42,67,0.07);font-size:0.78rem;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;color:var(--crm-text-secondary);">
+            Affiliate Performance
+          </div>
+          <div class="neo-table-wrap" style="box-shadow:none;border-radius:0;">
+            <table class="neo-table">
+              <thead>
+                <tr>
+                  <th>Affiliate</th><th>Email</th><th>Customers</th>
+                  <th>Opps</th><th>Won</th><th>Pipeline</th><th>Avg Score</th><th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (a of data.affiliates; track a.id) {
+                  <tr>
+                    <td style="font-weight:600">{{ a.name }}</td>
+                    <td style="color:var(--crm-text-secondary);font-size:0.8rem">{{ a.email }}</td>
+                    <td>{{ fmt(a.customers) }}</td>
+                    <td>{{ fmt(a.total_opps) }}</td>
+                    <td>{{ fmt(a.won) }}</td>
+                    <td style="font-weight:700;color:var(--crm-primary)">{{ fmtCurrency(a.pipeline) }}</td>
+                    <td>{{ a.avg_score }}</td>
+                    <td>
+                      <span [class]="a.is_active ? 'neo-badge neo-badge-active' : 'neo-badge neo-badge-danger'">
+                        {{ a.is_active ? 'Active' : 'Inactive' }}
+                      </span>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+      }
+
+      <!-- Quick links for manager -->
+      <div style="display:flex;gap:12px;flex-wrap:wrap;margin-top:4px;">
+        <a routerLink="/affiliate/management" class="neo-btn neo-btn-primary" style="text-decoration:none;">Manage Affiliates</a>
+        <a routerLink="/affiliate/customers" class="neo-btn" style="text-decoration:none;">All Customers</a>
+        <a routerLink="/affiliate/opportunities" class="neo-btn" style="text-decoration:none;">All Opportunities</a>
+        <a routerLink="/affiliate/conflicts" class="neo-btn" style="text-decoration:none;">Attribution Conflicts</a>
+        <a routerLink="/affiliate/audit-log" class="neo-btn" style="text-decoration:none;">Audit Log</a>
+      </div>
+    }
+
+  }
+</div>

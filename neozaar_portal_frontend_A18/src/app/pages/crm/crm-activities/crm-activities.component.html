@@ -1,0 +1,104 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Activities</h1>
+      <p class="crm-subtitle">Track all interactions and engagement history</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ Log Activity</button>
+  </div>
+
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">Type</label>
+      <select class="neo-select" [(ngModel)]="filters.type" (change)="load()">
+        <option value="">All Types</option>
+        @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">Related To</label>
+      <select class="neo-select" [(ngModel)]="filters.related_type" (change)="load()">
+        <option value="">All</option>
+        @for (r of relatedTypes; track r) { <option [value]="r">{{ r }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Filter</button>
+  </div>
+
+  <!-- Activity Timeline -->
+  @if (loading) {
+    <div class="neo-card" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">Loading activities...</div>
+  }
+
+  @if (!loading && activities.length) {
+    <div class="timeline">
+      @for (a of activities; track a.id) {
+        <div class="timeline-item">
+          <div class="timeline-card">
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:1rem;flex-wrap:wrap">
+              <div style="display:flex;align-items:center;gap:0.75rem;flex:1">
+                <span style="width:2.2rem;height:2.2rem;border-radius:50%;background:#F4F1ED;box-shadow:3px 3px 6px rgba(16,42,67,0.12),-3px -3px 6px rgba(255,255,255,0.9);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:0.8rem;color:#102A43;flex-shrink:0">{{ typeIcon(a.type) }}</span>
+                <div>
+                  <div class="timeline-title">{{ a.subject || a.type }}</div>
+                  <div class="timeline-date">{{ a.activity_date ? (a.activity_date | date:'dd MMM yyyy, HH:mm') : (a.created_at | date:'dd MMM yyyy, HH:mm') }}</div>
+                </div>
+              </div>
+              <div style="display:flex;gap:0.5rem;align-items:center;flex-wrap:wrap">
+                <span class="neo-badge neo-badge-gray">{{ a.type }}</span>
+                @if (a.related_type) { <span class="neo-badge neo-badge-new">{{ a.related_type }} #{{ a.related_id }}</span> }
+                <button class="neo-btn neo-btn-danger" style="padding:0.2rem 0.5rem;font-size:0.7rem" (click)="delete(a.id)">Del</button>
+              </div>
+            </div>
+            @if (a.description) {
+              <p class="timeline-desc" style="margin-top:0.6rem">{{ a.description }}</p>
+            }
+            @if (a.outcome) {
+              <p style="color:var(--crm-primary);font-size:0.8rem;font-weight:500;margin:0.4rem 0 0">✓ Outcome: {{ a.outcome }}</p>
+            }
+            <div style="margin-top:0.5rem;font-size:0.75rem;color:var(--crm-text-secondary)">
+              By {{ a.owner_name || 'Unknown' }}{{ a.duration_minutes ? ' · ' + a.duration_minutes + ' min' : '' }}
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+  }
+
+  @if (!loading && !activities.length) {
+    <div class="neo-card" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+      No activities logged yet
+    </div>
+  }
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.75rem;color:var(--crm-text);font-size:1.25rem">Log Activity</h2>
+      <div class="crm-grid-2">
+        <div class="form-group"><label class="form-label">Type *</label>
+          <select class="neo-select" [(ngModel)]="form.type">
+            @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Subject</label><input class="neo-input" [(ngModel)]="form.subject" /></div>
+        <div class="form-group"><label class="form-label">Date & Time</label><input class="neo-input" [(ngModel)]="form.activity_date" type="datetime-local" /></div>
+        <div class="form-group"><label class="form-label">Duration (min)</label><input class="neo-input" [(ngModel)]="form.duration_minutes" type="number" /></div>
+        <div class="form-group"><label class="form-label">Related To</label>
+          <select class="neo-select" [(ngModel)]="form.related_type">
+            <option value="">None</option>
+            @for (r of relatedTypes; track r) { <option [value]="r">{{ r }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Related ID</label><input class="neo-input" [(ngModel)]="form.related_id" type="number" /></div>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><textarea class="neo-input" [(ngModel)]="form.description" rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">Outcome</label><textarea class="neo-input" [(ngModel)]="form.outcome" rows="2"></textarea></div>
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">Log Activity</button>
+      </div>
+    </div>
+  </div>
+}

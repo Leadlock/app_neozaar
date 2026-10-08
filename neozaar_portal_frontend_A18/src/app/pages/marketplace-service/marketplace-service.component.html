@@ -1,0 +1,243 @@
+<div class="max-w-7xl mx-auto p-4 md:p-8 space-y-10">
+  <h2 class="text-3xl font-bold text-gray-800 text-center">
+    ☁️ NeoZaar Cloud Services Marketplace Listing
+  </h2>
+
+  <form
+    [formGroup]="form"
+    (ngSubmit)="onSubmit()"
+    class="space-y-8"
+  >
+    <!-- CARD WRAPPER -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-primary">1️⃣ Offer Basics</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Offer Title *</span>
+            </div>
+            <input
+              formControlName="offerTitle"
+              type="text"
+              placeholder="NeoZaar Cloud Cost Optimization Accelerator"
+              class="input input-bordered w-full"
+            />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Service Type *</span>
+            </div>
+            <select formControlName="serviceType" class="select select-bordered w-full">
+              <option *ngFor="let t of serviceTypes" [value]="t">{{ t }}</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <!-- <span class="label-text font-semibold">Cloud Platform *</span> -->
+            </div>
+            <select formControlName="cloudPlatform" multiple class="select select-bordered h-32">
+              <option *ngFor="let c of cloudPlatforms" [value]="c">{{ c }}</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Service Availability *</span>
+            </div>
+            <select formControlName="serviceAvailability" multiple class="select select-bordered h-32">
+              <option *ngFor="let r of regions" [value]="r">{{ r }}</option>
+            </select>
+          </label>
+
+          <label class="form-control md:col-span-2">
+            <div class="label">
+              <span class="label-text font-semibold">Short Tagline *</span>
+            </div>
+            <input
+              formControlName="shortTagline"
+              placeholder="Optimize and govern your cloud costs…"
+              class="input input-bordered w-full"
+            />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Starting Price (USD) *</span>
+            </div>
+            <input formControlName="startingPriceUsd" placeholder="Starting at $2,950" class="input input-bordered w-full" />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Duration *</span>
+            </div>
+            <input formControlName="duration" placeholder="As per Scope" class="input input-bordered w-full" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- DESCRIPTION -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-primary">2️⃣ Description</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <label class="form-control md:col-span-2">
+            <div class="label">
+              <span class="label-text font-semibold">Overview *</span>
+            </div>
+            <textarea
+              formControlName="overview"
+              rows="3"
+              placeholder="What the service is and why it matters…"
+              class="textarea textarea-bordered"
+            ></textarea>
+          </label>
+
+          <label class="form-control md:col-span-2">
+            <div class="label">
+              <span class="label-text font-semibold">Key Outcomes / Benefits *</span>
+            </div>
+            <textarea
+              formControlName="keyOutcomes"
+              rows="3"
+              placeholder="• 30–50% cost optimization&#10;• Governance & visibility&#10;• Funding support"
+              class="textarea textarea-bordered"
+            ></textarea>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Target Audience</span>
+            </div>
+            <select formControlName="targetAudience" multiple class="select select-bordered h-32">
+              <option *ngFor="let a of targetAudiences" [value]="a">{{ a }}</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Industry Focus</span>
+            </div>
+            <select formControlName="industryFocus" multiple class="select select-bordered h-32">
+              <option *ngFor="let i of industries" [value]="i">{{ i }}</option>
+            </select>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- PRICING -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-primary">4️⃣ Pricing & Commercials</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Pricing Model *</span>
+            </div>
+            <select formControlName="pricingModel" class="select select-bordered w-full">
+              <option *ngFor="let p of pricingModels" [value]="p">{{ p }}</option>
+            </select>
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Billing Frequency *</span>
+            </div>
+            <select formControlName="billingFrequency" class="select select-bordered w-full">
+              <option *ngFor="let b of billingFrequencies" [value]="b">{{ b }}</option>
+            </select>
+          </label>
+
+          <label class="flex items-center space-x-2 mt-8">
+            <input type="checkbox" formControlName="privateOfferAvailable" class="checkbox checkbox-primary" />
+            <span class="text-sm text-gray-700 font-medium">Private Offer Available</span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- MARKETING -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-primary">5️⃣ Marketing Assets</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Banner Image (1200×675)</span>
+            </div>
+            <input formControlName="bannerImage" placeholder="/assets/banner.jpg" class="input input-bordered" />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Offer Icon (300×300)</span>
+            </div>
+            <input formControlName="offerIcon" placeholder="/assets/icon.png" class="input input-bordered" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- CONTACT -->
+    <div class="card bg-base-100 shadow-xl">
+      <div class="card-body">
+        <h3 class="card-title text-primary">6️⃣ Contact & CTA</h3>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Contact Email *</span>
+            </div>
+            <input formControlName="contactEmail" class="input input-bordered" />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">Contact Person *</span>
+            </div>
+            <input formControlName="contactPerson" class="input input-bordered" />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">CTA Text</span>
+            </div>
+            <input formControlName="ctaText"   class="input input-bordered" />
+          </label>
+
+          <label class="form-control">
+            <div class="label">
+              <span class="label-text font-semibold">CTA URL *</span>
+            </div>
+            <input formControlName="ctaUrl" class="input input-bordered" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- ACTION BUTTONS -->
+    <div class="flex justify-end gap-4 mt-6">
+      <button type="submit" class="btn btn-primary">💾 Generate JSON</button>
+      <button type="button" (click)="copyJson()" class="btn btn-outline btn-secondary">
+        📋 Copy JSON
+      </button>
+    </div>
+  </form>
+
+  <!-- JSON PREVIEW -->
+  <div class="card bg-base-100 shadow-md">
+    <div class="card-body">
+      <h3 class="card-title text-secondary">📦 Listing Payload (Preview)</h3>
+      <pre class="bg-gray-100 rounded-lg p-4 text-xs overflow-x-auto">{{ payload | json }}</pre>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,2 @@
+require("dotenv").config();const fs=require("fs"),path=require("path"),pool=require("../config/database");
+(async()=>{const c=await pool.connect();try{await c.query(fs.readFileSync(path.join(__dirname,"047_marketing_automation.sql"),"utf8"));console.log("Applied 047_marketing_automation.sql");}catch(e){console.error("Phase 3 migration failed:",e.message);process.exitCode=1;}finally{c.release();await pool.end();}})();

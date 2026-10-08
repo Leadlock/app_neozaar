@@ -1,0 +1,101 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Users</h1>
+      <p class="crm-subtitle">Manage all NeoZaar users and their CRM access</p>
+    </div>
+  </div>
+
+  <!-- Stats Row -->
+  <div class="crm-grid-4" style="margin-bottom:1.5rem">
+    <div class="neo-stat">
+      <span class="neo-stat-label">Total Users</span>
+      <span class="neo-stat-value">{{ filteredUsers.length }}</span>
+    </div>
+    <div class="neo-stat">
+      <span class="neo-stat-label">Active</span>
+      <span class="neo-stat-value">{{ activeCount }}</span>
+    </div>
+    <div class="neo-stat">
+      <span class="neo-stat-label">Admins</span>
+      <span class="neo-stat-value">{{ adminCount }}</span>
+    </div>
+    <div class="neo-stat">
+      <span class="neo-stat-label">Partners</span>
+      <span class="neo-stat-value">{{ partnerCount }}</span>
+    </div>
+  </div>
+
+  <!-- Filters -->
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:200px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="searchQuery" placeholder="Search by name or email..." (input)="applyFilter()" />
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">Role</label>
+      <select class="neo-select" [(ngModel)]="filterRole" (change)="applyFilter()">
+        <option value="">All Roles</option>
+        @for (r of roles; track r) { <option [value]="r">{{ formatRole(r) }}</option> }
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:120px">
+      <label class="form-label">Status</label>
+      <select class="neo-select" [(ngModel)]="filterStatus" (change)="applyFilter()">
+        <option value="">All</option>
+        <option value="active">Active</option>
+        <option value="inactive">Inactive</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="neo-card" style="text-align:center;padding:3rem;color:var(--crm-text-secondary)">Loading users...</div>
+  }
+
+  <!-- User List -->
+  @if (!loading) {
+    <div style="display:flex;flex-direction:column;gap:0.6rem">
+      @for (user of filteredUsers; track user.id) {
+        <div class="neo-card" style="padding:0.85rem 1.25rem;display:flex;align-items:center;gap:1rem">
+          <!-- Avatar -->
+          <div style="width:38px;height:38px;border-radius:50%;background:var(--crm-primary);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700;font-size:0.8rem;flex-shrink:0">
+            {{ getInitials(user.name) }}
+          </div>
+
+          <!-- Name & Email -->
+          <div style="flex:1;min-width:0">
+            <h4 style="font-weight:600;color:var(--crm-text);font-size:0.85rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ user.name }}</h4>
+            <p style="font-size:0.72rem;color:var(--crm-text-secondary);margin:0.1rem 0 0">{{ user.email }}</p>
+          </div>
+
+          <!-- Role Badge -->
+          <span class="neo-badge neo-badge-new" style="flex-shrink:0">{{ formatRole(user.role_type) }}</span>
+
+          <!-- Status -->
+          <span class="neo-badge" [class.neo-badge-active]="user.is_active" [class.neo-badge-gray]="!user.is_active" style="flex-shrink:0">
+            {{ user.is_active ? 'Active' : 'Inactive' }}
+          </span>
+
+          <!-- Role Dropdown -->
+          <select class="neo-select" style="width:140px;padding:0.35rem 1.8rem 0.35rem 0.6rem;font-size:0.72rem;flex-shrink:0"
+            [ngModel]="user.role_type" (ngModelChange)="changeRole(user, $event)">
+            @for (r of roles; track r) { <option [value]="r">{{ formatRole(r) }}</option> }
+          </select>
+
+          <!-- Permissions Button -->
+          <button class="neo-btn neo-btn-primary" style="padding:0.35rem 0.7rem;font-size:0.7rem;flex-shrink:0" routerLink="/crm/permissions" [queryParams]="{user_id: user.id}">
+            Permissions
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (!filteredUsers.length) {
+      <div class="neo-card" style="text-align:center;padding:3rem;color:var(--crm-text-secondary)">
+        No users match your filters
+      </div>
+    }
+  }
+</div>

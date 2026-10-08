@@ -1,0 +1,64 @@
+<!-- Trigger — same icon/placement as the button it replaces -->
+@if(alreadyPushed){
+  <button (click)="openModal()" class="p-2 rounded-lg text-gray-400 hover:bg-green-50 hover:text-green-600 transition-colors" title="Pushed to Zoho — open share options"><i class="ri-mail-check-line"></i></button>
+} @else {
+  <button (click)="openModal()" class="p-2 rounded-lg text-gray-400 hover:bg-indigo-50 hover:text-indigo-600 transition-colors" title="Push to Zoho / Send as email"><i class="ri-mail-send-line"></i></button>
+}
+
+@if(open){
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+    <div class="bg-white rounded-xl w-full max-w-md flex flex-col overflow-hidden text-left">
+
+      <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+        <h2 class="text-lg font-bold text-gray-800">{{ mode === 'email' ? 'Send as email' : 'Share this listing' }}</h2>
+        <button (click)="close()" [disabled]="busy" class="text-gray-400 hover:text-gray-600 disabled:opacity-40"><i class="ri-close-line text-xl"></i></button>
+      </div>
+
+      @if(mode === 'choice') {
+        <div class="px-5 py-5 space-y-3">
+          <p class="text-sm text-gray-500 truncate">{{ item?.name }}</p>
+          @if(alreadyPushed){
+            <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              Already pushed to Zoho{{ item?.zoho_campaign_pushed_at ? ' on ' + (item.zoho_campaign_pushed_at | date:'mediumDate') : '' }}. Pushing again creates a new draft.
+            </p>
+          }
+          <button (click)="chooseEmail()" [disabled]="busy"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-gray-800 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-40">
+            <i class="ri-mail-line text-lg text-orange-600"></i> Send as Email
+          </button>
+          <button (click)="pushZoho()" [disabled]="busy"
+            class="w-full flex items-center gap-3 px-4 py-3 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40">
+            <i class="ri-send-plane-line text-lg"></i>
+            {{ busy ? 'Pushing…' : (alreadyPushed ? 'Push to Zoho Campaigns again' : 'Push to Zoho Campaigns') }}
+          </button>
+        </div>
+      } @else {
+        <div class="px-5 py-4 space-y-3">
+          <p class="text-xs text-gray-500">Renders this listing and emails it straight to the addresses below — bypasses Zoho.</p>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject <span class="text-red-500">*</span></label>
+            <input [(ngModel)]="emailSubject" type="text" placeholder="Email subject line"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Recipients <span class="text-red-500">*</span></label>
+            <textarea [(ngModel)]="emailRecipients" rows="3" placeholder="one per line, or comma-separated"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400"></textarea>
+            <p class="text-[11px] text-gray-400 mt-1">Each address gets its own copy. Max 25 per send.</p>
+          </div>
+        </div>
+        <div class="flex items-center justify-between px-5 py-4 border-t border-gray-100">
+          <button (click)="backToChoice()" [disabled]="busy" class="px-3 py-2 text-sm font-medium text-gray-500 hover:bg-gray-100 rounded-lg disabled:opacity-40"><i class="ri-arrow-left-line"></i> Back</button>
+          <div class="flex gap-2">
+            <button (click)="close()" [disabled]="busy" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40">Cancel</button>
+            <button (click)="sendEmail()" [disabled]="busy || !emailSubject.trim() || !emailRecipients.trim()"
+              class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed">
+              {{ busy ? 'Sending…' : 'Send' }}
+            </button>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+}

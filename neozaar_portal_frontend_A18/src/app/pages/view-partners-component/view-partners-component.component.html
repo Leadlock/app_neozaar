@@ -1,0 +1,96 @@
+<section>
+
+  <!-- Header -->
+  <div class="flex justify-between items-end">
+    <div>
+      <h1 class="text-2xl font-semibold">Partners Users</h1>
+    </div>
+
+    <div class="flex items-center gap-3">
+      <a routerLink="create"
+         class="btn btn-sm bg-white m-1 font-semibold text-sm flex items-center gap-1">
+        <i class="ri-add-line"></i> Create <i class="ri-instance-line"></i>
+      </a>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="p-5 bg-white rounded-lg mt-5 border">
+
+    <div class="overflow-x-auto">
+      <table class="table table-auto w-full">
+        <thead>
+          <tr class="uppercase">
+            <th>Sr no</th>
+            <th>Name</th>
+            <th>Designation</th>
+            <th>Mobile</th>
+            <th>primary cloud alignment</th>
+        
+          </tr>
+        </thead>
+
+        <tbody>
+      <tbody>
+  @for (i of partnerlist; track $index) {
+    <tr>
+      <td> {{ ($index + 1) + (currentPage - 1)  }}</td>
+      <td class="flex gap-2">
+        <div class="flex flex-col">
+          <span>{{ i?.name }}</span>
+         
+        </div>
+      </td>
+      <td> <span class="text-sm text-gray-500">{{ i?.designation  }}</span></td>
+      <td>{{ i?.mobile }}</td>
+      <td class="flex gap-2">
+        <!-- <span class="bg-red-400 inline-block  p-2"> -->
+
+          {{ i?.primary_cloud_alignment }}
+        <!-- </span> -->
+
+      </td>
+    </tr>
+  }
+</tbody>
+
+     
+      </table>
+    </div>
+
+    <!-- Pagination -->
+    <div class="flex items-center justify-center space-x-2 mt-4" *ngIf="pagination">
+      <!-- Prev -->
+      <button 
+        (click)="prevPage()" 
+        [disabled]="currentPage === 1"
+        class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        Prev
+      </button>
+
+      <!-- Page numbers -->
+      @for (i of visiblePages; track $index) {
+        <button
+          (click)="goToPage(i)"
+          [ngClass]="{
+            'bg-blue-600 text-white border-blue-600': currentPage === i,
+            'bg-white text-gray-700 border-gray-300 hover:bg-gray-100': currentPage !== i
+          }"
+          class="px-3 py-1 rounded-lg border"
+        >
+          {{ i }}
+        </button>
+      }
+
+      <!-- Next -->
+      <button 
+        (click)="nextPage()" 
+        [disabled]="currentPage === totalPages"
+        class="px-3 py-1 rounded-lg border border-gray-300 bg-white text-gray-700 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed">
+        Next
+      </button>
+    </div>
+
+  </div>
+
+</section>

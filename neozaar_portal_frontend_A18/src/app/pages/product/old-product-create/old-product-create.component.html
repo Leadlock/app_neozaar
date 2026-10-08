@@ -1,0 +1,372 @@
+<form [formGroup]="productForm" (ngSubmit)="onSubmit()" class="p-2 min-h-screen max-w-8xl mx-auto">
+  <h2 class="text-2xl font-semibold mb-6">Create Product</h2>
+
+  <!-- Basic Info Section -->
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold">Basic Info old</h3>
+    <div class="border-t  border-dashed border-gray-300 pt-4 space-y-6">
+
+      <!-- Title -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <p class="font-medium">Title</p>
+        <div>
+
+          <input type="text" formControlName="name" placeholder="Title"
+            class="input input-bordered w-full sm:w-80 md:w-96" />
+          @if (productForm.get('name')?.invalid &&
+          productForm.get('name')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Title</p>
+          }
+        </div>
+      </div>
+
+      <!-- Description -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <p class="font-medium">Description</p>
+        <div>
+          <textarea formControlName="description" class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none"
+            placeholder="Description" rows="5"></textarea>
+          @if (productForm.get('description')?.invalid &&
+          productForm.get('description')?.touched) {
+          <p class="text-xs text-red-500"> Please enter Description</p>
+          }
+        </div>
+      </div>
+
+      <!-- Cover Image -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <div class="text-sm font-medium text-gray-600">
+          <p>Cover</p>
+          <p class="text-xs text-gray-400">JPEG or PNG, Max 2MB<br />Dimension 500 X 500</p>
+        </div>
+
+        <div class="w-full sm:w-[10rem] md:w-[13rem] lg:w-[16rem]">
+          <div
+            class="aspect-square border-2 border-zinc-300 border-dashed rounded-md flex justify-center items-center relative group hover:border-zinc-500 overflow-hidden">
+            @if (customCouponImageUrl) {
+            <div>
+              <img class="w-full h-full object-cover" src="{{customCouponImageUrl}}" alt="">
+              <div
+                class="flex items-center justify-center gap-2 text-white bg-black/50 backdrop-blur-sm absolute top-0 left-0 w-full h-full opacity-0 transition duration-300 group-hover:opacity-100">
+                <i class="ri-image-edit-fill text-3xl"></i>
+                <p class="text-sm border-l border-white pl-2 font-medium">Change Product Image</p>
+              </div>
+            </div>
+            } @else {
+            <div class="flex items-center gap-2 text-zinc-400">
+              <i class="ri-image-fill text-3xl group-hover:text-zinc-500"></i>
+              <p class="text-sm border-l border-zinc-300 pl-2 font-medium">Upload Product Image</p>
+            </div>
+            }
+            <input formControlName="image_url" type="file" (change)="addCouponImage($event)"
+              class="absolute top-0 left-0 w-full h-full opacity-0 cursor-pointer" accept="image/*">
+          </div>
+
+          @if (productForm.get('image_url')?.invalid &&
+          productForm.get('image_url')?.touched) {
+          <span class="text-xs text-red-500">Upload Image</span>
+          }
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Category & Pricing -->
+  <div class="mb-8">
+    <h3 class="text-lg font-semibold">Category & Pricing</h3>
+    <div class="border-t border-dashed border-gray-300 pt-4 space-y-6">
+
+      <!-- Starting Price -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <label class="font-medium">Starting Price</label>
+        <div class="flex gap-3 items-center">
+          <input formControlName="starting_price" type="text" placeholder="₹" class="input input-bordered w-24" />
+          <!-- <span>—</span>
+          <input formControlName="priceMax" type="text" placeholder="₹" class="input input-bordered w-24" /> -->
+        </div>
+      </div>
+
+  
+      <!-- Demo Available -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium mt-1">Demo Available</label>
+        <div class="flex items-start gap-3">
+          <input (click)="checkDEMO()" type="checkbox" class="toggle toggle-warning mt-1" checked
+            formControlName='demo_available' />
+          <div>
+            <p class="font-medium">Check If Demo is available</p>
+            <p class="text-sm text-gray-500 leading-snug w-full sm:w-80 md:w-96">
+              Lorem ipsum is placeholder text used for previewing layouts and mockups.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- @if (productForm.get('demo_available')?.value) { -->
+      <!-- Demo Email -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <label class="font-medium">Demo Person Email</label>
+        <div>
+
+
+          <div class="flex items-center border rounded-md px-3 py-2 w-full sm:w-80 md:w-96 bg-white">
+            <i class="ri-mail-line text-lg mr-2"></i>
+            <input [ngClass]="{'disabled' : emailDisabled }" [disabled]="emailDisabled" formControlName="demo_person_email" type="email" placeholder="Email Here"
+              class="w-full outline-none text-sm placeholder-gray-400" />
+
+
+          </div>
+          @if (productForm.get('demo_person_email')?.invalid &&
+          productForm.get('demo_person_email')?.touched ) {
+          <span class="text-xs text-red-500">Please enter DemoEmail</span>
+          }
+        </div>
+      </div>
+
+      <!-- Launch URL -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <label class="font-medium">Launch URL</label>
+        <input formControlName="launch_url" type="text" placeholder="HTTPS://"
+          class="input input-bordered w-full sm:w-80 md:w-96" />
+      </div>
+
+      <!-- Brand -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-center">
+        <label class="font-medium">Brand</label>
+        <select formControlName="brand" class="select select-bordered w-full sm:w-80 md:w-96">
+          <option disabled selected>Brand</option>
+          <option>NeoZaar</option>
+          <option>Brand B</option>
+        </select>
+      </div>
+
+           <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium mt-1">Private Offer</label>
+        <div class="flex items-start gap-3">
+          <input type="checkbox" class="toggle toggle-warning mt-1" checked
+            formControlName='has_private_offer' />
+          <div>
+            <p class="font-medium">Check If Private Offer available</p>
+          </div>
+        </div>
+      </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium mt-1">Sales Enablement Collateral</label>
+        <div class="flex items-start gap-3">
+        <!-- <input type="file" (change)="onFileSelected($event)" /> -->
+            <input type="file" (change)="onFileSelected($event)"
+                class="file-input file-input-bordered w-full sm:w-80 md:w-96" />
+        
+        </div>
+      </div>
+
+      <!-- Category Chips -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+        <label class="font-medium">Category</label>
+        <div>
+
+
+          <!-- <div class="flex flex-wrap gap-2 max-w-xl">
+            <div *ngFor="let category of categories" (click)="toggleCategory(category)" [ngClass]="{
+        'bg-black text-white': isSelected(category),
+        'bg-gray-200 text-black': !isSelected(category)
+      }" class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+              {{ category }}
+            </div>
+          </div> -->
+          <div class="flex flex-wrap gap-2 max-w-xl">
+  <div *ngFor="let category of categories"
+       (click)="selectCategory(category)"
+       [ngClass]="{
+         'bg-black text-white': selectedCategoryControl.value === category,
+         'bg-gray-200 text-black': selectedCategoryControl.value !== category
+       }"
+       class="px-3 py-1 rounded-full text-sm cursor-pointer transition-colors duration-200">
+    {{ category }}
+  </div>
+</div>
+
+          @if ( productForm.get('category')?.errors?.['minSelected']){
+
+          <span class="text-xs text-red-500">Please enter DemoEmail</span>
+          }
+
+        </div>
+      </div>
+      <!-- } -->
+    </div>
+  </div>
+
+  @if (showBundleSection) {
+  <div class="border-t border-dashed pt-4 mt-6">
+    <h3 class="text-lg font-semibold mb-2">Add Products</h3>
+    <div
+      class="border-t border-dashed border-gray-300 pt-4 space-y-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <p class="font-medium text-sm mb-2">Selected Products</p>
+      <div>
+
+
+        <div class="space-y-2">
+          @for (product of productSelectData; track $index) {
+          <div class="bg-white rounded-lg p-3 flex items-center justify-between">
+            <div class="flex items-center gap-3">
+              <img [src]="product.image" class="w-12 h-12 rounded" />
+              <div>
+                <p class="font-semibold text-sm truncate w-52">{{ product.name }}</p>
+                <p class="text-xs text-gray-500 italic"> {{ product.description }}</p>
+              </div>
+            </div>
+            <button type="button" (click)="removeProduct(product)">
+              <i class="ri-close-line text-lg"></i>
+            </button>
+          </div>
+          }
+        </div>
+        <div class="mt-4">
+          <button type="button" (click)="openAddproductModal()"
+            class="flex items-center gap-2 px-4 py-2 rounded-full bg-black text-white text-sm">
+            <i class="ri-add-line text-lg"></i>
+            Add More Products
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+  }
+
+  <!-- Product Info -->
+  <h3 class="text-lg font-semibold mt-6">Product Info</h3>
+  <div class="border-t border-dashed border-gray-300 pt-6 space-y-6">
+    <div class="flex justify-center">
+      <div class="w-full">
+        <div formGroupName="taxonomy_data" class="mt-10 space-y-6">
+          @for (field of selectedFields; track $index) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 items-start">
+            <label class="font-medium mt-2">{{ field.name }}</label>
+            <div>
+              @switch (field.type) {
+
+              @case ('textarea') {
+              <textarea [formControlName]="field.slug"
+                class="textarea textarea-bordered w-full sm:w-80 md:w-96 resize-none" [placeholder]="field.name"
+                rows="5"></textarea>
+              }
+
+              @case ('select') {
+              <select [formControlName]="field.slug" class="select select-bordered w-full sm:w-80 md:w-96 text-sm">
+                <option *ngFor="let opt of field.options" [value]="opt">{{ opt }}</option>
+              </select>
+              }
+
+              @case ('multiselect') {
+              <div class="space-y-1">
+                <div class="flex items-center border rounded-md px-3 py-2 w-full sm:w-80 md:w-96 bg-white">
+                  <i class="ri-search-line mr-2"></i>
+                  <input type="text" placeholder="Search" [(ngModel)]="searchTexts[field.slug]"
+                    [ngModelOptions]="{ standalone: true }" class="w-full outline-none text-sm" />
+                </div>
+
+                <!-- Selected Tags -->
+                <div class="flex flex-wrap gap-2">
+                  @for (tag of productForm.get('taxonomy_data')?.get(field.slug)?.value; track $index) {
+                    <button type="button" class="btn btn-xs font-semibold bg-orange-500 text-white hover:text-black" (click)="removeTag(field.slug, tag)">{{tag}} &times;</button>
+                  }
+                </div>
+
+                <!-- Filtered Options -->
+                <div class="flex flex-wrap gap-2">
+                  @for (opt of getFilteredOptions(field.slug); track $index) {
+                  <span (click)="toggleChip(field.slug, opt)" class="cursor-pointer px-2 py-1 text-sm rounded-md"
+                    [class.bg-black]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+                    [class.text-white]="productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)"
+                    [class.bg-gray-200]="!productForm.get('taxonomy_data')?.get(field.slug)?.value.includes(opt)">
+                    {{ opt }}
+                  </span>
+                  }
+                </div>
+              </div>
+              }
+
+              @case ('file') {
+              <input type="file" (change)="onFileChange($event, field.slug)"
+                class="file-input file-input-bordered w-full sm:w-80 md:w-96" />
+              }
+
+              }
+
+              @if (productForm.get('taxonomy_data')?.get(field.slug)?.touched &&
+              productForm.get('taxonomy_data')?.get(field.slug)?.invalid) {
+              <span class="text-xs text-red-500"> {{ field.name }} is required.</span>
+              }
+
+              <div class="text-right mb-4 sm:w-80 md:w-96">
+                <button type="button" (click)="removeField(field)" class="text-red-500 text-sm">Remove</button>
+              </div>
+            </div>
+          </div>
+          }
+
+        </div>
+
+        <!-- Add Fields Dropdown -->
+        <div class="grid grid-cols-1 md:grid-cols-3">
+          <div
+            class="col-span-1 md:col-start-2 mt-6 mb-10 border border-dashed border-gray-300 p-2 rounded-xl w-full max-w-xl mx-auto flex items-center gap-1 sm:w-80 md:w-96">
+            <label class="text-xs text-gray-500 font-medium">Add Fields</label>
+            <div class="dropdown dropdown-top dropdown-center w-full">
+              <div tabindex="0" role="button" (click)="dropdownOpen = !dropdownOpen"
+                class="btn w-full justify-between bg-white border border-gray-300 rounded-full px-4 py-2 text-sm">
+                Choose Fields
+                <i class="ri-arrow-down-s-line"></i>
+              </div>
+
+              @if (dropdownOpen) {
+              <ul tabindex="0"
+                class="dropdown-content z-[1] menu p-2 shadow bg-white border border-gray-300 rounded-box w-full max-h-60 overflow-y-auto">
+                @for (field of allFields; track $index) {
+                <li>
+                  <label class="label cursor-pointer justify-start gap-2">
+                    <input type="checkbox" class="checkbox checkbox-sm" [checked]="isSelected1(field)"
+                      (change)="onCheckboxChange($event, field)" />
+                    <span class="label-text text-sm">{{ field.slug }}</span>
+                  </label>
+                </li>
+                }
+              </ul>
+              }
+            </div>
+
+            <button type="button" (click)="addSelectedFields()"
+              class="flex items-center gap-1 px-2 py-1 rounded-full text-sm font-medium border border-dashed border-gray-300 bg-black text-white">
+              <i class="ri-add-line text-sm"></i>
+              ADD
+            </button>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <div class="mt-10 text-center">
+    <button type="submit" class="btn btn-primary " 
+   >
+     @if (isreqSending) {
+          <i class="ri-loader-2-line animate-spin"></i>
+          }@else {
+            @if(updateButton){
+              <span>Update</span>
+            }@else{
+              <span>Submit</span> 
+            }
+          }</button>
+  </div>
+</form>
+
+@if (isproductSelectModalOpen) {
+<app-selectable-product-list-modal [isOpen]="isproductSelectModalOpen" type="group" [categoryData]="productSelectData"
+  (closeModalemmit)="closedModal($event)"></app-selectable-product-list-modal>
+
+}

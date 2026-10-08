@@ -1,0 +1,660 @@
+@import 'remixicon/fonts/remixicon.css';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --background: #ffffff;
+  --foreground: #171717;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    /* --background: #0a0a0a; */
+    --foreground: #ededed;
+  }
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+.scrollbar-hide::-webkit-scrollbar { display: none; }
+.scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: scale(1.05); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+.mycardimg {
+  background: url('/assests/card_background.png');
+}
+
+.swiper {
+  overflow-x: hidden !important;
+}
+
+.myshortcard .swiper,
+#kitsider .swiper {
+  height: 300px;
+}
+
+.swiper-wrapper {
+  z-index: 999 !important;
+  margin-top: 82px;
+}
+
+.myshortcard .swiper-wrapper {
+  margin-top: 10px !important;
+}
+
+.swiper-button-next {
+  right: 40px !important;
+  font-size: 10px !important;
+  padding: 10px !important;
+}
+
+.swiper-button-prev,
+.swiper-rtl .swiper-button-next {
+  left: auto !important;
+  right: 110px !important;
+  font-size: 10px !important;
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  top: 50px !important;
+  z-index: 9999 !important;
+}
+
+.swiper-button-prev:after,
+.swiper-rtl .swiper-button-next:after,
+.hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}
+
+/* Custom styles for react-phone-input-2 in dark theme */
+.dark-phone.react-tel-input {
+  position: relative !important;
+  width: 100% !important;
+}
+
+.dark-phone.react-tel-input .form-control {
+  width: 100% !important;
+  height: auto !important;
+  padding-top: 14px !important;
+  padding-bottom: 14px !important;
+  padding-left: 82px !important;
+  /* Accommodation for Phone Icon + Flag dropdown */
+  background-color: rgba(24, 24, 27, ) !important;
+  /* bg-zinc-900/50 */
+  color: #ffffff !important;
+  border: 1px solid #27272a !important;
+  /* border-zinc-800 */
+  border-radius: 0.75rem !important;
+  /* rounded-xl */
+  font-size: 1rem !important;
+  transition: all 0.2s ease-in-out !important;
+}
+
+.dark-phone.react-tel-input .form-control:focus {
+  border-color: #f97316 !important;
+  /* border-orange-500 */
+  box-shadow: 0 0 0 1px #f97316 !important;
+}
+
+/* Position flag dropdown after the Phone icon */
+.dark-phone.react-tel-input .flag-dropdown {
+  background-color: transparent !important;
+  border: none !important;
+  border-radius: 0.75rem 0 0 0.75rem !important;
+  padding-left: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  height: calc(100% - 2px) !important;
+  top: 1px !important;
+  left: 36px !important;
+  /* Shift to the right of Phone icon */
+}
+
+.dark-phone.react-tel-input .selected-flag {
+  background-color: transparent !important;
+  width: 38px !important;
+  height: 100% !important;
+  padding: 0 !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.dark-phone.react-tel-input .selected-flag:hover,
+.dark-phone.react-tel-input .selected-flag:focus {
+  background-color: transparent !important;
+}
+
+/* Country list dropdown */
+.dark-phone.react-tel-input .country-list {
+  background-color: #18181b !important;
+  /* bg-zinc-900 */
+  color: #ffffff !important;
+  border: 1px solid #27272a !important;
+  /* border-zinc-800 */
+  border-radius: 0.75rem !important;
+  margin-top: 6px !important;
+  padding: 0px 6px !important;
+  width: 320px !important;
+  max-height: 250px !important;
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.7), 0 4px 6px -2px rgba(0, 0, 0, 0.5) !important;
+  z-index: 90 !important;
+  top: 100% !important;
+  /* Position right below the flag dropdown button */
+  left: -36px !important;
+  /* Align dropdown back to the edge of the input container */
+}
+
+/* Search input container inside dropdown */
+.dark-phone.react-tel-input .country-list .search {
+  background-color: #18181b !important;
+  padding: 6px 0 !important;
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 2 !important;
+  border-bottom: 1px solid #27272a !important;
+  margin-bottom: 6px !important;
+}
+
+/* Search input box */
+.dark-phone.react-tel-input .country-list .search-box {
+  width: 95% !important;
+  margin: 0 auto !important;
+  background-color: #27272a !important;
+  /* bg-zinc-800 */
+  color: #ffffff !important;
+  border: 1px solid #3f3f46 !important;
+  /* border-zinc-700 */
+  border-radius: 0.375rem !important;
+  padding: 6px 10px !important;
+  font-size: 0.875rem !important;
+}
+
+/* Country item */
+.dark-phone.react-tel-input .country-list .country {
+  position: relative !important;
+  padding: 8px 10px 8px 46px !important; /* Make room for the absolute positioned flag on the left */
+  border-radius: 0.375rem !important;
+  transition: background-color 0.15s ease !important;
+}
+
+/* Text color for country names */
+.dark-phone.react-tel-input .country-list .country .country-name {
+  color: #ffffff !important;
+  /* White text */
+  font-size: 0.875rem !important;
+}
+
+/* Text color for dial codes */
+.dark-phone.react-tel-input .country-list .country .dial-code {
+  color: #a1a1aa !important;
+  /* gray-400 */
+  font-size: 0.875rem !important;
+}
+
+/* Highlight / Hover */
+.dark-phone.react-tel-input .country-list .country:hover,
+.dark-phone.react-tel-input .country-list .country.highlight {
+  background-color: #27272a !important;
+  /* bg-zinc-800 */
+}
+
+/* Scrollbar styles for dropdown list */
+.dark-phone.react-tel-input .country-list::-webkit-scrollbar {
+  width: 6px !important;
+}
+
+.dark-phone.react-tel-input .country-list::-webkit-scrollbar-track {
+  background: #18181b !important;
+}
+
+.dark-phone.react-tel-input .country-list::-webkit-scrollbar-thumb {
+  background: #3f3f46 !important;
+  border-radius: 3px !important;
+}
+
+.dark-phone.react-tel-input .country-list::-webkit-scrollbar-thumb:hover {
+  background: #52525b !important;
+}
+
+.country-name {
+  color: black !important;
+}
+
+.swiper-button-prev:after .hide-scrollbar {
+  -ms-overflow-style: none;
+  /* IE and Edge */
+  scrollbar-width: none;
+  /* Firefox */
+}
+
+.swiper-button-prev:after {
+  font-size: 10px !important;
+  font-family: swiper-icons !important;
+  color: #171717;
+  display: block
+}
+
+.swiper-button-prev,
+.swiper-button-next {
+  height: 27px !important;
+  width: 55px !important;
+}
+
+.swiper-button-prev,
+.swiper-rtl .swiper-button-next {
+  font-size: 10px !important;
+
+  content: '<';
+  color: black;
+  background-color: #ffffff;
+  box-shadow: 10px;
+  border-radius: 20px;
+  border: 1px solid gray
+}
+
+.swiper-button-next:after,
+.swiper-rtl .swiper-button-prev:after {
+  font-size: 10px !important;
+  padding: 7px 25px;
+  color: black;
+  background-color: #ffffff;
+  box-shadow: 10px;
+  border-radius: 20px;
+  border: 1px solid gray
+}
+
+#backgroundimagegif {
+  background: url('/WebsiteGif_Askthechamp.gif') no-repeat center center;
+  background-size: cover;
+  transition: transform 1s ease-in-out;
+}
+
+@media (min-width: 668px) and (max-width: 1924px) {
+  #backgroundimagegif {
+    background: url('/assests/Website-Gif-Ask-the-champ.gif') no-repeat center center;
+    background-size: cover;
+    transition: transform 1s ease-in-out;
+  }
+
+}
+
+
+
+
+@keyframes scroll-x {
+  0% {
+    transform: translateX(0);
+  }
+
+  100% {
+    transform: translateX(-50%);
+  }
+}
+
+.animate-scroll-x {
+  animation: scroll-x 1s linear infinite;
+}
+
+/* PWA Install Prompt Animation */
+@keyframes slide-up {
+  from {
+    transform: translateY(100%);
+    opacity: 0;
+  }
+
+  to {
+    transform: translateY(0);
+    opacity: 1;
+  }
+}
+
+.animate-slide-up {
+  animation: slide-up 0.3s ease-out;
+}
+
+/* PWA specific styles */
+@media (display-mode: standalone) {
+
+  /* Hide install prompts when in standalone mode */
+  .pwa-install-prompt {
+    display: none !important;
+  }
+
+  /* Safe area padding for notched devices */
+  body {
+    padding-top: env(safe-area-inset-top);
+    padding-bottom: env(safe-area-inset-bottom);
+    padding-left: env(safe-area-inset-left);
+    padding-right: env(safe-area-inset-right);
+  }
+}
+
+/* iOS height fix */
+@supports (-webkit-touch-callout: none) {
+  .min-h-screen {
+    min-height: -webkit-fill-available;
+  }
+}
+
+/* Add to your global CSS file */
+.scope-content ul,
+.scope-content ol,
+.approach-content ul,
+.approach-content ol {
+  list-style: disc !important;
+  padding-left: 1.5rem !important;
+  margin-top: 0.5rem !important;
+  margin-bottom: 0.5rem !important;
+}
+
+.scope-content li,
+.approach-content li {
+  margin-bottom: 0.25rem !important;
+  color: #4b5563 !important;
+}
+
+.scope-content ul ul,
+.approach-content ul ul {
+  list-style: circle !important;
+  padding-left: 1.5rem !important;
+}
+
+/* WhatsApp button: above ticker on mobile, default position on desktop */
+.whatsapp-btn {
+  bottom: 75px;
+}
+
+@media (max-width: 767px) {
+  body[data-has-bottom-nav] .whatsapp-btn {
+    /* BottomNav ~76px + ticker 52px + 8px gap */
+    bottom: 136px;
+  }
+}
+
+/* Proposal Studio floating button: stacks directly above the WhatsApp button
+   (same 50px size + 8px gap), tracking the same mobile bottom-nav offset.
+   Rest state: orange-gradient disc with an unfilled (outline) sparkle.
+   Hover: zooms slightly, fades to a black disc with the filled sparkle, and
+   an animated "electric" ring (SVG turbulence filter) traces the border. */
+.proposal-studio-btn {
+  position: fixed;
+  right: 17px;
+  bottom: 133px;
+  z-index: 9998;
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+  cursor: pointer;
+  background: linear-gradient(135deg, #fb923c, #ea580c);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+  transition: transform 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.proposal-studio-btn:hover {
+  transform: scale(1.12);
+  background: #0d0d0d;
+  box-shadow: 0 6px 22px rgba(234, 88, 12, 0.45);
+}
+
+@media (max-width: 767px) {
+  body[data-has-bottom-nav] .proposal-studio-btn {
+    bottom: 194px;
+  }
+}
+
+.proposal-studio-btn__icon {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: opacity 0.25s ease;
+}
+
+.proposal-studio-btn__icon img {
+  width: 24px;
+  height: 24px;
+  transition: transform 0.3s ease;
+}
+
+.proposal-studio-btn__icon--outline {
+  opacity: 1;
+}
+
+.proposal-studio-btn__icon--filled {
+  opacity: 0;
+}
+
+.proposal-studio-btn:hover .proposal-studio-btn__icon--outline {
+  opacity: 0;
+}
+
+.proposal-studio-btn:hover .proposal-studio-btn__icon--filled {
+  opacity: 1;
+}
+
+.proposal-studio-btn:hover .proposal-studio-btn__icon--filled img {
+  transform: scale(1.35);
+}
+
+.proposal-studio-btn__ring {
+  position: absolute;
+  inset: -8px;
+  width: 66px;
+  height: 66px;
+  pointer-events: none;
+  opacity: 0;
+  filter: drop-shadow(0 0 5px rgba(251, 146, 60, 0.85)) drop-shadow(0 0 12px rgba(234, 88, 12, 0.55));
+  transition: opacity 0.25s ease;
+}
+
+.proposal-studio-btn:hover .proposal-studio-btn__ring {
+  opacity: 1;
+}
+
+.proposal-studio-btn__tooltip {
+  position: absolute;
+  right: 68px;
+  background-color: #1a1a1a;
+  color: #fff;
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 13px;
+  white-space: nowrap;
+  border: 1px solid rgba(251, 146, 60, 0.3);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s ease;
+}
+
+.proposal-studio-btn:hover .proposal-studio-btn__tooltip {
+  opacity: 1;
+}
+
+/* ── Proposal Studio CTA — liquid-metal, cursor-tracking ───────────────────
+   Dark pill at rest. On hover a bright molten "well" of light follows the
+   pointer across the face (--ps-mx / --ps-my, set on pointermove), riding over
+   a dim base sheen, with a bright inner rim and an outer white→warm bloom.
+   Lights fast (~0.16s); cools slowly on leave (~0.75s). The well lags the
+   cursor slightly (~0.12s) for a liquid drag. */
+@property --ps-mx {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 50%;
+}
+@property --ps-my {
+  syntax: "<percentage>";
+  inherits: true;
+  initial-value: 135%;
+}
+
+.ps-liquid {
+  --ps-mx: 50%;
+  --ps-my: 135%;
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  color: #ffffff;
+  background: #0b0b0d;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+  transition: color 0.7s ease-out, border-color 0.7s ease-out,
+    box-shadow 0.75s ease-out, text-shadow 0.7s ease-out,
+    --ps-mx 0.12s ease-out, --ps-my 0.12s ease-out;
+}
+/* Active (inside the Proposal Studio experience): hold the lit state — the
+   molten well + rim + soft glow stay on, plus a subtle "you are here" ring. */
+.ps-liquid[data-active] {
+  border-color: transparent;
+  text-shadow: 0 0 10px rgba(8, 8, 12, 0.55), 0 1px 1px rgba(8, 8, 12, 0.5);
+  box-shadow:
+    0 0 3px 0 rgba(255, 255, 255, 0.28),
+    0 0 10px 1px rgba(255, 255, 255, 0.12),
+    0 0 24px 6px rgba(249, 115, 22, 0.06),
+    inset 0 0 0 1px rgba(249, 115, 22, 0.45);
+}
+.ps-liquid[data-active]::before,
+.ps-liquid[data-active]::after {
+  opacity: 1;
+}
+
+/* molten face — a dim base sheen with a hot well that tracks the cursor */
+.ps-liquid::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background-image:
+    radial-gradient(85px 62px at var(--ps-mx) var(--ps-my),
+      rgba(255, 255, 255, 0.98) 0%, rgba(255, 255, 255, 0.6) 22%,
+      rgba(255, 255, 255, 0.14) 50%, transparent 76%),
+    radial-gradient(130% 165% at 50% 125%,
+      #d7dae2 0%, #a2a5b0 28%, #63666f 52%, #33353c 76%, #191a20 100%);
+  background-repeat: no-repeat;
+  opacity: 0;
+  transition: opacity 0.75s ease-out;
+}
+/* inner rim highlight — the metal edge catching light */
+.ps-liquid::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  pointer-events: none;
+  box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.9),
+    inset 0 0 0 1px rgba(255, 255, 255, 0.35),
+    inset 0 -8px 12px -6px rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  transition: opacity 0.7s ease-out;
+}
+.ps-liquid > .ps-liquid__c {
+  position: relative;
+  z-index: 1;
+}
+
+.ps-liquid:hover,
+.ps-liquid:focus-visible {
+  border-color: transparent;
+  text-shadow: 0 0 10px rgba(8, 8, 12, 0.55), 0 1px 1px rgba(8, 8, 12, 0.5);
+  box-shadow:
+    0 0 3px 0 rgba(255, 255, 255, 0.28),
+    0 0 10px 1px rgba(255, 255, 255, 0.12),
+    0 0 24px 6px rgba(249, 115, 22, 0.06);
+  transition: color 0.16s ease-in, border-color 0.16s ease-in,
+    box-shadow 0.16s ease-in, text-shadow 0.16s ease-in,
+    --ps-mx 0.12s ease-out, --ps-my 0.12s ease-out;
+}
+.ps-liquid:hover::before,
+.ps-liquid:focus-visible::before {
+  opacity: 1;
+  transition: opacity 0.16s ease-in;
+}
+.ps-liquid:hover::after,
+.ps-liquid:focus-visible::after {
+  opacity: 1;
+  transition: opacity 0.16s ease-in;
+}
+@media (prefers-reduced-motion: reduce) {
+  .ps-liquid,
+  .ps-liquid::before,
+  .ps-liquid::after,
+  .ps-liquid:hover,
+  .ps-liquid:hover::before,
+  .ps-liquid:hover::after {
+    transition-duration: 1ms;
+  }
+}
+
+/* ==========================================================================
+   Native App (Capacitor) overrides — active only inside the mobile app.
+   Web visitors on Chrome/Safari/Edge are unaffected (no .is-native-app class).
+   ========================================================================== */
+
+/* Enable safe area handling for notches */
+.is-native-app body {
+  margin: 0 !important;
+  padding-top: env(safe-area-inset-top, 0px) !important;
+  padding-bottom: env(safe-area-inset-bottom, 0px) !important;
+}
+
+/* Fix iOS specific white bars */
+.is-ios body {
+  background-color: #000000 !important;
+}
+
+/* Compress UI for Mobile App */
+.is-native-app section.pt-20 {
+  padding-top: 10px !important;
+}
+.is-native-app div.mt-20 {
+  margin-top: 15px !important;
+}
+
+/* Hide website footer in the mobile app ONLY */
+.is-native-app footer,
+.is-native-app .relative:has(footer) {
+  display: none !important;
+}
+
+/* Prevent content from being cut off by the iOS system and bottom navigation bars. */
+.is-native-app body::after {
+  content: "";
+  display: block;
+  height: 120px !important;
+  width: 100%;
+}
+
+.is-native-app main {
+  padding-bottom: env(safe-area-inset-bottom, 20px) !important;
+  margin-bottom: 20px !important;
+}
+
+.is-native-app .fixed.bottom-0 {
+  z-index: 9999 !important;
+}

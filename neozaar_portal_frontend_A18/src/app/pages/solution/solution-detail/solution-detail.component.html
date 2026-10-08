@@ -1,0 +1,610 @@
+<section class="min-h-screen bg-slate-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-4 gap-8">
+    
+    <!-- Left Sidebar -->
+    <div class="lg:col-span-1 space-y-6">
+      <button (click)="goBack()" class="btn btn-ghost gap-2 hover:bg-white shadow-sm border border-gray-200 rounded-xl">
+        <i class="ri-arrow-left-line"></i> Back
+      </button>
+
+      <div class="sticky top-8 space-y-6">
+        <!-- Solution Logo -->
+        @if (product.product_logo) {
+          <div class="card bg-white p-4 shadow-xl shadow-slate-200/50 border border-slate-100 rounded-3xl overflow-hidden group cursor-zoom-in"
+               (click)="openLightbox(product.product_logo)">
+            <img [src]="product.product_logo" [alt]="product.name" 
+                 class="w-full h-auto aspect-square object-contain transition-transform duration-500 group-hover:scale-110">
+            <div class="mt-4 text-center">
+              <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Solution Logo</span>
+            </div>
+          </div>
+        }
+
+        <!-- Gallery - No screenshots in data, so conditionally hidden -->
+        @if (product.screenshots && product.screenshots.length > 0) {
+          <div class="card bg-white p-6 shadow-sm border border-slate-200 rounded-3xl">
+            <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+              <i class="ri-image-line text-blue-500"></i> Gallery
+            </h3>
+            <div class="grid grid-cols-2 gap-3">
+              @for (screenshot of product.screenshots; track $index) {
+                <div class="relative aspect-video rounded-xl overflow-hidden cursor-pointer group"
+                     (click)="openLightbox(screenshot)">
+                  <img [src]="screenshot" class="w-full h-full object-cover transition-transform group-hover:scale-110">
+                  <div class="absolute inset-0 bg-black/20 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <i class="ri-zoom-in-line text-white"></i>
+                  </div>
+                </div>
+              }
+            </div>
+          </div>
+        }
+
+        <!-- Quick Info Card -->
+        <div class="card bg-white p-6 shadow-sm border border-slate-200 rounded-3xl">
+          <h3 class="text-sm font-bold text-slate-800 mb-4 flex items-center gap-2">
+            <i class="ri-information-line text-blue-500"></i> Quick Info
+          </h3>
+          <div class="space-y-3">
+            <!-- @if (product.action_for) {
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-500">Provider Type</span>
+                <span class="badge badge-primary">{{product.action_for}}</span>
+              </div>
+            } -->
+            @if (product.sku_id) {
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-500">SKU ID</span>
+                <span class="font-mono text-xs">{{product.sku_id}}</span>
+              </div>
+            }
+            <!-- @if (product.id) {
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-500">Solution ID</span>
+                <span class="font-mono text-xs">#{{product.id}}</span>
+              </div>
+            } -->
+            @if (product.starting_price) {
+              <div class="flex justify-between items-center text-sm">
+                <span class="text-slate-500">Starting Price</span>
+                <span class="text-green-600 font-bold">{{product.starting_price}}</span>
+              </div>
+            }
+          </div>
+        </div>
+
+        <!-- Demo Link Card -->
+        @if (product.api_metering_endpoint) {
+          <div class="card bg-white p-4 shadow-sm border border-slate-200 rounded-2xl">
+            <a [href]="product.api_metering_endpoint" target="_blank" class="flex items-center justify-between">
+              <span class="text-sm font-semibold text-slate-700">Live Demo</span>
+              <i class="ri-external-link-line text-slate-400"></i>
+            </a>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="lg:col-span-3 space-y-6">
+      <div class="card bg-white shadow-sm border border-slate-200 rounded-3xl overflow-hidden">
+        <!-- Header -->
+         <div class="p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-4 bg-gradient-to-r from-white to-slate-50">
+          <div>
+            <div class="flex items-center gap-2 mb-1">
+              <!-- Status Badge -->
+              @if (product.status) {
+                <span class="badge" [ngClass]="{
+                  'badge-warning': product.status === 'Pending',
+                  'badge-success': product.status === 'Published',
+                  'badge-error': product.status === 'Rejected'
+                }">{{product.status}}</span>
+              }
+              <!-- Draft Status -->
+              @if (product.is_drapt) {
+                <span class="badge badge-ghost">Draft</span>
+              }
+            </div>
+            <h1 class="text-4xl font-black text-slate-900 leading-tight">{{product.name}}</h1>
+          </div>
+
+          <!-- Action Buttons -->
+          <div class="flex flex-wrap gap-2">
+         
+               <div class="flex flex-wrap gap-2">
+            @if(product.is_drapt && !product.is_approved){
+              <button class="btn btn-success text-white rounded-2xl px-6" (click)="acceptProduct(true)" *appHasRole="[role.SUPERADMIN, role.ADMIN]">Approve</button>
+              <button class="btn btn-outline btn-error rounded-2xl" (click)="openRejectModal()" *appHasRole="[role.SUPERADMIN, role.ADMIN]">Reject</button>
+            }
+            @if(product.is_approved && !product.is_publish){
+              <button class="btn btn-primary text-white rounded-2xl px-8 shadow-lg shadow-blue-200" (click)="publishProduct(true)">Publish to Marketplace</button>
+            }
+            @if(product.is_approved && product.is_publish){
+              <button class="btn btn-outline btn-error rounded-2xl" (click)="openModal()">Unpublish</button>
+            }
+          </div>
+          </div>
+        </div>
+
+        <div class="p-8 border-t border-slate-100 grid gap-10">
+          <!-- Short Description -->
+          @if (product.short_description) {
+            <section>
+              <h2 class="text-xl font-bold text-slate-800 mb-4">Overview</h2>
+              <p class="text-slate-600 text-lg leading-relaxed">{{product.short_description}}</p>
+            </section>
+          }
+
+          <!-- Long Description -->
+          @if (product.long_description) {
+            <section>
+              <h2 class="text-xl font-bold text-slate-800 mb-4">Detailed Description</h2>
+              <div class="p-6 bg-slate-50 rounded-2xl border border-slate-100 text-slate-700 leading-relaxed">
+                {{product.long_description}}
+              </div>
+            </section>
+          }
+
+          <!-- Key Features -->
+          @if (product.key_features && product.key_features !== 'undefined') {
+            <section>
+              <h2 class="text-xl font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="ri-star-line text-yellow-500"></i> Key Features
+              </h2>
+              <div class="grid md:grid-cols-2 gap-3">
+                @for (feature of parseJsonArray(product.key_features); track $index) {
+                  <div class="flex items-start gap-3 p-4 bg-white border border-slate-100 rounded-xl shadow-sm">
+                    <div class="mt-1 w-5 h-5 rounded-full bg-blue-100 flex items-center justify-center flex-shrink-0">
+                      <i class="ri-check-line text-blue-600 text-xs"></i>
+                    </div>
+                    <span class="text-slate-700">{{feature}}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Customer Challenges -->
+          @if (product.customer_challenges && product.customer_challenges.length > 0) {
+            <section class="p-6 bg-rose-50 rounded-3xl border border-rose-200">
+              <h3 class="text-lg font-bold text-rose-800 mb-4 flex items-center gap-2">
+                <i class="ri-shield-exclamation-line"></i> Customer Challenges
+              </h3>
+              <ul class="space-y-2">
+                @for (item of product.customer_challenges; track $index) {
+                  <li class="flex items-start gap-2 text-rose-700">
+                    <i class="ri-arrow-right-s-line mt-0.5 flex-shrink-0"></i>
+                    <span>{{item}}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          <!-- Business Outcomes -->
+          @if (product.primary_business_outcome && product.primary_business_outcome.length > 0) {
+            <section class="p-6 bg-emerald-50 rounded-3xl border border-emerald-200">
+              <h3 class="text-lg font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                <i class="ri-trophy-line"></i> Business Outcomes
+              </h3>
+              <ul class="space-y-2">
+                @for (item of product.primary_business_outcome; track $index) {
+                  <li class="flex items-start gap-2 text-emerald-700">
+                    <i class="ri-check-double-line mt-0.5 flex-shrink-0"></i>
+                    <span>{{item}}</span>
+                  </li>
+                }
+              </ul>
+            </section>
+          }
+
+          <!-- Use Cases / Capabilities -->
+          @if (product.use_cases && product.use_cases.length > 0) {
+            <section class="p-6 bg-indigo-50 rounded-3xl border border-indigo-100">
+              <h3 class="text-lg font-bold text-indigo-800 mb-4 flex items-center gap-2">
+                <i class="ri-lightbulb-flash-line"></i> Use Cases / Capabilities
+              </h3>
+              <div class="grid md:grid-cols-2 gap-2">
+                @for (item of product.use_cases; track $index) {
+                  <div class="flex items-start gap-2 p-3 bg-white rounded-xl border border-indigo-100">
+                    <i class="ri-focus-3-line text-indigo-500 mt-0.5 flex-shrink-0"></i>
+                    <span class="text-indigo-700 text-sm">{{item}}</span>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- extraDataForServiceSolution Sections -->
+          @if (product.extraDataForServiceSolution) {
+            <!-- Scope -->
+            @if (product.extraDataForServiceSolution.scope) {
+              <section>
+                <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                  <i class="ri-focus-3-line text-blue-600"></i> Solution Scope
+                </h3>
+                <div class="p-6 bg-white border border-slate-200 rounded-2xl text-slate-700 prose max-w-none  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6"
+                     [innerHTML]="product.extraDataForServiceSolution.scope">
+                </div>
+              </section>
+            }
+
+            <!-- Challenges Addressed -->
+            @if (product.extraDataForServiceSolution.challenges_addressed) {
+              <section class="p-6 bg-rose-50 rounded-3xl border border-rose-200">
+                <h3 class="text-lg font-bold text-rose-800 mb-4 flex items-center gap-2">
+                  <i class="ri-shield-exclamation-line"></i> Challenges We Address
+                </h3>
+                <div class="text-rose-700 prose max-w-none  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" 
+                     [innerHTML]="product.extraDataForServiceSolution.challenges_addressed">
+                </div>
+              </section>
+            }
+
+            <!-- Why Choose Neozaar -->
+            @if (product.extraDataForServiceSolution.why_choose_neozaar) {
+              <section class="p-6 bg-emerald-50 rounded-3xl border border-emerald-200">
+                <h3 class="text-lg font-bold text-emerald-800 mb-4 flex items-center gap-2">
+                  <i class="ri-star-smile-line"></i> Why Choose Neozaar
+                </h3>
+                <div class="text-emerald-700 prose max-w-none  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" 
+                     [innerHTML]="product.extraDataForServiceSolution.why_choose_neozaar">
+                </div>
+              </section>
+            }
+
+          }
+
+          <!-- Technical Prerequisites -->
+          @if (product.technical_prerequisites) {
+            <section class="p-6 bg-slate-900 rounded-3xl text-white">
+              <h3 class="text-lg font-bold mb-4 flex items-center gap-2">
+                <i class="ri-terminal-box-line text-slate-400"></i> Technical Prerequisites
+              </h3>
+              <div class="prose prose-invert max-w-none opacity-90  [&_ul]:list-disc [&_ul]:pl-6 [&_ol]:list-decimal [&_ol]:pl-6" 
+                   [innerHTML]="product.technical_prerequisites">
+              </div>
+            </section>
+          }
+
+          <!-- Metadata Grid -->
+          <div class="bg-white border border-slate-200 rounded-2xl p-6">
+            <h3 class="text-lg font-bold text-slate-800 mb-4">Solution Specifications</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              
+              <!-- Cloud Provider Support -->
+              @if (product.cloud_provider_support && product.cloud_provider_support.length > 0) {
+                <div class="p-4 bg-slate-50 rounded-xl">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Platform</span>
+                  <div class="mt-2 flex flex-wrap gap-1">
+                    @for (cps of product.cloud_provider_support; track $index) {
+                      <span class="badge badge-ghost font-bold text-blue-600">{{cps}}</span>
+                    }
+                  </div>
+                </div>
+              }
+
+              <!-- Regions Supported -->
+              @if (product.regions_supported && product.regions_supported.length > 0) {
+                <div class="p-4 bg-slate-50 rounded-xl">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Regions</span>
+                  <p class="mt-1 text-slate-900 font-medium">{{product.regions_supported.join(', ')}}</p>
+                </div>
+              }
+
+              <!-- Pricing Model -->
+              @if (product.pricing_model) {
+                <div class="p-4 bg-slate-50 rounded-xl">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Pricing Model</span>
+                  <p class="mt-1 text-slate-900 font-semibold">{{cleanString(product.pricing_model)}}</p>
+                </div>
+              }
+
+              <!-- Starting Price -->
+              @if (product.starting_price) {
+                <div class="p-4 bg-slate-50 rounded-xl">
+                  <span class="text-xs font-bold text-slate-400 uppercase tracking-widest">Starting Price</span>
+                  <p class="mt-1 text-green-600 font-black text-xl">${{product.starting_price}}</p>
+                </div>
+              }
+            </div>
+          </div>
+
+          <!-- Target Audience & Segments -->
+          <div class="grid grid-cols-1 gap-6">
+            <!-- Target Audience -->
+            @if (product.target_audience && product.target_audience.length > 0) {
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                  <i class="ri-group-line"></i> Target Audience
+                </h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (audience of product.target_audience; track $index) {
+                    <span class="px-3 py-1.5 bg-indigo-50 text-indigo-700 text-sm rounded-xl border border-indigo-200 font-medium">{{audience}}</span>
+                  }
+                </div>
+              </div>
+            }
+
+            <!-- Target Segments -->
+             @if (product.industry && product.industry.length > 0) {
+              <div class="space-y-3">
+                <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest">Industry</h4>
+                <div class="flex flex-wrap gap-2">
+                  @for (segment of product.industry; track $index) {
+                    <span class="px-3 py-1 bg-slate-100 text-slate-700 text-sm rounded-lg border border-slate-200">{{segment}}</span>
+                  }
+                </div>
+              </div>
+            }
+          </div>
+
+          <!-- Categories -->
+          @if (product.category && product.category.length > 0) {
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <i class="ri-apps-2-line"></i> Categories
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                @for (category of product.category; track $index) {
+                  <span class="px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-xl border border-purple-200 font-medium">{{category}}</span>
+                }
+              </div>
+            </div>
+          }
+          @if (product.category_subcategory && product.category_subcategory.length > 0) {
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <i class="ri-apps-2-line"></i> Subcategories
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                @for (category of product.category_subcategory; track $index) {
+                  <span class="px-3 py-1.5 bg-purple-50 text-purple-700 text-sm rounded-xl border border-purple-200 font-medium">{{category}}</span>
+                }
+              </div>
+            </div>
+          }
+
+          <!-- Linked Products grouped by brand -->
+          @if (linkedProductsByBrand.length > 0) {
+            <section>
+              <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="ri-box-3-line text-blue-500"></i> Technology Products
+              </h3>
+              <div class="space-y-4">
+                @for (group of linkedProductsByBrand; track group.brand) {
+                  <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <!-- Brand header -->
+                    <div class="flex items-center gap-3 px-4 py-3 bg-slate-50 border-b border-slate-200">
+                      <div class="w-8 h-8 rounded-lg bg-white border border-slate-200 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img *ngIf="group.logo" [src]="group.logo" [alt]="group.brand" class="w-full h-full object-contain" />
+                        <i *ngIf="!group.logo" class="ri-building-2-line text-slate-400 text-sm"></i>
+                      </div>
+                      <span class="font-semibold text-slate-700 text-sm">{{ group.brand }}</span>
+                    </div>
+                    <!-- Products under this brand -->
+                    <div class="divide-y divide-slate-100">
+                      @for (item of group.items; track item.id) {
+                        <div class="flex items-center gap-3 px-4 py-3">
+                          <img *ngIf="item.product_logo" [src]="item.product_logo" [alt]="item.name"
+                            class="w-9 h-9 rounded-lg object-contain bg-slate-50 border border-slate-100 flex-shrink-0" />
+                          <div class="flex-1 min-w-0">
+                            <p class="font-medium text-slate-800 text-sm truncate">{{ item.name }}</p>
+                            <p *ngIf="item.short_description" class="text-xs text-slate-400 truncate">{{ stripHtml(item.short_description) }}</p>
+                          </div>
+                          @if (item.category_subcategory?.length > 0) {
+                            <span class="badge badge-ghost text-xs flex-shrink-0">{{ item.category_subcategory[0] }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- Linked Services grouped by brand -->
+          @if (linkedServicesByBrand.length > 0) {
+            <section>
+              <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="ri-service-line text-orange-500"></i> Linked Services
+              </h3>
+              <div class="space-y-4">
+                @for (group of linkedServicesByBrand; track group.brand) {
+                  <div class="border border-slate-200 rounded-2xl overflow-hidden">
+                    <div class="flex items-center gap-3 px-4 py-3 bg-orange-50 border-b border-orange-100">
+                      <div class="w-8 h-8 rounded-lg bg-white border border-orange-100 flex items-center justify-center overflow-hidden flex-shrink-0">
+                        <img *ngIf="group.logo" [src]="group.logo" [alt]="group.brand" class="w-full h-full object-contain" />
+                        <i *ngIf="!group.logo" class="ri-building-2-line text-orange-400 text-sm"></i>
+                      </div>
+                      <span class="font-semibold text-orange-700 text-sm">{{ group.brand }}</span>
+                    </div>
+                    <div class="divide-y divide-slate-100">
+                      @for (item of group.items; track item.id) {
+                        <div class="flex items-center gap-3 px-4 py-3">
+                          <img *ngIf="item.product_logo" [src]="item.product_logo" [alt]="item.name"
+                            class="w-9 h-9 rounded-lg object-contain bg-slate-50 border border-slate-100 flex-shrink-0" />
+                          <div class="flex-1 min-w-0">
+                            <p class="font-medium text-slate-800 text-sm truncate">{{ item.name }}</p>
+                            <p *ngIf="item.short_description" class="text-xs text-slate-400 truncate">{{ stripHtml(item.short_description) }}</p>
+                          </div>
+                          @if (item.cta_model?.length > 0) {
+                            <span class="badge badge-ghost text-xs flex-shrink-0">{{ item.cta_model[0] }}</span>
+                          }
+                        </div>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            </section>
+          }
+
+          <!-- CTA Model -->
+          @if (product.cta_model && product.cta_model.length > 0) {
+            <div class="space-y-3">
+              <h4 class="text-xs font-bold text-slate-400 uppercase tracking-widest flex items-center gap-1">
+                <i class="ri-megaphone-line"></i> Call to Action
+              </h4>
+              <div class="flex flex-wrap gap-2">
+                @for (cta of product.cta_model; track $index) {
+                  <span class="px-3 py-1.5 bg-green-50 text-green-700 text-sm rounded-xl border border-green-200 font-medium">
+                    <i class="ri-arrow-right-circle-line mr-1"></i>{{cta}}
+                  </span>
+                }
+              </div>
+            </div>
+          }
+
+
+                   @if ((product.brochures && product.brochures.length > 0) || 
+               (product.customer_case_studies && product.customer_case_studies.length > 0)) {
+            <section class="border-t border-slate-100 pt-6">
+              <h3 class="text-lg font-bold text-slate-800 mb-4 flex items-center gap-2">
+                <i class="ri-file-copy-line"></i> Resources & Documents
+              </h3>
+              <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+                <!-- Brochures -->
+                @for (doc of product.brochures; track $index) {
+                  <a [href]="doc" target="_blank" 
+                     class="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all group">
+                    <div class="w-10 h-10 bg-red-50 rounded-lg flex items-center justify-center">
+                      <i class="ri-file-pdf-2-fill text-red-500 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-slate-800 group-hover:text-blue-600">Brochure {{$index + 1}}</p>
+                      <p class="text-xs text-slate-400">PDF Document</p>
+                    </div>
+                    <i class="ri-download-line text-slate-400 group-hover:text-blue-600"></i>
+                  </a>
+                }
+                
+                <!-- Case Studies -->
+                @for (study of product.customer_case_studies; track $index) {
+                  <a [href]="study" target="_blank" 
+                     class="flex items-center gap-3 p-4 bg-white border border-slate-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all group">
+                    <div class="w-10 h-10 bg-purple-50 rounded-lg flex items-center justify-center">
+                      <i class="ri-file-text-fill text-purple-500 text-xl"></i>
+                    </div>
+                    <div class="flex-1">
+                      <p class="text-sm font-semibold text-slate-800 group-hover:text-purple-600">Case Study {{$index + 1}}</p>
+                      <p class="text-xs text-slate-400">PDF Document</p>
+                    </div>
+                    <i class="ri-download-line text-slate-400 group-hover:text-purple-600"></i>
+                  </a>
+                }
+              </div>
+            </section>
+          }
+       @if (product.api_metering_endpoint) {
+              <div class="py-3 flex justify-between items-center">
+                <span class="text-slate-500">Meeting Link</span>
+                <a [href]="product.api_metering_endpoint" target="_blank" 
+                   class="text-xs font-mono text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors flex items-center gap-1">
+                  <i class="ri-google-meet-line"></i> Join Meeting
+                  <i class="ri-external-link-line text-xs"></i>
+                </a>
+              </div>
+            }
+
+            <!-- Demo Video -->
+            @if (product.demo_video_link) {
+              <div class="py-3 flex justify-between items-center">
+                <span class="text-slate-500">Demo Video</span>
+                <a [href]="product.demo_video_link" target="_blank" 
+                   class="text-xs text-purple-600 bg-purple-50 px-3 py-1.5 rounded-lg hover:bg-purple-100 transition-colors flex items-center gap-1">
+                  <i class="ri-video-line"></i> Watch Demo
+                  <i class="ri-external-link-line text-xs"></i>
+                </a>
+              </div>
+            }
+          <!-- Meta Information -->
+          <!-- <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200 text-xs">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
+              @if (product.created_at) {
+                <div>
+                  <span class="text-slate-400 block">Created</span>
+                  <span class="text-slate-700 font-medium">{{product.created_at | date:'mediumDate'}}</span>
+                </div>
+              }
+              @if (product.updated_at) {
+                <div>
+                  <span class="text-slate-400 block">Updated</span>
+                  <span class="text-slate-700 font-medium">{{product.updated_at | date:'mediumDate'}}</span>
+                </div>
+              }
+              @if (product.published_by) {
+                <div>
+                  <span class="text-slate-400 block">Published By</span>
+                  <span class="text-slate-700 font-medium">User #{{product.published_by}}</span>
+                </div>
+              }
+              @if (product.approved_by) {
+                <div>
+                  <span class="text-slate-400 block">Approved By</span>
+                  <span class="text-slate-700 font-medium">User #{{product.approved_by}}</span>
+                </div>
+              }
+            </div>
+          </div> -->
+        </div>
+      </div>
+            <div *appHasRole="[role.SUPERADMIN, role.ADMIN]">
+              <app-vendor-feature
+                [vendorId]="product.id" 
+                [initialStatus]="product.is_feature">
+              </app-vendor-feature>
+            </div>
+    </div>
+  </div>
+
+  <!-- Lightbox Modal -->
+  @if (selectedImage) {
+    <div class="fixed inset-0 z-[100] flex items-center justify-center p-4 md:p-12 animate-in fade-in duration-300">
+      <div class="absolute inset-0 bg-slate-900/95 backdrop-blur-md" (click)="closeLightbox()"></div>
+      <button (click)="closeLightbox()" class="absolute top-6 right-6 btn btn-circle btn-ghost text-white text-2xl z-[110]">
+        <i class="ri-close-line"></i>
+      </button>
+      <div class="relative z-[110] max-w-5xl w-full h-full flex items-center justify-center">
+        <img [src]="selectedImage" class="max-w-full max-h-full object-contain rounded-lg shadow-2xl animate-in zoom-in-95 duration-300">
+      </div>
+    </div>
+  }
+
+  <!-- Unpublish Modal -->
+  <dialog class="modal" [class.modal-open]="isModalOpen">
+    <div class="modal-box rounded-3xl shadow-2xl">
+      <h3 class="font-black text-2xl text-slate-900 mb-4">Unpublish Solution</h3>
+      <form (ngSubmit)="onSubmit()" #remarkForm="ngForm">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold text-slate-600">Why are you unpublishing this? <span class="text-red-500">*</span></span>
+          </label>
+          <textarea [(ngModel)]="remark" name="remark" required placeholder="Enter reason for unpublishing..." class="textarea textarea-bordered h-32 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+        </div>
+        <div class="modal-action">
+          <button type="submit" class="btn btn-error text-white rounded-xl px-8" [disabled]="!remarkForm.valid">Confirm Unpublish</button>
+          <button type="button" class="btn btn-ghost rounded-xl" (click)="closeModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+    <dialog class="modal" [class.modal-open]="isRejectModalOpen">
+    <div class="modal-box rounded-3xl shadow-2xl">
+      <h3 class="font-black text-2xl text-slate-900 mb-4">Reject Solution</h3>
+      <form (ngSubmit)="onRejectSubmit()" #rejectForm="ngForm">
+        <div class="form-control">
+          <label class="label">
+            <span class="label-text font-bold text-slate-600">Why are you Reject this? <span class="text-red-500">*</span></span>
+          </label>
+          <textarea [(ngModel)]="rejectRemark" name="rejectRemark" required placeholder="Reasoning..." class="textarea textarea-bordered h-32 rounded-2xl focus:ring-2 focus:ring-blue-500 transition-all"></textarea>
+        </div>
+        <div class="modal-action">
+          <button type="submit" class="btn btn-error text-white rounded-xl px-8" [disabled]="!rejectForm.valid">Confirm Reject</button>
+          <button type="button" class="btn btn-ghost rounded-xl" (click)="closeRejectModal()">Cancel</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+</section>

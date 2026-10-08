@@ -1,0 +1,357 @@
+
+> nextjs@0.1.0 sim:whatsapp
+> node scripts/whatsapp-sim.mjs
+
+(node:8360) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/smart/Desktop/Neozaar/Neozaareact/app/allapi/whatsapp/lib/botService.js is not specified and it doesn't parse as CommonJS.
+Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+To eliminate this warning, add "type": "module" to C:\Users\smart\Desktop\Neozaar\Neozaareact\package.json.
+(Use `node --trace-warnings ...` to show where the warning was created)
+═══════════ JOURNEY 0: floating-button prefill lands on the menu ═══════════
+🗂️  wa_sessions table ready
+🗂️  wa_messages / wa_contacts ready
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ button opener  "Hi Neo, can you help me find, build or buy the right thing?"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+═══════════ JOURNEY 1: main menu → Find a Solution → detail → Build ═══════════
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ first contact  "hi"
+  state: main_menu
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ open solution flow  [tap:menu_solution]
+  state: solution_ask
+  ← list: "What are you trying to achieve? Pick an area below, or type your goal " {Enterprise Security | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ pick category Enterprise Security  [tap:cat_enterprise_security]
+  state: solution_results
+  ← list: "Here's what fits:" {Endpoint Security | Security Operations | Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ pick first solution  [tap:1]
+  state: solution_detail
+  ← text: *Endpoint Security* ⏎  ⏎ Endpoint security solution ⏎  ⏎ *Relevant products:* Barracuda Test Product ⏎ *Relevant services:* Cloud Migration 
+  ← buttons: "Where next?" {Build My Requirement | Speak to an Expert | Back to Menu}
+✅ WhatsApp cta_url → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ tap Build My Requirement  [tap:act_build]
+  state: build_requirement
+  ← cta:  "I already have the starting point:
+
+Solution: Endpoint Secur" [Continue in Proposa…] https://example.test/proposal-studio?src=whatsapp-neo&solution=Endpoint+Security
+  ← buttons: "Or:" {Speak to an Expert | Back to Menu}
+
+═══════════ JOURNEY 2: Find a Product → Get Commercial Offer → submit ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ open product flow  [tap:menu_product]
+  state: product_ask
+  ← buttons: "What product are you looking for?
+
+_Examples: MongoDB, endpoint securi" {Speak to an Expert | Back to Menu}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ search 'barracuda'  "barracuda"
+  state: product_results
+  ← list: "Results for "barracuda":" {Barracuda Test Alternat… | Barracuda Test Product | Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ pick first product  [tap:6]
+  state: product_detail
+  ← text: *Barracuda Test Alternative* ⏎ Barracuda ⏎  ⏎ Test alternative ⏎  ⏎ View the product: https://example.test/product/6
+  ← buttons: "What next?" {Get Commercial Offer | Need Services | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ tap Get Commercial Offer  [tap:pd_offer]
+  state: offer_route
+  ← list: "Where would you like to transact?" {AWS Marketplace | Microsoft Marketplace | Transact with NeoZaar | Not Sure | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ route: AWS Marketplace  [tap:route_aws]
+  state: offer_intent
+  ← list: "What would you like us to help with?" {Best Commercial Offer | Standard Pricing | Already Negotiated | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ intent: Best Commercial Offer  [tap:ci_best]
+  state: offer_services
+  ← list: "Do you also need help with implementation, migration or managed servic" {Yes — Build My Requirem… | Software Only | Not Sure | Speak to an Expert}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ services: Software Only  [tap:sv_software]
+  state: offer_identity_email
+  ← text: Almost there — what's the best email for our commercial team to reach you?
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ email  "buyer@acme.com"
+  state: offer_identity_name
+  ← text: And your name and company? _(e.g. Ravi, Acme Corp — or type skip)_
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ name + company  "Ravi, Acme Corp"
+  state: offer_summary
+  ← text: *COMMERCIAL REQUEST* ⏎  ⏎ Product: Barracuda Test Alternative ⏎ Route: AWS Marketplace ⏎ Commercial Intent: Best Commercial Offer ⏎ Services
+  ← list: "Ready to send this to the NeoZaar team?" {Submit Request | Build My Requirement | Speak to an Expert | Edit}
+🔑 Bigin access token refreshed
+✅ Bigin contact created: {
+  "data": [
+    {
+      "code": "SUCCESS",
+      "details": {
+        "id": "bigin1"
+      }
+    }
+  ]
+}
+📥 Commercial request for 000_sim_user: { crm_cta: 'ok', bigin: 'ok', lead_details: 'ok' }
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ submit  [tap:sum_submit]
+  state: (cleared)
+  ← text: ✅ Your commercial request is in. The NeoZaar team will get back to you at buyer@acme.com. ⏎  ⏎ Type *menu* anytime.
+   cta-action payload: {"source":"WhatsApp Neo","name":"Ravi","email":"buyer@acme.com","phone":"000_sim_user","company":"Acme Corp","requirement":"Source: WhatsApp Neo\nIntent: Commercial Offer\nRoute: AWS Marketplace\nCommercial Intent: Best Commercial Offer\nServices: Software only\nCatalog status: verified\nProduct: Barracuda Test Alternative (Barracuda)\nContact: Ravi | Acme Corp | buyer@acme.com\nPhone: 000_sim_user","consent_status":true,"product_name":"Barracuda Test Alternative","product_id":6,"procurement_stage":"AWS Marketplace"}
+
+═══════════ JOURNEY 3: Find a Service (no scoping questions) ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ open service flow  [tap:menu_service]
+  state: service_ask
+  ← list: "What kind of help are you looking for? Pick an area below, or type wha" {Cloud | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ type 'migration'  "migration"
+  state: service_results
+  ← list: "Here's what fits:" {Cloud Migration Service | Migration Assessment | Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ pick first service  [tap:3]
+  state: service_detail
+  ← text: *Cloud Migration Service* ⏎  ⏎ Cloud migration ⏎  ⏎ More detail: https://example.test/service/3
+  ← buttons: "Where next?" {Build My Requirement | Speak to an Expert | Back to Menu}
+
+═══════════ JOURNEY 4: product not found → Ask NeoZaar to Check ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ open product flow  [tap:menu_product]
+  state: product_ask
+  ← buttons: "What product are you looking for?
+
+_Examples: MongoDB, endpoint securi" {Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ search made-up  "Nonexistent Widget 9000"
+  state: product_notfound
+  ← text: I couldn't confirm this product in our current catalogue. I can still send the request to the NeoZaar team to check availability.
+  ← buttons: "How would you like to proceed?" {Ask NeoZaar to Check | Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ Ask NeoZaar to Check  [tap:pnf_check]
+  state: offer_identity_email
+  ← text: I'll get this checked with the NeoZaar team. Just a couple of details so they can come back to you.
+  ← text: Almost there — what's the best email for our commercial team to reach you?
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ email  "check@acme.com"
+  state: offer_identity_name
+  ← text: And your name and company? _(e.g. Ravi, Acme Corp — or type skip)_
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ skip name  "skip"
+  state: offer_summary
+  ← text: *COMMERCIAL REQUEST* ⏎  ⏎ Product: Nonexistent Widget 9000 — pending verification ⏎ Route: — ⏎ Commercial Intent: — ⏎ Services: —
+  ← list: "Ready to send this to the NeoZaar team?" {Submit Request | Build My Requirement | Speak to an Expert | Edit}
+✅ Bigin contact created: {
+  "data": [
+    {
+      "code": "SUCCESS",
+      "details": {
+        "id": "bigin1"
+      }
+    }
+  ]
+}
+📥 Commercial request for 000_sim_user: { crm_cta: 'ok', bigin: 'ok', lead_details: 'ok' }
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ submit  [tap:sum_submit]
+  state: (cleared)
+  ← text: ✅ Your commercial request is in. The NeoZaar team will get back to you at check@acme.com. ⏎  ⏎ Type *menu* anytime.
+
+═══════════ JOURNEY 5: direct intent — 'I need CrowdStrike pricing through AWS' ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ nl intent  "I need CrowdStrike pricing through AWS"
+  state: offer_intent
+  ← list: "What would you like us to help with?" {Best Commercial Offer | Standard Pricing | Already Negotiated | Speak to an Expert}
+   ctx: {"route":"AWS Marketplace","cloud":"AWS","product":{"id":4,"url":"https://example.test/product/4","name":"CrowdStrike Test Product","type":"product","vendor":"CrowdStrike","catalog_status":"verified"}}
+
+═══════════ JOURNEY 6: Speak to an Expert — cold vs with context ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ cold expert (free text)  "can I talk to someone"
+  state: expert_topic
+  ← list: "What would you like help with?" {Solution Advice | Product / Licensing | Services | Commercial Offer | Something Else}
+🧑‍💼 Expert handoff for 000_sim_user — topic: Commercial Offer
+Source: WhatsApp Neo
+Intent: Speak to Expert
+Route: —
+Commercial Intent: —
+Services: —
+Catalog status: —
+Phone: 000_sim_user
+   expert CRM record: skipped: no email
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ pick topic  [tap:et_offer]
+  state: expert_done
+  ← text: A NeoZaar expert will reach out to you shortly on this number.
+  ← buttons: "Anything else?" {Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ solution first  "endpoint security"
+  state: solution_detail
+  ← text: *Endpoint Security* ⏎  ⏎ Endpoint security solution ⏎  ⏎ *Relevant products:* Barracuda Test Product ⏎ *Relevant services:* Cloud Migration 
+  ← buttons: "Where next?" {Build My Requirement | Speak to an Expert | Back to Menu}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+🧑‍💼 Expert handoff for 000_sim_user — topic: Solution Advice
+Source: WhatsApp Neo
+Intent: Speak to Expert
+Route: —
+Commercial Intent: —
+Services: —
+Catalog status: —
+Solution: Endpoint Security
+Phone: 000_sim_user
+   expert CRM record: skipped: no email
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp buttons → 000_sim_user: wamid.mock
+
+▶ then expert mid-flow (no email → no CRM record)  "please connect me with an expert"
+  state: expert_done
+  ← text: Absolutely. I'll pass along what we've already discussed so you don't have to repeat yourself.
+  ← text: A NeoZaar expert will reach out to you shortly on this number.
+  ← buttons: "Anything else?" {Back to Menu}
+   cta-action calls (expect 0, no email): 0
+
+═══════════ GUARDRAIL: unknown input re-prompts, no crash ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ garbage at menu  "asdfqwer"
+  state: main_menu
+  ← list: "Pick one of these to get started 👇" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ garbage tap  [tap:bogus_id]
+  state: main_menu
+  ← list: "Pick one of these to get started 👇" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+
+═══════════ JOURNEY 7: opt-out → silent → opt-in ═══════════
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ reset  "reset"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+✅ WhatsApp text → 000_sim_user: wamid.mock
+
+▶ stop  "stop"
+  state: main_menu
+  ← text: You won't receive further messages from Neo. Reply *START* any time to resume.
+   opted_out after 'stop': true (expect true)
+
+▶ hi (while opted out)  "hi"
+  state: main_menu
+   bot messages while opted out: 0 (expect 0)
+✅ WhatsApp text → 000_sim_user: wamid.mock
+✅ WhatsApp list → 000_sim_user: wamid.mock
+
+▶ start  "start"
+  state: main_menu
+  ← text: 👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can help you discover solutions, find products and services, build a require
+  ← list: "How can I help today?" {Find a Solution | Find a Product | Find a Service | Build My Requirement | Get a Commercial Offer | Speak to an Expert}
+   opted_out after 'start': false (expect false), bot replied: true
+
+═══════════ TRANSCRIPT LOG: wa_messages / wa_contacts ═══════════
+   wa_messages by direction: [{"direction":"in","n":44},{"direction":"out","n":66}]
+   wa_contacts row: {"profile_name":"Sim","message_count":44,"last_state":"main_menu","last_intent":"solution","opted_out":false}
+   first 6 messages:
+     in  text      Hi Neo, can you help me find, build or buy the right thing?
+     out text      👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can hel
+     out list      How can I help today? / (list: Find a Solution | Find a Product | Find
+     in  text      reset
+     out text      👋 Welcome to *NeoZaar*. I'm Neo — your technology concierge. I can hel
+     out list      How can I help today? / (list: Find a Solution | Find a Product | Find
+
+✅ simulation complete

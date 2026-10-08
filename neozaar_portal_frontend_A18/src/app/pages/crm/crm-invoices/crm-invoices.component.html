@@ -1,0 +1,178 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Invoices</h1>
+      <p class="crm-subtitle">Track payments and manage billing</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Invoice</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:1.5rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="filters.search" placeholder="Invoice number, contact…" />
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">Status</label>
+      <select class="neo-select" [(ngModel)]="filters.status">
+        <option value="">All Statuses</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Search</button>
+  </div>
+
+  <!-- Table -->
+  <div class="neo-table-wrap">
+    @if (loading) {
+      <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading invoices...</div>
+    }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead>
+          <tr>
+            <th>Invoice #</th>
+            <th>Contact / Company</th>
+            <th>Sales Order</th>
+            <th>Invoice Date</th>
+            <th>Due Date</th>
+            <th style="text-align:right">Total</th>
+            <th style="text-align:right">Amount Due</th>
+            <th>Status</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (inv of filteredInvoices; track inv.id) {
+            <tr [style.opacity]="inv.status === 'Cancelled' ? '0.55' : '1'">
+              <td style="font-weight:700;color:var(--crm-text);font-size:0.82rem">
+                {{ inv.invoice_number || ('INV-' + inv.id) }}
+              </td>
+              <td>
+                <span style="font-weight:600;color:var(--crm-text);font-size:0.82rem;display:block">
+                  {{ inv.contact_company || inv.contact_name || '—' }}
+                </span>
+                @if (inv.contact_name && inv.contact_company) {
+                  <span style="font-size:0.7rem;color:var(--crm-text-secondary)">{{ inv.contact_name }}</span>
+                }
+              </td>
+              <td style="font-size:0.78rem;color:var(--crm-text-secondary)">
+                {{ inv.sales_order_id ? ('SO-' + inv.sales_order_id) : '—' }}
+              </td>
+              <td style="font-size:0.78rem;color:var(--crm-text-secondary)">
+                {{ inv.invoice_date | date:'dd MMM yyyy' }}
+              </td>
+              <td style="font-size:0.78rem"
+                [style.color]="isOverdue(inv) ? '#dc2626' : 'var(--crm-text-secondary)'"
+                [style.font-weight]="isOverdue(inv) ? '700' : '400'">
+                {{ inv.due_date ? (inv.due_date | date:'dd MMM yyyy') : '—' }}
+                @if (isOverdue(inv)) { <span style="font-size:0.65rem"> ⚠</span> }
+              </td>
+              <td style="font-weight:700;color:var(--crm-primary);text-align:right">
+                ₹{{ getInvoiceTotal(inv).toLocaleString() }}
+              </td>
+              <td style="font-weight:700;text-align:right"
+                [style.color]="getAmountDue(inv) > 0 ? '#dc2626' : '#059669'">
+                ₹{{ getAmountDue(inv).toLocaleString() }}
+              </td>
+              <td>
+                <span class="neo-badge" [ngClass]="statusColor(inv.status)">{{ inv.status }}</span>
+              </td>
+              <td>
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  <button class="neo-btn" style="padding:0.3rem 0.7rem;font-size:0.72rem" (click)="openEdit(inv)">Edit</button>
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.7rem;font-size:0.72rem" (click)="delete(inv.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!filteredInvoices.length) {
+            <tr>
+              <td colspan="9" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+                No invoices yet. Create your first invoice.
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Create / Edit Modal -->
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()" style="max-width:700px">
+      <h2 style="font-weight:800;margin-bottom:1.5rem;color:var(--crm-text);font-size:1.2rem">
+        {{ editMode ? 'Edit Invoice' : 'New Invoice' }}
+      </h2>
+
+      <div class="crm-grid-2">
+        <div class="form-group">
+          <label class="form-label">Invoice Number</label>
+          <input class="neo-input" [(ngModel)]="form.invoice_number" placeholder="Auto-generated if blank" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="neo-select" [(ngModel)]="form.status">
+            @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Due Date</label>
+          <input class="neo-input" [(ngModel)]="form.due_date" type="date" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Amount Paid (₹)</label>
+          <input class="neo-input" [(ngModel)]="form.amount_paid" type="number" min="0" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Discount (₹)</label>
+          <input class="neo-input" [(ngModel)]="form.discount" type="number" min="0" placeholder="0" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Tax (₹)</label>
+          <input class="neo-input" [(ngModel)]="form.tax" type="number" min="0" placeholder="0" />
+        </div>
+      </div>
+
+      <!-- Line Items -->
+      <div style="margin:0.25rem 0 1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+          <label class="form-label" style="margin:0">Line Items</label>
+          <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="addItem()">+ Add Item</button>
+        </div>
+        @for (item of form.items; track $index; let i = $index) {
+          <div style="display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.5rem">
+            <div style="flex:3"><input class="neo-input" [(ngModel)]="item.description" placeholder="Description" /></div>
+            <div style="flex:1"><input class="neo-input" [(ngModel)]="item.quantity" type="number" min="1" placeholder="Qty" /></div>
+            <div style="flex:1.5"><input class="neo-input" [(ngModel)]="item.unit_price" type="number" min="0" placeholder="Price (₹)" /></div>
+            <button class="neo-btn neo-btn-danger" style="padding:0.35rem 0.6rem;font-size:0.7rem" (click)="removeItem(i)">×</button>
+          </div>
+        }
+        <div style="margin-top:0.75rem;display:flex;flex-direction:column;align-items:flex-end;gap:0.25rem;font-size:0.8rem">
+          <span style="color:var(--crm-text-secondary)">Subtotal: <strong>₹{{ subtotal.toLocaleString() }}</strong></span>
+          <span style="color:var(--crm-text-secondary)">Discount: <strong>−₹{{ (+form.discount||0).toLocaleString() }}</strong></span>
+          <span style="color:var(--crm-text-secondary)">Tax: <strong>+₹{{ (+form.tax||0).toLocaleString() }}</strong></span>
+          <span style="font-weight:800;font-size:0.9rem;color:var(--crm-text);border-top:1px solid var(--crm-border);padding-top:0.25rem;margin-top:0.15rem">
+            Total: ₹{{ total.toLocaleString() }}
+          </span>
+          <span style="color:#dc2626;font-weight:700">
+            Amount Due: ₹{{ amountDue.toLocaleString() }}
+          </span>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="neo-input" [(ngModel)]="form.notes" rows="2" placeholder="Payment terms, bank details…"></textarea>
+      </div>
+
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create Invoice' }}</button>
+      </div>
+    </div>
+  </div>
+}

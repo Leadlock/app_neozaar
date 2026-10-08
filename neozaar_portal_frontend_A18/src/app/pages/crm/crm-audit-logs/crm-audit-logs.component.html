@@ -1,0 +1,53 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Audit Logs</h1>
+      <p class="crm-subtitle">Complete record of all CRM actions and changes</p>
+    </div>
+  </div>
+
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">Entity Type</label>
+      <select class="neo-select" [(ngModel)]="filters.entity_type" (change)="load()">
+        <option value="">All</option>
+        <option value="Lead">Lead</option>
+        <option value="Account">Account</option>
+        <option value="Contact">Contact</option>
+        <option value="Opportunity">Opportunity</option>
+        <option value="Task">Task</option>
+        <option value="Activity">Activity</option>
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Filter</button>
+  </div>
+
+  <div class="neo-table-wrap">
+    @if (loading) { <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading...</div> }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead><tr><th>Action</th><th>Entity</th><th>ID</th><th>User</th><th>IP Address</th><th>Date</th></tr></thead>
+        <tbody>
+          @for (log of logs; track log.id) {
+            <tr>
+              <td><span class="neo-badge" [ngClass]="actionColor(log.action)">{{ log.action }}</span></td>
+              <td style="color:var(--crm-text-secondary)">{{ log.entity_type || '—' }}</td>
+              <td style="color:var(--crm-text-secondary)">{{ log.entity_id || '—' }}</td>
+              <td>
+                <div>
+                  <span style="font-weight:600;color:var(--crm-text)">{{ log.user_name || '—' }}</span>
+                  <br><span style="font-size:0.72rem;color:var(--crm-text-secondary)">{{ log.user_email }}</span>
+                </div>
+              </td>
+              <td style="font-size:0.8rem;color:var(--crm-text-secondary);font-family:monospace">{{ log.ip_address || '—' }}</td>
+              <td style="font-size:0.825rem;color:var(--crm-text-secondary)">{{ log.created_at | date:'dd MMM yyyy HH:mm' }}</td>
+            </tr>
+          }
+          @if (!logs.length) { <tr><td colspan="6" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+            No audit logs found
+          </td></tr> }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>

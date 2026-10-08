@@ -1,0 +1,153 @@
+TAP version 13
+# (node:45376) [MODULE_TYPELESS_PACKAGE_JSON] Warning: Module type of file:///C:/Users/smart/Desktop/Neozaar/Neozaareact/app/allapi/whatsapp/internal/conversations/%5Bphone%5D/%5Baction%5D/route.js is not specified and it doesn't parse as CommonJS.
+# Reparsing as ES module because module syntax was detected. This incurs a performance overhead.
+# To eliminate this warning, add "type": "module" to C:\\Users\\smart\\Desktop\\Neozaar\\Neozaareact\\package.json.
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# Subtest: private sender bridge rejects missing/invalid JWT and unauthorized roles
+ok 1 - private sender bridge rejects missing/invalid JWT and unauthorized roles
+  ---
+  duration_ms: 27.7602
+  type: 'test'
+  ...
+# 🗂️  wa_messages / wa_contacts ready
+# Subtest: Human Mode and frozen bot pipeline with real PostgreSQL
+    # Subtest: migration preserves existing rows and is idempotent
+    ok 1 - migration preserves existing rows and is idempotent
+      ---
+      duration_ms: 15.4909
+      type: 'test'
+      ...
+# 🗂️  wa_sessions table ready
+# ✅ WhatsApp text → 919999000001: wamid.out.1
+# ✅ WhatsApp list → 919999000001: wamid.out.2
+# ✅ WhatsApp list → 919999000001: wamid.out.3
+# ✅ WhatsApp text → 919999000001: wamid.out.4
+# ✅ WhatsApp list → 919999000001: wamid.out.5
+# ✅ WhatsApp text → 919999000001: wamid.out.6
+# ✅ WhatsApp text → 919999000001: wamid.out.7
+# ✅ WhatsApp list → 919999000001: wamid.out.8
+    # Subtest: BOT menu, reset, opt-out and opt-in still use the existing router
+    ok 2 - BOT menu, reset, opt-out and opt-in still use the existing router
+      ---
+      duration_ms: 131.6943
+      type: 'test'
+      ...
+# ✅ WhatsApp text → 919999000002: wamid.out.9
+# ✅ WhatsApp list → 919999000002: wamid.out.10
+    # Subtest: new contacts default BOT and historical outbound metadata stays null
+    ok 3 - new contacts default BOT and historical outbound metadata stays null
+      ---
+      duration_ms: 14.5447
+      type: 'test'
+      ...
+    # Subtest: takeover is persistent and does not send a customer message
+    ok 4 - takeover is persistent and does not send a customer message
+      ---
+      duration_ms: 5.7705
+      type: 'test'
+      ...
+    # Subtest: HUMAN inbound logs once, stays unread, skips menus, LLM and CRM even after session expiry
+    ok 5 - HUMAN inbound logs once, stays unread, skips menus, LLM and CRM even after session expiry
+      ---
+      duration_ms: 36.9068
+      type: 'test'
+      ...
+    # Subtest: HUMAN stop blocks agent send and START restores permission without a bot reply
+    ok 6 - HUMAN stop blocks agent send and START restores permission without a bot reply
+      ---
+      duration_ms: 13.4026
+      type: 'test'
+      ...
+# ✅ WhatsApp text → 919999000001: wamid.out.11
+    # Subtest: agent message uses existing sender and agent-labelled transcript
+    ok 7 - agent message uses existing sender and agent-labelled transcript
+      ---
+      duration_ms: 11.9527
+      type: 'test'
+      ...
+    # Subtest: read watermark does not clear a newer unseen inbound
+    ok 8 - read watermark does not clear a newer unseen inbound
+      ---
+      duration_ms: 24.1091
+      type: 'test'
+      ...
+# ✅ WhatsApp text → 919999000001: wamid.out.12
+    # Subtest: expired window cannot be reopened by a delayed webhook timestamp
+    ok 9 - expired window cannot be reopened by a delayed webhook timestamp
+      ---
+      duration_ms: 13.6917
+      type: 'test'
+      ...
+# ✅ WhatsApp list → 919999000001: wamid.out.13
+    # Subtest: release preserves session/history and next customer message routes normally
+    ok 10 - release preserves session/history and next customer message routes normally
+      ---
+      duration_ms: 16.8104
+      type: 'test'
+      ...
+# ✅ WhatsApp list → 919999000001: wamid.out.14
+    # Subtest: concurrent duplicate callbacks process exactly once
+    ok 11 - concurrent duplicate callbacks process exactly once
+      ---
+      duration_ms: 67.8779
+      type: 'test'
+      ...
+    # Subtest: takeover waits for in-flight work on the same conversation
+    ok 12 - takeover waits for in-flight work on the same conversation
+      ---
+      duration_ms: 97.7386
+      type: 'test'
+      ...
+    # Subtest: validation rejects forged roles, identity, malformed phone/body and unknown conversations
+    ok 13 - validation rejects forged roles, identity, malformed phone/body and unknown conversations
+      ---
+      duration_ms: 2.7063
+      type: 'test'
+      ...
+    # Subtest: logging transaction never increments contact counts for duplicate wamid
+    ok 14 - logging transaction never increments contact counts for duplicate wamid
+      ---
+      duration_ms: 5.1846
+      type: 'test'
+      ...
+    # Subtest: audit contains agent/actions and never message contents
+    ok 15 - audit contains agent/actions and never message contents
+      ---
+      duration_ms: 1.5581
+      type: 'test'
+      ...
+    # Subtest: audit failure rolls back takeover and prevents sending
+    ok 16 - audit failure rolls back takeover and prevents sending
+      ---
+      duration_ms: 15.1737
+      type: 'test'
+      ...
+# ❌ WhatsApp text error: Mock Meta outage
+    # Subtest: Meta failures are agent-labelled in transcript and return a clear error
+    ok 17 - Meta failures are agent-labelled in transcript and return a clear error
+      ---
+      duration_ms: 6.4031
+      type: 'test'
+      ...
+# 🧹 wa_messages retention sweep: removed 1 row(s) older than 545d
+    # Subtest: existing log APIs preserve search, pagination, exports, deletion, CRM link and retention
+    ok 18 - existing log APIs preserve search, pagination, exports, deletion, CRM link and retention
+      ---
+      duration_ms: 35.6204
+      type: 'test'
+      ...
+    1..18
+ok 2 - Human Mode and frozen bot pipeline with real PostgreSQL
+  ---
+  duration_ms: 971.4207
+  type: 'test'
+  ...
+1..2
+# tests 20
+# suites 0
+# pass 20
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 1435.2646

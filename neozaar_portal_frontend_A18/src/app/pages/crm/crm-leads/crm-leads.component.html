@@ -1,0 +1,252 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Leads</h1>
+      <p class="crm-subtitle">Manage and qualify your sales leads</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Lead</button>
+  </div>
+
+  <!-- Filters -->
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="filters.search" placeholder="Name, email, company..." (keyup.enter)="load()" />
+    </div>
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">Status</label>
+      <select class="neo-select" [(ngModel)]="filters.status" (change)="load()">
+        <option value="">All Statuses</option>
+        @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+      </select>
+    </div>
+    <div class="form-group" style="margin:0;min-width:140px">
+      <label class="form-label">Priority</label>
+      <select class="neo-select" [(ngModel)]="filters.priority" (change)="load()">
+        <option value="">All</option>
+        @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+      </select>
+    </div>
+    <!-- Date Range Filter -->
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">📅 Date Range</label>
+      <select class="neo-select" [(ngModel)]="filters.dateRange" (change)="load()">
+        @for (d of dateRanges; track d.value) { <option [value]="d.value">{{ d.label }}</option> }
+      </select>
+    </div>
+    <!-- Owner Filter -->
+    <div class="form-group" style="margin:0;min-width:150px">
+      <label class="form-label">👤 Owner</label>
+      <select class="neo-select" [(ngModel)]="filterOwner">
+        <option value="">All Owners</option>
+        @for (o of ownerOptions; track o) { <option [value]="o">{{ o }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Search</button>
+  </div>
+  <!-- Active date/owner tracker chips -->
+  @if (filters.dateRange || filterOwner) {
+    <div style="display:flex;gap:0.5rem;flex-wrap:wrap;margin-bottom:1rem">
+      @if (filters.dateRange) {
+        <span style="background:#eff6ff;border:1px solid #bfdbfe;border-radius:20px;padding:0.2rem 0.65rem;font-size:0.72rem;color:#1d4ed8;display:flex;align-items:center;gap:0.4rem">
+          📅 @for (d of dateRanges; track d.value) { @if (d.value === filters.dateRange) { {{ d.label }} } }
+          <span style="cursor:pointer;opacity:0.6" (click)="filters.dateRange='';load()">✕</span>
+        </span>
+      }
+      @if (filterOwner) {
+        <span style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:20px;padding:0.2rem 0.65rem;font-size:0.72rem;color:#15803d;display:flex;align-items:center;gap:0.4rem">
+          👤 {{ filterOwner }}
+          <span style="cursor:pointer;opacity:0.6" (click)="filterOwner=''">✕</span>
+        </span>
+      }
+      <span style="font-size:0.72rem;color:var(--crm-text-secondary);align-self:center">
+        Showing {{ filteredLeads.length }} lead{{ filteredLeads.length !== 1 ? 's' : '' }}
+      </span>
+    </div>
+  }
+
+  <!-- Table -->
+  <div class="neo-table-wrap">
+    @if (loading) {
+      <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">
+        <div class="skeleton" style="height:20px;width:120px;margin:0 auto 0.5rem"></div>
+        <span style="font-size:0.85rem">Loading leads...</span>
+      </div>
+    }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead>
+          <tr>
+            <th>Name</th><th>Company</th><th>Email</th><th>Status</th>
+            <th>Priority</th><th>Lead Score</th><th>Owner</th><th>Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (lead of filteredLeads; track lead.id) {
+            <tr>
+              <td style="font-weight:600;color:var(--crm-text)">{{ lead.name }}</td>
+              <td style="color:var(--crm-text-secondary)">{{ lead.company || '—' }}</td>
+              <td style="color:var(--crm-text-secondary);font-size:0.825rem">{{ lead.email }}</td>
+              <td>
+                <span class="neo-badge"
+                  [class.neo-badge-new]="lead.status==='New'"
+                  [class.neo-badge-active]="lead.status==='Qualified'||lead.status==='Converted'"
+                  [class.neo-badge-warning]="lead.status==='Contacted'||lead.status==='Nurturing'"
+                  [class.neo-badge-danger]="lead.status==='Disqualified'">
+                  {{ lead.status }}
+                </span>
+              </td>
+              <td>
+                <span class="neo-badge"
+                  [class.neo-badge-danger]="lead.priority==='Urgent'"
+                  [class.neo-badge-warning]="lead.priority==='High'"
+                  [class.neo-badge-new]="lead.priority==='Medium'"
+                  [class.neo-badge-gray]="lead.priority==='Low'">
+                  {{ lead.priority }}
+                </span>
+              </td>
+              <td>
+                <div style="display:flex;align-items:center;gap:0.5rem;min-width:90px">
+                  <div class="neo-progress-ring">
+                    <svg width="40" height="40" viewBox="0 0 40 40">
+                      <circle class="ring-bg" cx="20" cy="20" r="16"/>
+                      <circle class="ring-fill" cx="20" cy="20" r="16"
+                        [attr.stroke-dasharray]="100.5"
+                        [attr.stroke-dashoffset]="100.5 - (lead.score / 100) * 100.5"/>
+                    </svg>
+                    <span class="ring-value">{{ lead.score }}</span>
+                  </div>
+                  <div>
+                    <span style="font-size:0.68rem;color:var(--crm-text-secondary);font-weight:500;display:block">{{ scoreLabel(lead.score) }}</span>
+                    <span style="font-size:0.6rem;color:var(--crm-primary);font-weight:500">→ {{ nextStepSuggestion(lead) }}</span>
+                  </div>
+                </div>
+              </td>
+              <td style="color:var(--crm-text-secondary)">{{ lead.owner_name || '—' }}</td>
+              <td>
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  @if (!isSeller) {
+                    <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="openEdit(lead)">Edit</button>
+                  }
+                  @if (isAffiliate && lead.status !== 'Converted') {
+                    <button class="neo-btn neo-btn-success" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="transferToSeller(lead.id)">→ Seller</button>
+                  }
+                  @if (canManage && lead.status !== 'Converted') {
+                    <button class="neo-btn neo-btn-success" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="convert(lead.id)">Convert</button>
+                    <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="delete(lead.id)">Del</button>
+                  }
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!filteredLeads.length) {
+            <tr><td colspan="8" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+              No leads found
+            </td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  <!-- Pagination -->
+  @if (pages > 1) {
+    <div class="pagination">
+      <button class="neo-btn" (click)="prevPage()" [disabled]="page===1">← Prev</button>
+      <span class="pagination-info">Page {{ page }} of {{ pages }}</span>
+      <button class="neo-btn" (click)="nextPage()" [disabled]="page===pages">Next →</button>
+    </div>
+  }
+</div>
+
+<!-- Modal -->
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.75rem;color:var(--crm-text);font-size:1.25rem">{{ editMode ? 'Edit Lead' : 'New Lead' }}</h2>
+      <div class="crm-grid-2">
+        <div class="form-group">
+          <label class="form-label">Name *</label>
+          <input class="neo-input" [(ngModel)]="form.name" placeholder="Full name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Email</label>
+          <input class="neo-input" [(ngModel)]="form.email" type="email" placeholder="email&#64;company.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Phone</label>
+          <input class="neo-input" [(ngModel)]="form.phone" placeholder="+1 234 567 8900" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">WhatsApp</label>
+          <input class="neo-input" [(ngModel)]="form.whatsapp" placeholder="+1 234 567 8900" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Company</label>
+          <input class="neo-input" [(ngModel)]="form.company" placeholder="Company name" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Designation</label>
+          <input class="neo-input" [(ngModel)]="form.designation" placeholder="CTO, VP Engineering..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Country</label>
+          <input class="neo-input" [(ngModel)]="form.country" placeholder="Country" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Industry</label>
+          <input class="neo-input" [(ngModel)]="form.industry" placeholder="Industry" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Source</label>
+          <input class="neo-input" [(ngModel)]="form.lead_source" placeholder="Website, Referral..." />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Cloud Preference</label>
+          <select class="neo-select" [(ngModel)]="form.cloud_preference">
+            <option value="">Select</option>
+            @for (c of clouds; track c) { <option [value]="c">{{ c }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Status</label>
+          <select class="neo-select" [(ngModel)]="form.status">
+            @for (s of statuses; track s) { <option [value]="s">{{ s }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Priority</label>
+          <select class="neo-select" [(ngModel)]="form.priority">
+            @for (p of priorities; track p) { <option [value]="p">{{ p }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Lead Stage</label>
+          <select class="neo-select" [(ngModel)]="form.lead_stage">
+            @for (st of leadStages; track st) { <option [value]="st">{{ st }}</option> }
+          </select>
+        </div>
+        <div class="form-group">
+          <label class="form-label">Score (0–100)</label>
+          <input class="neo-input" [(ngModel)]="form.score" type="number" min="0" max="100" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Budget</label>
+          <input class="neo-input" [(ngModel)]="form.budget" placeholder="₹10k–₹50k" />
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Requirement</label>
+        <textarea class="neo-input" [(ngModel)]="form.requirement" rows="3" placeholder="Describe the requirement..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Notes</label>
+        <textarea class="neo-input" [(ngModel)]="form.notes" rows="2" placeholder="Internal notes..."></textarea>
+      </div>
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create' }}</button>
+      </div>
+    </div>
+  </div>
+}

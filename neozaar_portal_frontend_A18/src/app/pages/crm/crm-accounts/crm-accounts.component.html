@@ -1,0 +1,96 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Accounts</h1>
+      <p class="crm-subtitle">Manage company accounts and partnerships</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Account</button>
+  </div>
+
+  <div class="neo-card-sm" style="display:flex;gap:1.25rem;flex-wrap:wrap;margin-bottom:2rem;align-items:flex-end">
+    <div class="form-group" style="margin:0;flex:1;min-width:180px">
+      <label class="form-label">Search</label>
+      <input class="neo-input" [(ngModel)]="filters.search" placeholder="Account name..." (keyup.enter)="load()" />
+    </div>
+    <div class="form-group" style="margin:0;min-width:160px">
+      <label class="form-label">Type</label>
+      <select class="neo-select" [(ngModel)]="filters.type" (change)="load()">
+        <option value="">All Types</option>
+        @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+      </select>
+    </div>
+    <button class="neo-btn" (click)="load()">Search</button>
+  </div>
+
+  <div class="neo-table-wrap">
+    @if (loading) { <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading...</div> }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead><tr><th>Name</th><th>Type</th><th>Industry</th><th>Country</th><th>Cloud</th><th>Owner</th><th>Actions</th></tr></thead>
+        <tbody>
+          @for (a of accounts; track a.id) {
+            <tr>
+              <td style="font-weight:600;color:var(--crm-text)">{{ a.name }}</td>
+              <td><span class="neo-badge neo-badge-orange">{{ a.type || '—' }}</span></td>
+              <td style="color:var(--crm-text-secondary)">{{ a.industry || '—' }}</td>
+              <td style="color:var(--crm-text-secondary)">{{ a.country || '—' }}</td>
+              <td><span class="neo-badge neo-badge-gray">{{ a.cloud_preference || '—' }}</span></td>
+              <td style="color:var(--crm-text-secondary)">{{ a.owner_name || '—' }}</td>
+              <td>
+                <div style="display:flex;gap:0.4rem">
+                  <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="openEdit(a)">Edit</button>
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="delete(a.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!accounts.length) { <tr><td colspan="7" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">
+            No accounts found
+          </td></tr> }
+        </tbody>
+      </table>
+    }
+  </div>
+
+  @if (pages > 1) {
+    <div class="pagination">
+      <button class="neo-btn" (click)="prevPage()" [disabled]="page===1">← Prev</button>
+      <span class="pagination-info">Page {{ page }} of {{ pages }}</span>
+      <button class="neo-btn" (click)="nextPage()" [disabled]="page===pages">Next →</button>
+    </div>
+  }
+</div>
+
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.75rem;color:var(--crm-text);font-size:1.25rem">{{ editMode ? 'Edit Account' : 'New Account' }}</h2>
+      <div class="crm-grid-2">
+        <div class="form-group"><label class="form-label">Name *</label><input class="neo-input" [(ngModel)]="form.name" /></div>
+        <div class="form-group"><label class="form-label">Type</label>
+          <select class="neo-select" [(ngModel)]="form.type">
+            <option value="">Select</option>
+            @for (t of types; track t) { <option [value]="t">{{ t }}</option> }
+          </select>
+        </div>
+        <div class="form-group"><label class="form-label">Industry</label><input class="neo-input" [(ngModel)]="form.industry" /></div>
+        <div class="form-group"><label class="form-label">Country</label><input class="neo-input" [(ngModel)]="form.country" /></div>
+        <div class="form-group"><label class="form-label">Website</label><input class="neo-input" [(ngModel)]="form.website" /></div>
+        <div class="form-group"><label class="form-label">Phone</label><input class="neo-input" [(ngModel)]="form.phone" /></div>
+        <div class="form-group"><label class="form-label">Email</label><input class="neo-input" [(ngModel)]="form.email" type="email" /></div>
+        <div class="form-group"><label class="form-label">Cloud Preference</label>
+          <select class="neo-select" [(ngModel)]="form.cloud_preference">
+            <option value="">Select</option>
+            <option value="AWS">AWS</option><option value="Azure">Azure</option><option value="Both">Both</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-group"><label class="form-label">Address</label><textarea class="neo-input" [(ngModel)]="form.address" rows="2"></textarea></div>
+      <div class="form-group"><label class="form-label">Notes</label><textarea class="neo-input" [(ngModel)]="form.notes" rows="2"></textarea></div>
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create' }}</button>
+      </div>
+    </div>
+  </div>
+}

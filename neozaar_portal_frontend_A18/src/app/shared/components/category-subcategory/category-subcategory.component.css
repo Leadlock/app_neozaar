@@ -1,0 +1,50 @@
+/* Add any custom styles here if needed */
+.animate-in {
+  animation-duration: 0.2s;
+  animation-fill-mode: both;
+}
+
+.slide-in-from-left-2 {
+  animation-name: slideInFromLeft;
+}
+
+.slide-in-from-right-3 {
+  animation-name: slideInFromRight;
+}
+
+.zoom-in-95 {
+  animation-name: zoomIn;
+}
+
+@keyframes slideInFromLeft {
+  from {
+    transform: translateX(-0.5rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes slideInFromRight {
+  from {
+    transform: translateX(0.75rem);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+@keyframes zoomIn {
+  from {
+    transform: scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}

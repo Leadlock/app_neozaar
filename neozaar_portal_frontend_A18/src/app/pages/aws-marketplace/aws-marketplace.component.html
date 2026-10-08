@@ -1,0 +1,125 @@
+<section class="min-h-screen bg-slate-50 p-4 md:p-8">
+  <div class="max-w-7xl mx-auto space-y-6">
+
+    <!-- Header -->
+    <div class="flex flex-col md:flex-row md:items-center justify-between gap-4">
+      <div>
+        <h1 class="text-3xl font-black text-slate-900">AWS Marketplace</h1>
+        <p class="text-slate-500 text-sm mt-1">Manage NeoZaar product publishing requests to AWS Marketplace.</p>
+      </div>
+    </div>
+
+    <!-- Filter Tabs -->
+    <div class="flex flex-wrap gap-2 border-b border-slate-200 pb-2">
+      @for (tab of tabs; track tab.value) {
+        <button
+          type="button"
+          (click)="setTab(tab.value)"
+          [class]="'px-4 py-1.5 rounded-full text-sm font-medium transition-all ' +
+            (activeStatus === tab.value
+              ? 'bg-amber-600 text-white shadow'
+              : 'bg-white text-slate-600 border border-slate-200 hover:border-amber-300 hover:text-amber-700')"
+        >
+          {{ tab.label }}
+        </button>
+      }
+    </div>
+
+    <!-- Search + Summary -->
+    <div class="flex flex-col sm:flex-row gap-3 items-start sm:items-center">
+      <div class="relative flex-1 max-w-sm">
+        <i class="ri-search-line absolute left-3 top-1/2 -translate-y-1/2 text-slate-400"></i>
+        <input
+          type="text"
+          [(ngModel)]="searchStr"
+          (ngModelChange)="onSearch()"
+          placeholder="Search product, ISV, ID..."
+          class="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-xl bg-white text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+        />
+      </div>
+      <span class="text-sm text-slate-500">{{ total }} request{{ total !== 1 ? 's' : '' }}</span>
+    </div>
+
+    <!-- Table -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      @if (isFetching) {
+        <div class="p-12 flex justify-center">
+          <span class="loading loading-spinner text-amber-500"></span>
+        </div>
+      } @else if (requests.length === 0) {
+        <div class="p-12 text-center text-slate-400">
+          <i class="ri-cloud-off-line text-4xl mb-3 block"></i>
+          <p>No requests found.</p>
+        </div>
+      } @else {
+        <div class="overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-50 text-slate-500 text-xs uppercase tracking-wider">
+              <tr>
+                <th class="px-4 py-3 text-left">ID</th>
+                <th class="px-4 py-3 text-left">Product</th>
+                <th class="px-4 py-3 text-left">ISV / Vendor</th>
+                <th class="px-4 py-3 text-left">Requested By</th>
+                <th class="px-4 py-3 text-left">Date</th>
+                <th class="px-4 py-3 text-left">Status</th>
+                <th class="px-4 py-3 text-left">Change Set ID</th>
+                <th class="px-4 py-3 text-left">Action</th>
+              </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-100">
+              @for (r of requests; track trackById($index, r)) {
+                <tr class="hover:bg-slate-50 transition-colors">
+                  <td class="px-4 py-3 font-mono text-slate-500">#{{ r.id }}</td>
+                  <td class="px-4 py-3">
+                    <div class="flex items-center gap-2">
+                      @if (r.product_logo) {
+                        <img [src]="r.product_logo" [alt]="r.product_name" class="w-7 h-7 rounded object-contain border border-slate-100">
+                      }
+                      <div>
+                        <div class="font-semibold text-slate-800">{{ r.product_name || '—' }}</div>
+                        <div class="text-xs text-slate-400">ID: {{ r.product_id }}</div>
+                      </div>
+                    </div>
+                  </td>
+                  <td class="px-4 py-3 text-slate-700">{{ r.isv_name || '—' }}</td>
+                  <td class="px-4 py-3 text-slate-600">{{ r.requested_by_name || '—' }}</td>
+                  <td class="px-4 py-3 text-slate-500 whitespace-nowrap">{{ r.created_at | date:'mediumDate' }}</td>
+                  <td class="px-4 py-3">
+                    <span [class]="'px-2 py-1 rounded-full text-xs font-semibold ' + statusClass(r.status)">
+                      {{ r.status | titlecase }}
+                    </span>
+                  </td>
+                  <td class="px-4 py-3 font-mono text-xs text-slate-400">{{ r.aws_change_set_id || '—' }}</td>
+                  <td class="px-4 py-3">
+                    <a
+                      [routerLink]="['/aws-marketplace/review', r.id]"
+                      class="btn btn-sm btn-outline rounded-xl border-amber-300 text-amber-700 hover:bg-amber-50"
+                    >
+                      Review
+                    </a>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Pagination -->
+        @if (totalPages > 1) {
+          <div class="flex items-center justify-between px-4 py-3 border-t border-slate-100">
+            <span class="text-sm text-slate-500">Page {{ currentPage }} of {{ totalPages }}</span>
+            <div class="flex gap-2">
+              <button (click)="prevPage()" [disabled]="currentPage === 1" class="btn btn-sm btn-ghost rounded-xl">
+                <i class="ri-arrow-left-line"></i> Prev
+              </button>
+              <button (click)="nextPage()" [disabled]="currentPage === totalPages" class="btn btn-sm btn-ghost rounded-xl">
+                Next <i class="ri-arrow-right-line"></i>
+              </button>
+            </div>
+          </div>
+        }
+      }
+    </div>
+
+  </div>
+</section>

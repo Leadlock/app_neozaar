@@ -1,0 +1,112 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Campaigns</h1>
+      <p class="text-sm text-gray-500 mt-1">Compose one email out of several products, services, or solutions, then push it to Zoho Campaigns as a draft.</p>
+    </div>
+    <a [routerLink]="['create']" class="flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 transition-colors">
+      <i class="ri-add-line"></i> New Campaign
+    </a>
+  </div>
+
+  <div class="bg-white border border-gray-100 rounded-xl overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full text-sm">
+        <thead>
+          <tr class="border-b border-gray-100 text-left text-xs font-semibold text-gray-500 uppercase tracking-wide">
+            <th class="px-5 py-3.5">Title</th>
+            <th class="px-5 py-3.5">Status</th>
+            <th class="px-5 py-3.5">Listings</th>
+            <th class="px-5 py-3.5">Created</th>
+            <th class="px-5 py-3.5 text-right">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if(isLoading){
+            <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">Loading…</td></tr>
+          } @else if(!campaigns.length){
+            <tr><td colspan="5" class="px-5 py-8 text-center text-gray-400">No campaigns yet — click "New Campaign" to compose one.</td></tr>
+          } @else {
+            @for(c of campaigns; track c.id){
+              <tr class="border-b border-gray-50 hover:bg-gray-50/60 transition-colors">
+                <td class="px-5 py-3.5">
+                  <p class="font-medium text-gray-800">{{ c.title }}</p>
+                  @if(c.description){
+                    <p class="text-xs text-gray-400 mt-0.5 truncate max-w-xs">{{ c.description }}</p>
+                  }
+                  @if(linkStatsFor(c); as stats){
+                    <p class="text-[11px] text-gray-400 mt-1 flex items-center gap-2.5" title="Total across every public link made for this campaign">
+                      <span class="flex items-center gap-1"><i class="ri-eye-line"></i>{{ stats.views }} view{{ stats.views === 1 ? '' : 's' }}</span>
+                      <span class="flex items-center gap-1"><i class="ri-cursor-line"></i>{{ stats.ctaClicks }} click{{ stats.ctaClicks === 1 ? '' : 's' }}</span>
+                    </p>
+                  }
+                </td>
+                <td class="px-5 py-3.5">
+                  <span class="px-2.5 py-1 text-xs font-semibold rounded-full"
+                    [ngClass]="c.status === 'pushed' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'">
+                    {{ c.status === 'pushed' ? 'Pushed' : 'Draft' }}
+                  </span>
+                </td>
+                <td class="px-5 py-3.5 text-gray-600">{{ c.blocks.length }}</td>
+                <td class="px-5 py-3.5 text-gray-500">{{ c.created_at ? (c.created_at | date:'MMM d, y') : '—' }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center justify-end gap-1.5">
+                    <a [routerLink]="['edit', c.id]" class="p-2 rounded-lg bg-amber-50 text-amber-600 hover:bg-amber-100 transition-colors" title="Edit"><i class="ri-pencil-line"></i></a>
+                    <button (click)="pushCampaign(c)" class="p-2 rounded-lg transition-colors"
+                      [ngClass]="c.status === 'pushed' ? 'bg-green-50 text-green-600 hover:bg-green-100' : 'bg-indigo-50 text-indigo-600 hover:bg-indigo-100'"
+                      [title]="c.status === 'pushed' ? 'Already pushed — click to push again' : 'Push to Zoho'">
+                      <i class="ri-mail-send-line"></i>
+                    </button>
+                    @if (c.id) {
+                      <app-public-link-panel [targetType]="'campaign'" [targetId]="c.id" [targetTitle]="c.title"></app-public-link-panel>
+                    }
+                    <button (click)="deleteCampaign(c)" class="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 transition-colors" title="Delete"><i class="ri-delete-bin-line"></i></button>
+                  </div>
+                </td>
+              </tr>
+            }
+          }
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- "For which list?" push modal — mandatory answer, stored on the campaign and
+       emailed to tech-support for tracking. -->
+  @if(pushTarget){
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-md flex flex-col overflow-hidden">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-800">Push to Zoho</h2>
+          <button (click)="closePushModal()" [disabled]="isPushing" class="text-gray-400 hover:text-gray-600 disabled:opacity-40"><i class="ri-close-line text-xl"></i></button>
+        </div>
+
+        <div class="px-5 py-4 space-y-3">
+          <p class="text-sm text-gray-500">Pushing <span class="font-semibold text-gray-800">{{ pushTarget.title }}</span> to Zoho as a draft.</p>
+          @if(pushTarget.status === 'pushed'){
+            <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              Already pushed{{ pushTarget.zoho_campaign_pushed_at ? ' on ' + (pushTarget.zoho_campaign_pushed_at | date:'mediumDate') : '' }}. Sending again creates a new Zoho draft.
+            </p>
+          }
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">For which list? <span class="text-red-500">*</span></label>
+            <input [(ngModel)]="pushListLabel" type="text" placeholder="e.g. Azure Marketplace subscribers"
+              (keyup.enter)="confirmPush()"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+            <p class="text-[11px] text-gray-400 mt-1">Recorded on the campaign and emailed to tech-support for tracking.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+          <button (click)="closePushModal()" [disabled]="isPushing" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40">Cancel</button>
+          <button (click)="confirmPush()" [disabled]="isPushing || !pushListLabel.trim()"
+            class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ isPushing ? 'Sending…' : 'Send' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+</div>

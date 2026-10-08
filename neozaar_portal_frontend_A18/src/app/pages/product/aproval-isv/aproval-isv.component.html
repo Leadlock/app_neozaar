@@ -1,0 +1,288 @@
+<section class="p-6 bg-slate-50 min-h-screen">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900">ISV Verification & Approval</h1>
+      <p class="text-sm text-gray-500 mt-0.5">Review and approve the ISV registration details</p>
+    </div>
+    <a routerLink="/isv" class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium bg-white border border-gray-200 rounded-lg text-gray-600 hover:bg-gray-50 transition-colors" style="text-decoration:none">
+      ← Back to ISV List
+    </a>
+  </div>
+
+  <form *ngIf="isvForm" [formGroup]="isvForm" (ngSubmit)="onSubmit()">
+
+    <!-- Basic Information -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Basic Information</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Full Name *</label>
+          <input formControlName="name" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="Full name"
+            (keypress)="allowOnlyLettersAndSpaces($event)" (paste)="validatePaste($event)" />
+          @if (isvForm.get('name')?.touched && isvForm.get('name')?.hasError('required')) {
+            <p class="text-xs text-red-500">Name is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Email *</label>
+          <input formControlName="email" type="email" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="you@company.com" />
+          @if (isvForm.get('email')?.touched && isvForm.get('email')?.hasError('required')) {
+            <p class="text-xs text-red-500">Email is required.</p>
+          }
+          @if (isvForm.get('email')?.touched && isvForm.get('email')?.hasError('email')) {
+            <p class="text-xs text-red-500">Please enter a valid email address.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Mobile Number *</label>
+          <app-custom-phone-input [phoneNumber]="isvForm.value.mobile"></app-custom-phone-input>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Designation *</label>
+          <input formControlName="designation" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="e.g., Marketing Manager"
+            (keypress)="allowOnlyLettersAndSpaces($event)" (paste)="validatePaste($event)" />
+          @if (isvForm.get('designation')?.touched && isvForm.get('designation')?.hasError('required')) {
+            <p class="text-xs text-red-500">Designation is required.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Company Information -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Company Information</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Company Name *</label>
+          <input formControlName="company_name" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="Company Pvt Ltd"
+            (keypress)="allowOnlyLettersAndSpaces($event)" (paste)="validatePaste($event)" />
+          @if (isvForm.get('company_name')?.touched && isvForm.get('company_name')?.hasError('required')) {
+            <p class="text-xs text-red-500">Company Name is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Registered Business Name *</label>
+          <input formControlName="registered_business_name" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="Registered legal name"
+            (keypress)="allowOnlyLettersAndSpaces($event)" (paste)="validatePaste($event)" />
+          @if (isvForm.get('registered_business_name')?.touched && isvForm.get('registered_business_name')?.hasError('required')) {
+            <p class="text-xs text-red-500">Registered Business Name is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Brand Name *</label>
+          <input formControlName="brand_name" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="Brand"
+            (keypress)="allowOnlyLettersAndSpaces($event)" (paste)="validatePaste($event)" />
+          @if (isvForm.get('brand_name')?.touched && isvForm.get('brand_name')?.hasError('required')) {
+            <p class="text-xs text-red-500">Brand Name is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Legal Entity Type *</label>
+          <select formControlName="Legal_entity_type" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="">Select entity type</option>
+            <option value="Private Limited">Private Limited</option>
+            <option value="Public Limited">Public Limited</option>
+            <option value="Partnership">Partnership</option>
+            <option value="LLP">LLP</option>
+            <option value="Sole Proprietorship">Sole Proprietorship</option>
+          </select>
+          @if (isvForm.get('Legal_entity_type')?.touched && isvForm.get('Legal_entity_type')?.hasError('required')) {
+            <p class="text-xs text-red-500">Legal Entity Type is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Tax ID *</label>
+          <input formControlName="tax_id" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="GST / VAT / Tax ID" />
+          @if (isvForm.get('tax_id')?.touched && isvForm.get('tax_id')?.hasError('required')) {
+            <p class="text-xs text-red-500">Tax ID is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Headquarter Country *</label>
+          <input formControlName="headquater_country" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="Country" />
+          @if (isvForm.get('headquater_country')?.touched && isvForm.get('headquater_country')?.hasError('required')) {
+            <p class="text-xs text-red-500">Headquarter Country is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Website URL *</label>
+          <input formControlName="website_url" type="url" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="https://yourcompany.com" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">LinkedIn URL</label>
+          <input formControlName="linkedin_url" type="url" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="https://linkedin.com/company/..." />
+        </div>
+      </div>
+    </div>
+
+    <!-- ISV Details -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">ISV Details</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Preferred Engagement *</label>
+          <select formControlName="preferred_engagement" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white">
+            <option value="">Select Preferred Engagement</option>
+            <option value="Reseller">Reseller</option>
+            <option value="Direct">Direct</option>
+            <option value="Accelerator">Accelerator</option>
+          </select>
+          @if (isvForm.get('preferred_engagement')?.touched && isvForm.get('preferred_engagement')?.hasError('required')) {
+            <p class="text-xs text-red-500">Preferred Engagement is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">SLA Link *</label>
+          <input formControlName="sla_link" type="url" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="https://sla.company.com" />
+          @if (isvForm.get('sla_link')?.touched && isvForm.get('sla_link')?.hasError('required')) {
+            <p class="text-xs text-red-500">SLA link is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Support Desk Email *</label>
+          <input formControlName="support_desk_email" type="email" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="support@company.com" />
+          @if (isvForm.get('support_desk_email')?.touched && isvForm.get('support_desk_email')?.hasError('required')) {
+            <p class="text-xs text-red-500">Support desk email is required.</p>
+          }
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Terms of Use URL</label>
+          <input formControlName="terms_of_use_link" type="url" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="https://company.com/terms" />
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Commission % *</label>
+          <input formControlName="commission_percentage" class="w-full border border-gray-200 rounded-lg px-3 py-2.5 text-sm outline-none focus:ring-2 focus:ring-indigo-500 bg-white" placeholder="e.g. 05, 11, 15" (input)="validateNumber($event)" />
+          @if (isvForm.get('commission_percentage')?.touched && isvForm.get('commission_percentage')?.hasError('required')) {
+            <p class="text-xs text-red-500">Commission is required.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Cloud Partnership -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Cloud Partnership</p>
+      <div class="flex flex-wrap gap-2">
+        <label *ngFor="let cloud of cloudOptions" class="cursor-pointer">
+          <input type="checkbox" [checked]="isChecked(cloud)" (change)="toggleCloudPartnership(cloud)" class="hidden" />
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+            [class.bg-indigo-600]="isChecked(cloud)" [class.text-white]="isChecked(cloud)" [class.border-indigo-600]="isChecked(cloud)"
+            [class.bg-white]="!isChecked(cloud)" [class.text-slate-600]="!isChecked(cloud)" [class.border-gray-200]="!isChecked(cloud)">
+            {{ cloud | titlecase }}
+          </span>
+        </label>
+        <button *ngIf="!showCloudInput" type="button" (click)="showCloudInput = true"
+          class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-dashed border-gray-300 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+          + Add
+        </button>
+      </div>
+      <div *ngIf="showCloudInput" class="flex items-center gap-2 mt-4">
+        <input #inputRef type="text" [value]="newCloud" (input)="newCloud = inputRef.value" placeholder="Enter cloud provider"
+          class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 w-64" />
+        <button type="button" (click)="addCustomCloud()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Add</button>
+        <button type="button" (click)="cancelAddCloud()" class="px-4 py-2 text-xs font-semibold bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Marketplace Listing -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Existing Marketplace Listing</p>
+      <div class="flex flex-wrap gap-2">
+        <label *ngFor="let market of marketplaceOptions" class="cursor-pointer">
+          <input type="checkbox" [checked]="isCheckedmarket(market)" (change)="toggleMarketplace(market)" class="hidden" />
+          <span class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold border transition-colors"
+            [class.bg-indigo-600]="isCheckedmarket(market)" [class.text-white]="isCheckedmarket(market)" [class.border-indigo-600]="isCheckedmarket(market)"
+            [class.bg-white]="!isCheckedmarket(market)" [class.text-slate-600]="!isCheckedmarket(market)" [class.border-gray-200]="!isCheckedmarket(market)">
+            {{ market }}
+          </span>
+        </label>
+        <button *ngIf="!showMarketplaceInput" type="button" (click)="showMarketplaceInput = true"
+          class="inline-flex items-center px-3 py-1.5 rounded-full text-xs font-semibold bg-white border border-dashed border-gray-300 text-gray-500 hover:border-indigo-400 hover:text-indigo-600 transition-colors">
+          + Add
+        </button>
+      </div>
+      <div *ngIf="showMarketplaceInput" class="flex items-center gap-2 mt-4">
+        <input #marketInput type="text" [value]="newMarketplace" (input)="newMarketplace = marketInput.value" placeholder="Enter marketplace name"
+          class="border border-gray-200 rounded-lg px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-indigo-500 w-64" />
+        <button type="button" (click)="addCustomMarketplace()" class="px-4 py-2 text-xs font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">Add</button>
+        <button type="button" (click)="cancelAddMarketplace()" class="px-4 py-2 text-xs font-semibold bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors">Cancel</button>
+      </div>
+    </div>
+
+    <!-- Brand Logo -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-2">Brand Logo</p>
+      <p class="text-xs text-slate-400 mb-4">JPEG or PNG, Max 200KB</p>
+      <div class="relative w-40 h-40 cursor-pointer">
+        <div class="w-full h-full rounded-xl border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden bg-slate-50 hover:border-indigo-300 transition-colors">
+          @if (customCouponImageUrl) {
+            <img [src]="customCouponImageUrl" alt="" class="w-full h-full object-cover" />
+          } @else {
+            <div class="flex flex-col items-center gap-1.5 text-slate-400">
+              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
+              <span class="text-xs font-semibold">Upload Logo</span>
+            </div>
+          }
+          <input formControlName="image_url" id="brandlogo" type="file" (change)="addCouponImage($event)"
+            class="absolute inset-0 opacity-0 cursor-pointer" accept="image/*" />
+        </div>
+        @if (customCouponImageUrl) {
+          <label for="brandlogo" class="absolute -bottom-3 -right-3 px-2.5 py-1 text-xs font-semibold bg-white border border-gray-200 rounded-lg shadow-sm cursor-pointer hover:bg-gray-50 transition-colors">Replace</label>
+        }
+      </div>
+    </div>
+
+    <!-- Documents -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-5">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Documents</p>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Business Certification</label>
+          <app-file-upload [attachmentsFormArray]="business_certification"></app-file-upload>
+        </div>
+        <div class="flex flex-col gap-1.5">
+          <label class="text-xs font-semibold text-slate-500 uppercase tracking-wider">Upload Terms of Use *</label>
+          <app-file-upload [attachmentsFormArray]="agreement_document"></app-file-upload>
+          @if (isvForm.get('agreement_document')?.touched && isvForm.get('agreement_document')?.hasError('required')) {
+            <p class="text-xs text-red-500">Agreement document is required.</p>
+          }
+        </div>
+      </div>
+    </div>
+
+    <!-- Agreements -->
+    <div class="bg-white border border-slate-200 rounded-xl shadow-sm p-6 mb-6">
+      <p class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-5">Agreements & Verification</p>
+      <div class="flex flex-col gap-4">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="data_privacy" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+          <span class="text-sm text-slate-700">ISV accepted Neozaar T&C <span class="text-red-500">*</span></span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="neozaar_tc" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+          <span class="text-sm text-slate-700">ISV accepted Privacy Policy <span class="text-red-500">*</span></span>
+        </label>
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input type="checkbox" formControlName="accept_terms" class="w-4 h-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500" />
+          <span class="text-sm text-slate-700">Verified ISV partnership agreement <span class="text-red-500">*</span></span>
+        </label>
+      </div>
+    </div>
+
+    <!-- Actions -->
+    <div class="flex justify-end gap-3">
+      <a routerLink="/isv" class="px-5 py-2.5 text-sm font-medium bg-white border border-gray-200 text-gray-600 rounded-lg hover:bg-gray-50 transition-colors" style="text-decoration:none">Cancel</a>
+      <button *ngIf="!loading" type="submit" class="px-6 py-2.5 text-sm font-semibold bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors">
+        Verify & Approve
+      </button>
+    </div>
+
+  </form>
+</section>
+
+<!-- Full Page Loader -->
+<div *ngIf="loading" class="fixed inset-0 flex items-center justify-center bg-black/30 backdrop-blur-sm z-50">
+  <img src="assets/loaderlogo-neozaar.gif" alt="" width="50" height="50" />
+</div>

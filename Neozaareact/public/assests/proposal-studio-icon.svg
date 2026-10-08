@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 34 32" fill="none">
+  <defs>
+    <linearGradient id="psGrad" x1="4" y1="3" x2="31" y2="30" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#FB923C"/>
+      <stop offset="1" stop-color="#EA580C"/>
+    </linearGradient>
+  </defs>
+  <path d="M14,3 Q14,13 24,13 Q14,13 14,23 Q14,13 4,13 Q14,13 14,3 Z" fill="url(#psGrad)"/>
+  <path d="M25,18 Q25,24 31,24 Q25,24 25,30 Q25,24 19,24 Q25,24 25,18 Z" fill="url(#psGrad)"/>
+</svg>

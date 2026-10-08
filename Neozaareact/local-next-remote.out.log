@@ -1,0 +1,21 @@
+   ▲ Next.js 15.5.12
+   - Local:        http://localhost:3002
+   - Network:      http://192.168.1.28:3002
+   - Environments: .env.local, .env.development
+
+ ✓ Starting...
+> [PWA] PWA support is disabled
+> [PWA] PWA support is disabled
+ ✓ Ready in 7.2s
+ ○ Compiling / ...
+ ✓ Compiled / in 24.2s (1083 modules)
+ ✓ Compiled in 5.1s (444 modules)
+ GET / 200 in 29468ms
+ GET / 200 in 339ms
+ ○ Compiling /_not-found ...
+ ✓ Compiled /_not-found in 1353ms (997 modules)
+ POST /api/marketing/events 404 in 2018ms
+ GET / 200 in 514ms
+ GET / 200 in 641ms
+ POST /api/marketing/events 404 in 194ms
+[?25h

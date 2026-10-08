@@ -1,0 +1,135 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">ISV List</h1>
+      <p class="crm-subtitle">Independent Software Vendors registered on the platform</p>
+    </div>
+    <div style="display:flex;align-items:center;gap:0.75rem">
+      <label class="form-label" style="margin:0">Status:</label>
+      <select class="neo-select" style="width:140px" [(ngModel)]="status" (change)="onStatusChange()">
+        <option value="all">All</option>
+        <option value="pending">Pending</option>
+        <option value="approved">Approved</option>
+      </select>
+    </div>
+  </div>
+
+  <div class="neo-table-wrap">
+    <table class="neo-table">
+      <thead>
+        <tr>
+          <th>Sr No</th>
+          <th>Name</th>
+          <th>Designation</th>
+          <th>Company Name</th>
+          <th>Status</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (i of isvlist; track $index) {
+          <tr>
+            <td style="color:var(--crm-text-secondary);font-size:0.8rem">
+              {{ ((pagination?.page ?? 1) - 1) * (pagination?.limit ?? 10) + ($index + 1) }}
+            </td>
+            <td style="font-weight:600;color:var(--crm-text)">{{ i?.name }}</td>
+            <td style="color:var(--crm-text-secondary)">{{ i?.designation || '—' }}</td>
+            <td>
+              <div style="display:flex;flex-direction:column;gap:0.2rem">
+                <div style="display:flex;align-items:center;gap:0.4rem">
+                  <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="color:var(--crm-text-secondary);opacity:0.6">
+                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/>
+                  </svg>
+                  <span style="font-size:0.65rem;font-weight:700;color:var(--crm-text-secondary);text-transform:uppercase;letter-spacing:0.06em">Company</span>
+                </div>
+                <span style="font-weight:600;color:var(--crm-text);font-size:0.875rem">{{ i?.isv_detail?.company_detail?.company_name || '—' }}</span>
+                @if (i?.isv_detail?.company_detail?.registered_business_name) {
+                  <span style="font-size:0.75rem;color:var(--crm-text-secondary)">• {{ i?.isv_detail?.company_detail?.registered_business_name }}</span>
+                }
+              </div>
+            </td>
+            <td>
+              @if (i?.isv_detail?.is_approved === true) {
+                <span class="neo-badge neo-badge-active">Approved</span>
+              } @else {
+                <span class="neo-badge" style="color:#92400e;background:#fef3c7;box-shadow:none">Pending</span>
+              }
+            </td>
+            <td>
+              <div style="display:flex;gap:0.4rem;align-items:center;flex-wrap:wrap">
+                @if (isAdmin && i?.isv_detail?.is_approved === false) {
+                  <a [routerLink]="['/crm/verify', i?.id]" class="neo-btn neo-btn-primary" style="padding:0.3rem 0.75rem;font-size:0.75rem;text-decoration:none">
+                    Verify
+                  </a>
+                }
+                @if (isAdmin) {
+                  <button (click)="deleteIsv(i.id)" class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#dc2626" title="Delete">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6"/><path d="M14 11v6"/><path d="M9 6V4h6v2"/></svg>
+                  </button>
+                }
+                @if (isAdmin && i?.isv_detail?.is_approved === true) {
+                  <button (click)="inactiveIsv(i.id)" class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem;color:#d97706" title="Deactivate">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18.36 6.64A9 9 0 1 1 5.64 17.36"/><line x1="12" y1="2" x2="12" y2="12"/></svg>
+                  </button>
+                }
+                @if (canAssignIsv && i?.isv_detail?.is_approved === true) {
+                  <button (click)="openAssignIsvModal(i)" class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem;font-weight:700;color:var(--crm-primary)">
+                    Assign
+                  </button>
+                }
+                <a [routerLink]="['/crm/display-isv', i?.id]" class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.8rem" title="View">
+                  <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </a>
+              </div>
+            </td>
+          </tr>
+        }
+        @if (!isvlist.length) {
+          <tr><td colspan="6" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">No ISV records found</td></tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  @if (pagination && visiblePages.length > 0) {
+    <div class="pagination">
+      <button class="neo-btn" (click)="prevPage()" [disabled]="!pagination.prev_page" style="padding:0.5rem 1rem;font-size:0.8rem">← Prev</button>
+      @for (pageNumber of visiblePages; track pageNumber) {
+        <button (click)="goToPage(pageNumber)" class="neo-btn"
+          [style.background]="currentPage === pageNumber ? 'var(--crm-primary)' : ''"
+          [style.color]="currentPage === pageNumber ? '#fff' : ''"
+          style="padding:0.5rem 0.85rem;font-size:0.8rem;min-width:36px">
+          {{ pageNumber }}
+        </button>
+      }
+      <button class="neo-btn" (click)="nextPage()" [disabled]="!pagination.next_page" style="padding:0.5rem 1rem;font-size:0.8rem">Next →</button>
+    </div>
+  }
+</div>
+
+<!-- Assign ISV to Seller Modal -->
+@if (showAssignIsvModal) {
+  <div class="neo-modal-backdrop" (click)="showAssignIsvModal = false">
+    <div class="neo-modal" style="max-width:480px" (click)="$event.stopPropagation()">
+      <h2 style="font-weight:800;margin-bottom:1.5rem;color:var(--crm-text);font-size:1.1rem">Assign ISV to Seller</h2>
+      <p style="font-size:0.875rem;color:var(--crm-text-secondary);margin-bottom:0.25rem">ISV: <strong style="color:var(--crm-text)">{{ assignIsvTarget?.name }}</strong></p>
+      <p style="font-size:0.8rem;color:var(--crm-text-secondary);margin-bottom:1.5rem">{{ assignIsvTarget?.isv_detail?.company_detail?.company_name }}</p>
+      <div class="form-group">
+        <label class="form-label">Select Seller *</label>
+        <select [(ngModel)]="selectedSellerForIsv" class="neo-select">
+          <option [ngValue]="null" disabled>Choose a seller...</option>
+          @for (s of sellers; track s.id) {
+            <option [ngValue]="s.id">{{ s.name }} ({{ s.email }})</option>
+          }
+        </select>
+      </div>
+      <p style="font-size:0.78rem;color:var(--crm-text-secondary);margin-bottom:1.5rem">The seller will be able to view and manage this ISV from their dashboard.</p>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button (click)="showAssignIsvModal = false" class="neo-btn" style="padding:0.6rem 1.25rem">Cancel</button>
+        <button (click)="assignIsvToSeller()" [disabled]="!selectedSellerForIsv || assignIsvLoading" class="neo-btn neo-btn-primary" style="padding:0.6rem 1.25rem">
+          {{ assignIsvLoading ? 'Assigning...' : 'Assign to Seller' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

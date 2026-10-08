@@ -1,0 +1,58 @@
+<div class="w-full max-w-lg">
+  <div
+    class="border-2 border-dashed border-slate-300 rounded-2xl p-8 flex flex-col items-center justify-center mb-6 w-full cursor-pointer hover:border-[#1e40af] hover:bg-blue-50 transition-all group"
+    (click)="fileInput.click()"
+  >
+    <input
+      type="file"
+      class="hidden"
+      (change)="onFileSelected($event)"
+      #fileInput
+      multiple
+      accept=".pdf,.doc,.docx,.txt"
+    />
+    
+    <div class="flex flex-col items-center text-slate-500 group-hover:text-[#1e40af] transition-colors">
+      <i class="ri-upload-cloud-2-line text-4xl mb-2"></i>
+      <span class="font-bold text-sm uppercase tracking-wider">Upload Documents</span>
+      <span class="text-xs text-slate-400 mt-1">PDF, DOC, TXT up to 3MB</span>
+    </div>
+  </div>
+
+  <ul class="space-y-3" *ngIf="attachmentsFormArray && attachmentsFormArray.length > 0">
+    <li
+      *ngFor="let fileControl of attachmentsFormArray.controls; let i = index"
+      class="flex items-center justify-between p-4 bg-white border border-slate-100 rounded-xl shadow-sm border-l-4"
+      [ngClass]="isNewFile(fileControl.value) ? 'border-l-[#f97316]' : 'border-l-[#1e40af]'"
+    >
+      <div class="flex items-center gap-3 overflow-hidden">
+        <i 
+          class="text-2xl shrink-0" 
+          [ngClass]="isNewFile(fileControl.value) ? 'ri-file-add-fill text-[#f97316]' : 'ri-checkbox-circle-fill text-emerald-500'"
+        ></i>
+        
+        <div class="flex flex-col overflow-hidden">
+          <a
+            [href]="getFileUrl(fileControl.value)"
+            [target]="isNewFile(fileControl.value) ? '_self' : '_blank'"
+            class="text-sm font-semibold text-slate-800 hover:text-[#1e40af] truncate transition-colors"
+            [title]="getDisplayFileName(fileControl.value)"
+          >
+            {{ getDisplayFileName(fileControl.value) }}
+          </a>
+          <span class="text-[10px] uppercase font-black tracking-widest" [ngClass]="isNewFile(fileControl.value) ? 'text-[#f97316]' : 'text-slate-400'">
+            {{ isNewFile(fileControl.value) ? 'Ready to Sync' : 'Already Attached' }}
+          </span>
+        </div>
+      </div>
+
+      <button
+        class="p-2 text-slate-300 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+        (click)="removeFile(i)"
+        type="button"
+      >
+        <i class="ri-delete-bin-6-line text-lg"></i>
+      </button>
+    </li>
+  </ul>
+</div>

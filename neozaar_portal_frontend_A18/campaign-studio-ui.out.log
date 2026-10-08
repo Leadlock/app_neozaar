@@ -1,0 +1,155 @@
+> Building...
+
+🌼   daisyUI 4.12.24
+├─ ✔︎ 2 themes added		https://daisyui.com/docs/themes
+╰─ ❤︎ Support daisyUI project:	https://opencollective.com/daisyui
+
+√ Building...
+Initial chunk files                            | Names                              |  Raw size
+main.js                                        | main                               |   1.93 MB | 
+styles.css                                     | styles                             | 285.10 kB | 
+chunk-6QJI7N2B.js                              | -                                  |  92.10 kB | 
+polyfills.js                                   | polyfills                          |  90.20 kB | 
+chunk-LJJCV7UK.js                              | -                                  |  38.76 kB | 
+chunk-XCCHWGP4.js                              | -                                  |  27.47 kB | 
+chunk-Y73EEZV6.js                              | -                                  |  22.16 kB | 
+chunk-TWXB2RDJ.js                              | -                                  |  12.37 kB | 
+chunk-FK7RL5PC.js                              | -                                  |  10.44 kB | 
+chunk-Y5I2VM36.js                              | -                                  |   7.79 kB | 
+chunk-HPZADYYE.js                              | -                                  |   3.87 kB | 
+chunk-TRSY6DET.js                              | -                                  |   3.52 kB | 
+chunk-BBP37IUE.js                              | -                                  |   2.77 kB | 
+chunk-WDMUDEB6.js                              | -                                  |   1.93 kB | 
+chunk-UAUNS5GR.js                              | -                                  |   1.18 kB | 
+chunk-ZJTOPJ4H.js                              | -                                  | 396 bytes | 
+
+                                               | Initial total                      |   2.53 MB
+
+Lazy chunk files                               | Names                              |  Raw size
+aws-marketplace-review.component-XFVS2AXP.js   | aws-marketplace-review-component   | 145.54 kB | 
+crm-opportunities.component-NGFA5ECY.js        | crm-opportunities-component        | 134.75 kB | 
+azure-marketplace-review.component-JI4NR2YZ.js | azure-marketplace-review-component | 114.90 kB | 
+crm-dashboard-2.component-347PVW4R.js          | crm-dashboard-2-component          | 113.77 kB | 
+seller-dashboard.component-O24OBFIA.js         | seller-dashboard-component         |  98.87 kB | 
+marketing-emails.component-5POVQ5DM.js         | marketing-emails-component         |  97.24 kB | 
+marketing-automations.component-YNQY6LR4.js    | marketing-automations-component    |  81.53 kB | 
+campaign-create.component-EKP4A5LL.js          | campaign-create-component          |  79.52 kB | 
+consent-audit.component-LCRANYXS.js            | consent-audit-component            |  71.25 kB | 
+campaign-studio.component-TMK27VYQ.js          | campaign-studio-component          |  56.11 kB | 
+crm-shell.component-OQ6UIS2A.js                | crm-shell-component                |  49.65 kB | 
+crm-leads.component-FJG7YWF3.js                | crm-leads-component                |  49.50 kB | 
+whatsapp-conversations.component-S4QXWD5M.js   | whatsapp-conversations-component   |  48.98 kB | 
+sellerlist.component-TUCLL7NM.js               | sellerlist-component               |  46.57 kB | 
+partners.component-HJ2VG4GD.js                 | partners-component                 |  43.90 kB | 
+...and 52 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [30.281 seconds]
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  ➜  Local:   http://127.0.0.1:4200/app
+  ➜  press h + enter to show help
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                            | Names                              |  Raw size
+main.js                                        | main                               |   1.93 MB | 
+chunk-U6JNIRPB.js                              | -                                  |  92.10 kB | 
+chunk-MUVJQUSU.js                              | -                                  |  38.76 kB | 
+chunk-6YJ5TTO7.js                              | -                                  |  27.47 kB | 
+chunk-MY6KSUGU.js                              | -                                  |  22.16 kB | 
+chunk-QE3YY542.js                              | -                                  |  12.37 kB | 
+chunk-MEJSMC5I.js                              | -                                  |  10.44 kB | 
+chunk-OVXQIAIQ.js                              | -                                  |   7.79 kB | 
+chunk-LDUXBNKC.js                              | -                                  |   3.87 kB | 
+chunk-JZQL4CF5.js                              | -                                  |   3.52 kB | 
+chunk-LJTT23MC.js                              | -                                  |   2.77 kB | 
+chunk-4KF3IWXM.js                              | -                                  | 555 bytes | 
+
+Lazy chunk files                               | Names                              |  Raw size
+aws-marketplace-review.component-UOSSBVOK.js   | aws-marketplace-review-component   | 145.54 kB | 
+crm-opportunities.component-PK64WNRO.js        | crm-opportunities-component        | 134.75 kB | 
+azure-marketplace-review.component-7RYKKJV7.js | azure-marketplace-review-component | 114.90 kB | 
+crm-dashboard-2.component-3PDJFEHO.js          | crm-dashboard-2-component          | 113.77 kB | 
+seller-dashboard.component-KQQOTJQ5.js         | seller-dashboard-component         |  98.87 kB | 
+marketing-emails.component-W445ALXH.js         | marketing-emails-component         |  97.24 kB | 
+marketing-automations.component-5CWP6BK2.js    | marketing-automations-component    |  81.53 kB | 
+campaign-create.component-R3WDL7UT.js          | campaign-create-component          |  79.52 kB | 
+consent-audit.component-GAHL7KNH.js            | consent-audit-component            |  71.25 kB | 
+campaign-studio.component-JQH72WNJ.js          | campaign-studio-component          |  56.11 kB | 
+crm-shell.component-74R3OARA.js                | crm-shell-component                |  49.65 kB | 
+crm-leads.component-2GPZ5ZSB.js                | crm-leads-component                |  49.50 kB | 
+whatsapp-conversations.component-5OKRAK76.js   | whatsapp-conversations-component   |  48.98 kB | 
+sellerlist.component-DPSYMFPL.js               | sellerlist-component               |  46.57 kB | 
+partners.component-3KXWNPKY.js                 | partners-component                 |  43.90 kB | 
+...and 51 more lazy chunks files. Use "--verbose" to show all the files.
+
+Application bundle generation complete. [16.627 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.93 MB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-studio.component-MUX3BT3K.js | campaign-studio-component | 58.59 kB | 
+
+Application bundle generation complete. [2.212 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.93 MB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-studio.component-A7NNU2R6.js | campaign-studio-component | 61.67 kB | 
+
+Application bundle generation complete. [0.919 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.93 MB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-studio.component-I7U3JX3H.js | campaign-studio-component | 61.71 kB | 
+
+Application bundle generation complete. [1.229 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.93 MB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-studio.component-FP3VIPAO.js | campaign-studio-component | 62.54 kB | 
+
+Application bundle generation complete. [1.941 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     | Raw size
+main.js                               | main                      |  1.93 MB | 
+
+Lazy chunk files                      | Names                     | Raw size
+campaign-studio.component-4KU6GMDL.js | campaign-studio-component | 64.85 kB | 
+
+Application bundle generation complete. [2.005 seconds]
+
+Page reload sent to client(s).
+> Changes detected. Rebuilding...
+√ Changes detected. Rebuilding...
+Initial chunk files                   | Names                     |  Raw size
+main.js                               | main                      |   1.93 MB | 
+styles.css                            | styles                    | 285.33 kB | 
+
+Lazy chunk files                      | Names                     |  Raw size
+campaign-studio.component-D24E47JX.js | campaign-studio-component |  65.44 kB | 
+
+Application bundle generation complete. [1.541 seconds]
+
+Page reload sent to client(s).

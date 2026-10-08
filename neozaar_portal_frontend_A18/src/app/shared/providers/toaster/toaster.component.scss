@@ -1,0 +1,37 @@
+.toaster-wrapper{
+  @apply fixed top-5  grid grid-cols-1 gap-3
+         left-1/2 -translate-x-1/2
+         lg:left-auto lg:right-5 lg:translate-x-0
+}
+
+.toaster{
+    &.toaster-error{@apply bg-red-100/60 border-red-500/50; .icon{@apply text-red-600;} .title{@apply text-red-600;}}
+    &.toaster-success{@apply bg-green-100/60 border-green-500/50 ; .icon{@apply text-green-600;} .title{@apply text-green-600;}}
+    &.toaster-warning{@apply bg-yellow-100/60 border-yellow-500/50; .icon{@apply text-yellow-600;} .title{@apply text-yellow-600;}}
+    &.toaster-info{@apply bg-blue-100/60 border-blue-500/50 ; .icon{@apply text-blue-600;} .title{@apply text-blue-600;}}
+    &.toaster-default,&.toaster-request{@apply bg-zinc-100/60 border-zinc-500/50 ; .icon{@apply text-zinc-600;} .title{@apply text-zinc-600;}}
+    position: relative;
+    z-index: 10000 !important;
+    animation: fadeUpThenOut 5s ease forwards;
+     @apply transition-all duration-300 ease-in-out; 
+}
+
+@keyframes fadeUpThenOut {
+  0% {
+    opacity: 0;
+    transform: translateY(30px);
+  }
+  10% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  90% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+  100% {
+    opacity: 0;
+    display: none;
+    transform: translateY(-20px);
+  }
+}

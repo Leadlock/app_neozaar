@@ -1,0 +1,237 @@
+<div class="p-6">
+  <div class="flex items-center justify-between mb-6">
+    <h1 class="text-2xl font-bold">Featured Items</h1>
+    <a [href]="baseUrl" target="_blank" class="text-sm text-indigo-400 hover:underline flex items-center gap-1">
+      <i class="ri-external-link-line"></i> View on Marketplace
+    </a>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex gap-2 mb-6 border-b border-gray-200">
+    <button
+      *ngFor="let tab of tabs"
+      (click)="setTab(tab)"
+      [class.border-b-2]="activeTab === tab"
+      [class.border-orange-500]="activeTab === tab"
+      [class.text-orange-600]="activeTab === tab"
+      [class.font-semibold]="activeTab === tab"
+      class="px-5 py-2 capitalize text-gray-500 hover:text-orange-500 transition-colors"
+    >
+      {{ tab === 'category' ? 'Category' : tab + 's' }}
+    </button>
+  </div>
+
+  <!-- Filters Row -->
+  @if (activeTab !== 'category') {
+  <div class="mb-4 flex flex-wrap items-center gap-3">
+    <!-- Search -->
+    <input
+      [ngModel]="searchTerm"
+      (ngModelChange)="onSearchInput($event)"
+      placeholder="Search featured {{ activeTab }}s..."
+      class="border rounded-lg px-4 py-2 w-64 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400"
+    />
+
+    <!-- Brand Filter -->
+    <select
+      [(ngModel)]="brandFilter"
+      (ngModelChange)="onFilterChange()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+    >
+      <option value="">All Brands</option>
+      <option *ngFor="let brand of brands" [value]="brand.name">{{ brand.name }}</option>
+    </select>
+
+    <!-- Category Filter -->
+    <select
+      [(ngModel)]="categoryFilter"
+      (ngModelChange)="onFilterChange()"
+      class="border rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-orange-400 bg-white"
+    >
+      <option value="">All Categories</option>
+      <option *ngFor="let cat of categories" [value]="cat.name">{{ cat.name }}</option>
+    </select>
+
+    <!-- Clear Filters -->
+    @if (hasActiveFilters) {
+      <button (click)="clearFilters()" class="text-gray-500 hover:text-red-500 text-sm flex items-center gap-1 px-3 py-2 border border-gray-200 rounded-lg">
+        <i class="ri-close-line"></i> Clear
+      </button>
+    }
+  </div>
+
+  <!-- Active Filters Summary -->
+  @if (hasActiveFilters) {
+    <div class="mb-4 flex flex-wrap items-center gap-2 text-xs">
+      <span class="text-gray-500">Active filters:</span>
+      @if (brandFilter) {
+        <span class="px-2 py-1 bg-orange-100 text-orange-700 rounded-full flex items-center gap-1">
+          Brand: {{ brandFilter }}
+          <button (click)="brandFilter = ''; onFilterChange()" class="hover:text-red-500">&times;</button>
+        </span>
+      }
+      @if (categoryFilter) {
+        <span class="px-2 py-1 bg-blue-100 text-blue-700 rounded-full flex items-center gap-1">
+          Category: {{ categoryFilter }}
+          <button (click)="categoryFilter = ''; onFilterChange()" class="hover:text-red-500">&times;</button>
+        </span>
+      }
+      @if (searchTerm) {
+        <span class="px-2 py-1 bg-gray-100 text-gray-700 rounded-full flex items-center gap-1">
+          Search: "{{ searchTerm }}"
+          <button (click)="searchTerm = ''; onFilterChange()" class="hover:text-red-500">&times;</button>
+        </span>
+      }
+    </div>
+  }
+
+  <!-- Loading -->
+  @if (isLoading) {
+    <div class="flex justify-center py-16">
+      <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+    </div>
+  }
+
+  <!-- Empty -->
+  @if (!isLoading && items.length === 0) {
+    <div class="text-center py-16 text-gray-400">
+      <i class="ri-star-line text-5xl mb-3 block"></i>
+      <p class="text-lg">No featured {{ activeTab }}s found</p>
+      @if (hasActiveFilters) {
+        <p class="text-sm mt-1">Try adjusting your filters</p>
+        <button (click)="clearFilters()" class="mt-3 text-orange-500 hover:underline text-sm">Clear all filters</button>
+      } @else {
+        <p class="text-sm mt-1">Mark items as featured from the {{ activeTab }}s list</p>
+      }
+    </div>
+  }
+
+  <!-- Table -->
+  @if (!isLoading && items.length > 0) {
+    <div class="bg-white rounded-xl shadow overflow-hidden">
+      <table class="w-full text-sm">
+        <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+          <tr>
+            <th class="px-4 py-3 text-left">Logo</th>
+            <th class="px-4 py-3 text-left">Name</th>
+            <th class="px-4 py-3 text-left">Brand</th>
+            <th class="px-4 py-3 text-left">Category</th>
+            <th class="px-4 py-3 text-left">Status</th>
+            <th class="px-4 py-3 text-left">Featured</th>
+            <th class="px-4 py-3 text-left">Actions</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-gray-100">
+          @for (item of items; track item.id) {
+            <tr class="hover:bg-gray-50 transition-colors">
+              <td class="px-4 py-3">
+                <img
+                  [src]="item.product_logo || '/assets/default-product.png'"
+                  [alt]="item.name"
+                  class="w-10 h-10 rounded-lg object-cover border"
+                  onerror="this.src='/assets/default-product.png'"
+                />
+              </td>
+              <td class="px-4 py-3 font-medium text-gray-800 max-w-[200px] truncate">{{ item.name }}</td>
+              <td class="px-4 py-3 text-gray-500">{{ item.brand_name || '—' }}</td>
+              <td class="px-4 py-3 text-gray-500 max-w-[150px] truncate">
+                {{ item.category?.join(', ') || item.category || '—' }}
+              </td>
+              <td class="px-4 py-3">
+                @if (item.is_publish && item.is_approved) {
+                  <span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs">Published</span>
+                } @else if (item.is_drapt) {
+                  <span class="px-2 py-1 bg-yellow-100 text-yellow-700 rounded-full text-xs">Pending</span>
+                } @else {
+                  <span class="px-2 py-1 bg-gray-100 text-gray-600 rounded-full text-xs">Draft</span>
+                }
+              </td>
+              <td class="px-4 py-3">
+                <button
+                  (click)="toggleFeature(item)"
+                  [class.text-orange-500]="item.is_feature"
+                  [class.text-gray-300]="!item.is_feature"
+                  class="text-2xl hover:scale-110 transition-transform"
+                  title="{{ item.is_feature ? 'Remove from featured' : 'Add to featured' }}"
+                >
+                  <i class="{{ item.is_feature ? 'ri-star-fill' : 'ri-star-line' }}"></i>
+                </button>
+              </td>
+              <td class="px-4 py-3">
+                <a
+                  [routerLink]="getViewUrl(item)"
+                  class="text-indigo-500 hover:underline text-xs flex items-center gap-1"
+                >
+                  <i class="ri-eye-line"></i> View
+                </a>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- Results count -->
+    <div class="mt-4 text-xs text-gray-500">
+      Showing {{ items.length }} of {{ pagination.total || items.length }} featured {{ activeTab }}s
+    </div>
+
+    <!-- Pagination -->
+    @if (pagination.pages?.length > 1) {
+      <div class="flex justify-center gap-2 mt-4">
+        @for (page of pagination.pages; track $index) {
+          <button
+            (click)="goToPage(page)"
+            [class.bg-orange-500]="page === currentPage"
+            [class.text-white]="page === currentPage"
+            [class.bg-gray-100]="page !== currentPage"
+            class="w-9 h-9 rounded-lg text-sm font-medium hover:bg-orange-400 hover:text-white transition-colors"
+          >
+            {{ page }}
+          </button>
+        }
+      </div>
+    }
+  }
+  } @else {
+    <!-- Category tab: mark categories to show on the home page "Explore by Category" section -->
+    @if (isLoading) {
+      <div class="flex justify-center py-16">
+        <div class="w-10 h-10 border-4 border-orange-500 border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    }
+
+    @if (!isLoading && categoriesList.length === 0) {
+      <div class="text-center py-16 text-gray-400">
+        <i class="ri-price-tag-3-line text-5xl mb-3 block"></i>
+        <p class="text-lg">No categories found</p>
+      </div>
+    }
+
+    @if (!isLoading && categoriesList.length > 0) {
+      <div class="bg-white rounded-xl shadow overflow-hidden">
+        <table class="w-full text-sm">
+          <thead class="bg-gray-50 text-gray-600 uppercase text-xs">
+            <tr>
+              <th class="px-4 py-3 text-left">Category</th>
+              <th class="px-4 py-3 text-left">Featured on Home Page</th>
+            </tr>
+          </thead>
+          <tbody class="divide-y divide-gray-100">
+            @for (cat of categoriesList; track cat.id) {
+              <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-4 py-3 font-medium text-gray-800">{{ cat.name }}</td>
+                <td class="px-4 py-3">
+                  <label class="relative inline-flex items-center cursor-pointer">
+                    <input type="checkbox" [checked]="cat.is_feature" (change)="toggleCategoryFeature(cat)" class="sr-only peer">
+                    <div class="w-11 h-6 bg-gray-200 rounded-full peer peer-checked:after:translate-x-full peer-checked:bg-orange-600 after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:rounded-full after:h-5 after:w-5 after:transition-all"></div>
+                  </label>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    }
+  }
+</div>

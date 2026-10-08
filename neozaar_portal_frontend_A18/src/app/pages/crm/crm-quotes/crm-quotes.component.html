@@ -1,0 +1,92 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Quotes</h1>
+      <p class="crm-subtitle">Create and send quotes to customers</p>
+    </div>
+    <button class="neo-btn neo-btn-primary" (click)="openCreate()">+ New Quote</button>
+  </div>
+
+  <div class="neo-table-wrap">
+    @if (loading) {
+      <div style="padding:3rem;text-align:center;color:var(--crm-text-secondary)">Loading quotes...</div>
+    }
+    @if (!loading) {
+      <table class="neo-table">
+        <thead>
+          <tr><th>Subject</th><th>Customer</th><th>Amount</th><th>Status</th><th>Valid Until</th><th>Actions</th></tr>
+        </thead>
+        <tbody>
+          @for (q of quotes; track q.id) {
+            <tr>
+              <td style="font-weight:600;color:var(--crm-text)">{{ q.subject || 'Untitled' }}</td>
+              <td>
+                <div>
+                  <span style="color:var(--crm-text)">{{ q.customer_name }}</span>
+                  <br><span style="font-size:0.72rem;color:var(--crm-text-secondary)">{{ q.customer_email }}</span>
+                </div>
+              </td>
+              <td style="font-weight:700;color:var(--crm-primary)">₹{{ getQuoteTotal(q).toLocaleString() }}</td>
+              <td><span class="neo-badge" [ngClass]="statusColor(q.status)">{{ q.status }}</span></td>
+              <td style="font-size:0.825rem;color:var(--crm-text-secondary)">{{ q.valid_until | date:'dd MMM yyyy' }}</td>
+              <td>
+                <div style="display:flex;gap:0.4rem;flex-wrap:wrap">
+                  <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="openEdit(q)">Edit</button>
+                  @if (q.status === 'Draft') {
+                    <button class="neo-btn neo-btn-success" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="send(q)">Send</button>
+                  }
+                  <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="delete(q.id)">Del</button>
+                </div>
+              </td>
+            </tr>
+          }
+          @if (!quotes.length) {
+            <tr><td colspan="6" style="text-align:center;color:var(--crm-text-secondary);padding:3rem">No quotes yet. Create your first quote.</td></tr>
+          }
+        </tbody>
+      </table>
+    }
+  </div>
+</div>
+
+<!-- Quote Modal -->
+@if (showModal) {
+  <div class="neo-modal-backdrop" (click)="showModal=false">
+    <div class="neo-modal" (click)="$event.stopPropagation()" style="max-width:720px">
+      <h2 style="font-weight:800;margin-bottom:1.5rem;color:var(--crm-text);font-size:1.25rem">{{ editMode ? 'Edit Quote' : 'New Quote' }}</h2>
+
+      <div class="crm-grid-2">
+        <div class="form-group"><label class="form-label">Customer Name *</label><input class="neo-input" [(ngModel)]="form.customer_name" /></div>
+        <div class="form-group"><label class="form-label">Customer Email *</label><input class="neo-input" [(ngModel)]="form.customer_email" type="email" /></div>
+        <div class="form-group"><label class="form-label">Subject</label><input class="neo-input" [(ngModel)]="form.subject" /></div>
+        <div class="form-group"><label class="form-label">Valid Until</label><input class="neo-input" [(ngModel)]="form.valid_until" type="date" /></div>
+      </div>
+
+      <!-- Line Items -->
+      <div style="margin-top:1rem">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.75rem">
+          <label class="form-label" style="margin:0">Line Items</label>
+          <button class="neo-btn" style="padding:0.3rem 0.75rem;font-size:0.75rem" (click)="addItem()">+ Add Item</button>
+        </div>
+        @for (item of form.items; track $index; let i = $index) {
+          <div style="display:flex;gap:0.5rem;align-items:flex-end;margin-bottom:0.5rem">
+            <div style="flex:3"><input class="neo-input" [(ngModel)]="item.description" placeholder="Description" /></div>
+            <div style="flex:1"><input class="neo-input" [(ngModel)]="item.quantity" type="number" min="1" placeholder="Qty" /></div>
+            <div style="flex:1.5"><input class="neo-input" [(ngModel)]="item.unit_price" type="number" min="0" placeholder="Price" /></div>
+            <button class="neo-btn neo-btn-danger" style="padding:0.35rem 0.6rem;font-size:0.7rem" (click)="removeItem(i)">×</button>
+          </div>
+        }
+        <div style="text-align:right;margin-top:0.75rem;font-weight:700;color:var(--crm-text)">
+          Total: ₹{{ totalAmount.toLocaleString() }}
+        </div>
+      </div>
+
+      <div class="form-group" style="margin-top:1rem"><label class="form-label">Notes</label><textarea class="neo-input" [(ngModel)]="form.notes" rows="2" placeholder="Additional notes for the customer..."></textarea></div>
+
+      <div style="display:flex;gap:1rem;justify-content:flex-end;margin-top:1.25rem">
+        <button class="neo-btn" (click)="showModal=false">Cancel</button>
+        <button class="neo-btn neo-btn-primary" (click)="save()">{{ editMode ? 'Update' : 'Create Quote' }}</button>
+      </div>
+    </div>
+  </div>
+}

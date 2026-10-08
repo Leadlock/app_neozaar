@@ -1,0 +1,45 @@
+# Node.js
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# Environment variables (tracked per user request)
+# .env
+# .env.*
+
+# Logs
+logs/
+*.log
+*.out
+*.pid
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDEs
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Build output
+dist/
+build/
+coverage/
+tmp/
+temp/
+
+# Misc
+*.tgz
+*.swp
+*.bak
+*.orig
+*.rej
+
+# TypeScript
+*.tsbuildinfo

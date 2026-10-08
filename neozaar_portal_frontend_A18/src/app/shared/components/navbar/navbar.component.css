@@ -1,0 +1,15 @@
+/* Anchor the profile dropdown menu directly beneath the avatar.
+   Overrides DaisyUI's default dropdown-content offset which left a
+   large gap between the profile button and its popup options. */
+.dropdown {
+  display: inline-flex;
+  align-items: center;
+}
+
+.dropdown .dropdown-content {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  margin-top: 0.5rem; /* small, consistent 8px gap */
+  transform: none;
+}

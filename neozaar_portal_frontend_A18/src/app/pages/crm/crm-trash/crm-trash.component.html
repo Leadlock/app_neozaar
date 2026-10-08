@@ -1,0 +1,139 @@
+<div class="crm-page">
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">Trash</h1>
+      <p class="crm-subtitle">
+        {{ totalCount }} item{{ totalCount !== 1 ? 's' : '' }} awaiting permanent deletion
+      </p>
+    </div>
+    @if (totalCount > 0) {
+      <button class="neo-btn neo-btn-danger" (click)="openConfirm(true)" [disabled]="purging">
+        Empty All Trash
+      </button>
+    }
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem;flex-wrap:wrap">
+    @for (tab of tabs; track tab.key) {
+      <button
+        class="neo-btn"
+        [style.background]="activeTab === tab.key ? 'var(--crm-accent)' : ''"
+        [style.color]="activeTab === tab.key ? '#fff' : ''"
+        (click)="setTab(tab.key)">
+        {{ tab.label }}
+        @if (counts[tab.key] > 0) {
+          <span style="margin-left:0.4rem;background:rgba(0,0,0,.18);padding:1px 7px;border-radius:999px;font-size:0.75rem">
+            {{ counts[tab.key] }}
+          </span>
+        }
+      </button>
+    }
+  </div>
+
+  <!-- Bulk action bar -->
+  @if (selectedCount > 0) {
+    <div style="display:flex;align-items:center;gap:1rem;padding:0.75rem 1rem;background:var(--crm-card);border:1px solid var(--crm-border);border-radius:8px;margin-bottom:1rem">
+      <span style="color:var(--crm-text-secondary);font-size:0.875rem">
+        {{ selectedCount }} item{{ selectedCount !== 1 ? 's' : '' }} selected
+      </span>
+      <button class="neo-btn neo-btn-danger" style="padding:0.3rem 0.9rem;font-size:0.8rem"
+        (click)="openConfirm(false)" [disabled]="purging">
+        Delete Selected Permanently
+      </button>
+    </div>
+  }
+
+  <!-- Table -->
+  @if (loading) {
+    <div style="padding:4rem;text-align:center;color:var(--crm-text-secondary)">Loading...</div>
+  }
+
+  @if (!loading) {
+    <div class="neo-table-wrap">
+      <table class="neo-table">
+        <thead>
+          <tr>
+            <th style="width:2.5rem">
+              <input type="checkbox" [checked]="allPageChecked" (change)="toggleAll()" [disabled]="currentRows.length === 0" />
+            </th>
+            <th>Name / Title</th>
+            @if (activeTab === 'leads' || activeTab === 'accounts' || activeTab === 'contacts') {
+              <th>Email</th>
+            }
+            @if (activeTab === 'leads') { <th>Status</th><th>Score</th> }
+            @if (activeTab === 'accounts') { <th>Type</th><th>Industry</th> }
+            @if (activeTab === 'contacts') { <th>Phone</th><th>Designation</th> }
+            @if (activeTab === 'opportunities') { <th>Stage</th><th>Value</th> }
+            @if (activeTab === 'tasks') { <th>Status</th><th>Due Date</th> }
+            <th>Deleted On</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (row of currentRows; track row.id) {
+            <tr [style.opacity]="purging ? '0.5' : '1'">
+              <td>
+                <input type="checkbox"
+                  [checked]="currentSelected.has(row.id)"
+                  (change)="toggle(row.id)" />
+              </td>
+              <td style="font-weight:600;color:var(--crm-text)">{{ displayName(row) }}</td>
+
+              @if (activeTab === 'leads' || activeTab === 'accounts' || activeTab === 'contacts') {
+                <td style="color:var(--crm-text-secondary)">{{ row.email || '—' }}</td>
+              }
+              @if (activeTab === 'leads') {
+                <td><span class="neo-badge neo-badge-gray">{{ row.status || '—' }}</span></td>
+                <td style="color:var(--crm-text-secondary)">{{ row.score ?? '—' }}</td>
+              }
+              @if (activeTab === 'accounts') {
+                <td><span class="neo-badge neo-badge-orange">{{ row.type || '—' }}</span></td>
+                <td style="color:var(--crm-text-secondary)">{{ row.industry || '—' }}</td>
+              }
+              @if (activeTab === 'contacts') {
+                <td style="color:var(--crm-text-secondary)">{{ row.phone || '—' }}</td>
+                <td style="color:var(--crm-text-secondary)">{{ row.title || '—' }}</td>
+              }
+              @if (activeTab === 'opportunities') {
+                <td><span class="neo-badge neo-badge-gray">{{ row.stage || '—' }}</span></td>
+                <td style="color:var(--crm-text-secondary)">{{ row.value ? ('₹' + row.value) : '—' }}</td>
+              }
+              @if (activeTab === 'tasks') {
+                <td><span class="neo-badge neo-badge-gray">{{ row.status || '—' }}</span></td>
+                <td style="color:var(--crm-text-secondary)">{{ formatDate(row.due_date) }}</td>
+              }
+              <td style="color:var(--crm-text-secondary);font-size:0.8rem">{{ formatDate(row.updated_at) }}</td>
+            </tr>
+          }
+          @if (currentRows.length === 0) {
+            <tr>
+              <td [attr.colspan]="5" style="text-align:center;padding:4rem;color:var(--crm-text-secondary)">
+                No deleted {{ activeTab }} found
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
+</div>
+
+<!-- Confirmation modal -->
+@if (confirmOpen) {
+  <div class="modal-overlay" (click)="cancelConfirm()">
+    <div class="modal-box" (click)="$event.stopPropagation()" style="max-width:420px">
+      <h3 style="margin:0 0 0.75rem;color:var(--crm-text)">Permanently Delete?</h3>
+      <p style="color:var(--crm-text-secondary);margin:0 0 1.5rem;font-size:0.9rem;line-height:1.5">
+        @if (confirmAll) {
+          This will hard-delete <strong>all {{ totalCount }} items</strong> in the trash. This cannot be undone.
+        } @else {
+          This will hard-delete <strong>{{ selectedCount }} selected item{{ selectedCount !== 1 ? 's' : '' }}</strong>. This cannot be undone.
+        }
+      </p>
+      <div style="display:flex;gap:0.75rem;justify-content:flex-end">
+        <button class="neo-btn" (click)="cancelConfirm()">Cancel</button>
+        <button class="neo-btn neo-btn-danger" (click)="purge()">Delete Forever</button>
+      </div>
+    </div>
+  </div>
+}

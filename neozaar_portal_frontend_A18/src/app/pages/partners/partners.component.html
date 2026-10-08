@@ -1,0 +1,345 @@
+<div class="p-6">
+  <!-- Header -->
+  <div class="flex justify-between items-center mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">Solution Partners</h1>
+      <p class="text-sm text-gray-500 mt-1">Manage and approve Solution Partner registrations</p>
+    </div>
+  </div>
+
+  <!-- Search -->
+  <div class="mb-5">
+    <input
+      type="text"
+      class="w-full max-w-md px-4 py-2.5 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-gray-300"
+      placeholder="Search by name, company, or email..."
+      [(ngModel)]="searchQuery"
+      (input)="applyFilter()"
+    />
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="text-center py-12 text-gray-500">
+      <div class="inline-block w-6 h-6 border-2 border-gray-300 border-t-gray-700 rounded-full animate-spin mb-3"></div>
+      <p class="text-sm">Loading...</p>
+    </div>
+  }
+
+  <!-- Solution Partners Table -->
+  @if (!loading) {
+    <div class="bg-white rounded-xl border border-gray-200 overflow-hidden shadow-sm">
+      <div class="px-5 py-4 border-b border-gray-100 flex items-center justify-between">
+        <div>
+          <h2 class="text-base font-semibold text-gray-800">Solution Partners</h2>
+          <p class="text-xs text-gray-500 mt-0.5">Review and approve Solution Partner registrations</p>
+        </div>
+        <div class="flex items-center gap-2">
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">
+            {{ getPendingCount() }} Pending
+          </span>
+          <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">
+            {{ getApprovedCount() }} Approved
+          </span>
+        </div>
+      </div>
+      <div class="overflow-x-auto">
+        <table class="w-full">
+          <thead>
+            <tr class="bg-gray-50 border-b border-gray-200">
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">SR NO</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Name</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Email</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Company</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Country</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Capabilities</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Registered</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Status</th>
+              <th class="text-left px-5 py-3 text-xs font-semibold text-gray-500 uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (partner of filteredPartners; track partner.id; let i = $index) {
+              <tr class="border-b border-gray-100 hover:bg-gray-50 transition-colors">
+                <td class="px-5 py-3.5 text-sm text-gray-500">{{ i + 1 }}</td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-3">
+                    <div class="w-8 h-8 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+                      <span class="text-xs font-bold text-orange-600">{{ (partner.name || 'S').charAt(0).toUpperCase() }}</span>
+                    </div>
+                    <div>
+                      <p class="text-sm font-medium text-gray-800">{{ partner.name || '—' }}</p>
+                      <p class="text-xs text-gray-400">{{ partner.designation || '' }}</p>
+                    </div>
+                  </div>
+                </td>
+                <td class="px-5 py-3.5 text-sm text-gray-600">{{ partner.email || '—' }}</td>
+                <td class="px-5 py-3.5">
+                  <p class="text-sm font-semibold text-gray-800">{{ partner.company || '—' }}</p>
+                  @if (partner.brand_name && partner.brand_name !== partner.company) {
+                    <p class="text-xs text-gray-400">{{ partner.brand_name }}</p>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-sm text-gray-600">{{ partner.headquater_country || '—' }}</td>
+                <td class="px-5 py-3.5">
+                  @if (partner.existing_marketplace_listing?.length) {
+                    <div class="flex flex-wrap gap-1 max-w-[200px]">
+                      @for (svc of partner.existing_marketplace_listing.slice(0, 2); track $index) {
+                        <span class="px-1.5 py-0.5 text-[10px] font-medium bg-blue-50 text-blue-700 rounded">{{ svc }}</span>
+                      }
+                      @if (partner.existing_marketplace_listing.length > 2) {
+                        <span class="px-1.5 py-0.5 text-[10px] font-medium bg-gray-100 text-gray-500 rounded">+{{ partner.existing_marketplace_listing.length - 2 }} more</span>
+                      }
+                    </div>
+                  } @else {
+                    <span class="text-sm text-gray-400">—</span>
+                  }
+                </td>
+                <td class="px-5 py-3.5 text-xs text-gray-500">{{ partner.created_at | date:'dd MMM yyyy' }}</td>
+                <td class="px-5 py-3.5">
+                  @if (partner.status === 'active') {
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">Approved</span>
+                  } @else {
+                    <span class="px-3 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">Pending</span>
+                  }
+                </td>
+                <td class="px-5 py-3.5">
+                  <div class="flex items-center gap-2">
+                    @if (partner.status !== 'active') {
+                      <button (click)="verifyPartner(partner)"
+                        class="px-3 py-1 text-xs font-semibold rounded-md border border-green-300 text-green-700 hover:bg-green-50 transition-colors flex items-center gap-1">
+                        <i class="ri-check-line"></i> Approve
+                      </button>
+                    }
+                    <button (click)="openDetail(partner)"
+                      class="w-8 h-8 rounded-lg bg-gray-100 text-gray-600 hover:bg-orange-50 hover:text-orange-600 flex items-center justify-center transition-colors"
+                      title="View details">
+                      <i class="ri-eye-line"></i>
+                    </button>
+                    <button (click)="deletePartner(partner)"
+                      class="w-8 h-8 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors"
+                      title="Delete">
+                      <i class="ri-delete-bin-line"></i>
+                    </button>
+                    <button (click)="toggleStatus(partner)"
+                      class="w-8 h-8 rounded-lg flex items-center justify-center transition-colors"
+                      [class]="partner.status === 'active' ? 'bg-orange-50 text-orange-500 hover:bg-orange-100' : 'bg-gray-100 text-gray-400 hover:bg-gray-200'"
+                      title="Toggle status">
+                      <i class="{{ partner.status === 'active' ? 'ri-toggle-fill' : 'ri-toggle-line' }}"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            }
+            @if (!filteredPartners.length) {
+              <tr>
+                <td colspan="9" class="text-center py-12 text-gray-400 text-sm">No solution partners found</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+
+  <!-- ── SOLUTION PARTNER DETAIL SLIDE-OVER ─────────────────────── -->
+  @if (selectedPartner) {
+    <div
+      class="fixed inset-0 bg-black/40 z-40 transition-opacity duration-300"
+      (click)="closeDetail()">
+    </div>
+
+    <div class="fixed top-0 right-0 h-full w-full max-w-xl bg-white z-50 shadow-2xl flex flex-col overflow-hidden transition-transform duration-300">
+
+      <div class="flex items-center justify-between px-6 py-5 border-b border-gray-100 bg-white flex-shrink-0">
+        <div class="flex items-center gap-4">
+          <div class="w-11 h-11 rounded-full bg-orange-100 flex items-center justify-center flex-shrink-0">
+            <span class="text-base font-bold text-orange-600">{{ (selectedPartner.name || 'S').charAt(0).toUpperCase() }}</span>
+          </div>
+          <div>
+            <h2 class="text-base font-bold text-gray-900">{{ selectedPartner.company || selectedPartner.name || '—' }}</h2>
+            <p class="text-xs text-gray-400 mt-0.5">Solution Partner</p>
+          </div>
+        </div>
+        <div class="flex items-center gap-2">
+          @if (selectedPartner.status === 'active') {
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-green-50 text-green-700 border border-green-200">Approved</span>
+          } @else {
+            <span class="px-2.5 py-1 rounded-full text-xs font-semibold bg-yellow-50 text-yellow-700 border border-yellow-200">Pending</span>
+          }
+          <button (click)="closeDetail()"
+            class="w-8 h-8 rounded-lg bg-gray-100 text-gray-500 hover:bg-gray-200 flex items-center justify-center transition-colors ml-2">
+            <i class="ri-close-line text-base"></i>
+          </button>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto px-6 py-6 space-y-7">
+
+        <section>
+          <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Contact Information</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Full Name</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.name || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Designation</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.designation || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Email</p>
+              <p class="text-sm font-medium text-blue-600 break-all">{{ selectedPartner.email || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Phone</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.mobile || '—' }}</p>
+            </div>
+            @if (selectedPartner.support_desk_email) {
+              <div class="col-span-2">
+                <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Support Desk Email</p>
+                <p class="text-sm font-medium text-blue-600 break-all">{{ selectedPartner.support_desk_email }}</p>
+              </div>
+            }
+          </div>
+        </section>
+
+        <hr class="border-gray-100">
+
+        <section>
+          <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Company Information</p>
+          <div class="grid grid-cols-2 gap-4">
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Company Name</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.company || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Brand Name</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.brand_name || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Country</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.headquater_country || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Legal Entity</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.legal_entity_type || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Tax ID</p>
+              <p class="text-sm font-mono font-medium text-gray-900">{{ selectedPartner.tax_id || '—' }}</p>
+            </div>
+            <div>
+              <p class="text-[10px] font-semibold text-gray-400 uppercase tracking-wider mb-1">Registered</p>
+              <p class="text-sm font-medium text-gray-900">{{ selectedPartner.created_at | date:'dd MMM yyyy' }}</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-2 mt-4">
+            @if (selectedPartner.website_url) {
+              <a [href]="selectedPartner.website_url" target="_blank"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 transition-colors">
+                <i class="ri-global-line"></i> Website
+              </a>
+            }
+            @if (selectedPartner.linkedin_url) {
+              <a [href]="selectedPartner.linkedin_url" target="_blank"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-blue-50 text-blue-700 text-xs font-medium hover:bg-blue-100 transition-colors">
+                <i class="ri-linkedin-line"></i> LinkedIn
+              </a>
+            }
+            @if (selectedPartner.sla_link) {
+              <a [href]="selectedPartner.sla_link" target="_blank"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-gray-100 text-gray-700 text-xs font-medium hover:bg-gray-200 transition-colors">
+                <i class="ri-file-text-line"></i> SLA
+              </a>
+            }
+            @if (selectedPartner.business_certification) {
+              <a [href]="selectedPartner.business_certification" target="_blank"
+                class="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg bg-purple-50 text-purple-700 text-xs font-medium hover:bg-purple-100 transition-colors">
+                <i class="ri-award-line"></i> Certification
+              </a>
+            }
+          </div>
+        </section>
+
+        @if (selectedPartner.cloud_partnership?.length) {
+          <hr class="border-gray-100">
+          <section>
+            <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Cloud Partnerships</p>
+            <div class="flex flex-wrap gap-2">
+              @for (cp of selectedPartner.cloud_partnership; track $index) {
+                <span class="px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-100 uppercase">{{ cp }}</span>
+              }
+            </div>
+          </section>
+        }
+
+        @if (selectedPartner.existing_marketplace_listing?.length) {
+          <hr class="border-gray-100">
+          <section>
+            <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Service Capabilities</p>
+            <div class="flex flex-wrap gap-2">
+              @for (svc of selectedPartner.existing_marketplace_listing; track $index) {
+                <span class="px-3 py-1 rounded-lg text-xs font-medium bg-orange-50 text-orange-700 border border-orange-100">{{ svc }}</span>
+              }
+            </div>
+          </section>
+        }
+
+        @if (getSubOptionKeys(selectedPartner).length) {
+          <hr class="border-gray-100">
+          <section>
+            <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Detailed Capabilities</p>
+            <div class="space-y-3">
+              @for (key of getSubOptionKeys(selectedPartner); track key) {
+                <div class="bg-gray-50 rounded-xl p-4 border border-gray-100">
+                  <p class="text-xs font-bold text-gray-700 mb-2">{{ formatKey(key) }}</p>
+                  <div class="flex flex-wrap gap-1.5">
+                    @for (item of selectedPartner.service_sub_options[key]; track $index) {
+                      <span class="px-2 py-0.5 rounded text-[11px] font-medium bg-white border border-gray-200 text-gray-600">{{ item }}</span>
+                    }
+                  </div>
+                </div>
+              }
+            </div>
+          </section>
+        }
+
+        @if (selectedPartner.preferred_engagement) {
+          <hr class="border-gray-100">
+          <section>
+            <p class="text-[10px] font-bold tracking-widest uppercase text-orange-500 mb-3">Preferred Engagement</p>
+            <span class="px-3 py-1.5 rounded-lg text-sm font-semibold bg-gray-100 text-gray-700">{{ selectedPartner.preferred_engagement }}</span>
+          </section>
+        }
+
+      </div>
+
+      <div class="flex-shrink-0 px-6 py-4 border-t border-gray-100 bg-gray-50 flex items-center justify-between gap-3">
+        @if (selectedPartner.status !== 'active') {
+          <button (click)="verifyPartnerFromPanel()"
+            class="flex-1 py-2.5 rounded-xl bg-green-600 text-white text-sm font-semibold hover:bg-green-700 transition-colors flex items-center justify-center gap-2">
+            <i class="ri-check-line"></i> Approve Solution Partner
+          </button>
+          <button (click)="deletePartnerFromPanel()"
+            class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors flex-shrink-0">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        } @else {
+          <button (click)="toggleStatusFromPanel()"
+            class="flex-1 py-2.5 rounded-xl bg-orange-50 text-orange-600 border border-orange-200 text-sm font-semibold hover:bg-orange-100 transition-colors">
+            Deactivate
+          </button>
+          <button (click)="deletePartnerFromPanel()"
+            class="w-10 h-10 rounded-xl bg-red-50 text-red-500 hover:bg-red-100 flex items-center justify-center transition-colors flex-shrink-0">
+            <i class="ri-delete-bin-line"></i>
+          </button>
+        }
+        <button (click)="closeDetail()"
+          class="w-10 h-10 rounded-xl bg-gray-200 text-gray-600 hover:bg-gray-300 flex items-center justify-center transition-colors flex-shrink-0">
+          <i class="ri-close-line"></i>
+        </button>
+      </div>
+    </div>
+  }
+</div>

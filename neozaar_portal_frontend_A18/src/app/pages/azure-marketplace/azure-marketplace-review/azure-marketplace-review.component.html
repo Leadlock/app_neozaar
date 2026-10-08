@@ -1,0 +1,738 @@
+<section class="min-h-screen bg-slate-50 p-4 md:p-8" *ngIf="request; else loading">
+  <div class="max-w-5xl mx-auto space-y-6">
+
+    <!-- Back + Header -->
+    <div class="flex items-center gap-4 flex-wrap">
+      <button (click)="goBack()" class="btn btn-ghost btn-sm gap-1 rounded-xl border border-slate-200 bg-white shadow-sm">
+        <i class="ri-arrow-left-line"></i> Back
+      </button>
+      <div class="flex-1">
+        <h1 class="text-2xl font-black text-slate-900">Azure Marketplace Review</h1>
+        <p class="text-slate-500 text-sm">Request #{{ request.id }} &bull; {{ request.product_name }}</p>
+      </div>
+      <span [class]="'px-3 py-1 rounded-full text-sm font-bold border ' + statusClass(request.status)">
+        {{ request.status | titlecase }}
+      </span>
+    </div>
+
+    <!-- Success Banner -->
+    @if (submitSuccess) {
+      <div class="bg-green-50 border border-green-200 rounded-2xl p-4 flex items-center gap-3">
+        <i class="ri-checkbox-circle-fill text-green-500 text-xl"></i>
+        <span class="text-green-800 font-medium">Request approved and submitted to Azure Marketplace successfully.</span>
+      </div>
+    }
+
+    <!-- ====== STATUS TIMELINE ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-6">
+      <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest mb-5">Submission Timeline</h2>
+      <div class="flex items-center gap-0">
+        @for (step of timeline; track $index) {
+          <!-- Step -->
+          <div class="flex-1 flex flex-col items-center relative min-w-0">
+            <!-- Connector line (not on first item) -->
+            @if ($index > 0) {
+              <div [class]="'absolute left-0 top-4 w-1/2 h-0.5 ' + (step.status === 'done' ? 'bg-green-400' : step.status === 'failed' ? 'bg-red-300' : 'bg-slate-200')"></div>
+            }
+            @if ($index < timeline.length - 1) {
+              <div [class]="'absolute right-0 top-4 w-1/2 h-0.5 ' + (step.status === 'done' ? 'bg-green-400' : 'bg-slate-200')"></div>
+            }
+            <!-- Icon -->
+            <div [ngClass]="{
+              'bg-green-500 text-white': step.status === 'done',
+              'bg-blue-500 text-white ring-4 ring-blue-100': step.status === 'active',
+              'bg-red-500 text-white': step.status === 'failed',
+              'bg-white border-2 border-slate-200 text-slate-300': step.status === 'pending'
+            }" class="w-8 h-8 rounded-full flex items-center justify-center z-10 relative text-xs">
+              @if (step.status === 'done') { <i class="ri-check-line"></i> }
+              @else if (step.status === 'active') { <i class="ri-time-line"></i> }
+              @else if (step.status === 'failed') { <i class="ri-close-line"></i> }
+              @else { <i class="ri-circle-line"></i> }
+            </div>
+            <div class="mt-2 text-center px-1">
+              <div class="text-xs font-semibold text-slate-700">{{ step.label }}</div>
+              @if (step.timestamp) {
+                <div class="text-[10px] text-slate-400">{{ step.timestamp | date:'MMM d, y' }}</div>
+              }
+            </div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ====== ACTION BUTTONS ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 p-5 flex flex-wrap gap-3 items-center">
+      <h2 class="text-sm font-bold text-slate-400 uppercase tracking-widest w-full mb-1">Admin Actions</h2>
+
+      @if (request.status === 'PENDING_REVIEW' || request.status === 'FAILED') {
+        <button
+          (click)="openSubmitConfirm()"
+          [disabled]="isSubmitting"
+          class="btn btn-success text-white rounded-xl gap-2"
+        >
+          <i class="ri-send-plane-line"></i> Approve &amp; Submit to Azure
+        </button>
+
+        <button
+          (click)="openRejectModal()"
+          [disabled]="isSubmitting"
+          class="btn btn-outline btn-error rounded-xl gap-2"
+        >
+          <i class="ri-close-circle-line"></i> Reject
+        </button>
+      }
+
+      @if (request.status === 'FAILED') {
+        <button
+          (click)="retry()"
+          [disabled]="isSubmitting"
+          class="btn btn-warning text-white rounded-xl gap-2"
+        >
+          <i class="ri-refresh-line"></i> Retry Submission
+        </button>
+      }
+
+      @if (request.status === 'SUBMITTED' || request.status === 'VALIDATING') {
+        <button
+          (click)="pollStatus()"
+          [disabled]="isPolling"
+          class="btn btn-outline btn-info rounded-xl gap-2"
+        >
+          <i [class]="isPolling ? 'ri-loader-4-line animate-spin' : 'ri-refresh-line'"></i>
+          {{ isPolling ? 'Checking...' : 'Check MS Job Status' }}
+        </button>
+      }
+
+      @if (request.status === 'PUBLISHED') {
+        <span class="text-green-600 font-semibold flex items-center gap-2">
+          <i class="ri-checkbox-circle-fill"></i> Published on Azure Marketplace
+        </span>
+      }
+
+      @if (request.status === 'REJECTED') {
+        <div class="bg-slate-50 rounded-xl p-3 text-slate-600 text-sm border border-slate-200">
+          <span class="font-semibold">Rejection reason: </span>{{ request.rejection_reason || 'No reason provided.' }}
+        </div>
+      }
+    </div>
+
+    <!-- ====== FAILURE DETAILS ====== -->
+    @if (request.status === 'FAILED' && request.ms_response) {
+      <div class="bg-red-50 border border-red-200 rounded-2xl p-5 space-y-2">
+        <h3 class="font-bold text-red-700 flex items-center gap-2">
+          <i class="ri-error-warning-line"></i> Azure Submission Error
+        </h3>
+        @if (request.ms_job_id) {
+          <div class="text-sm text-red-600">Job ID: <span class="font-mono">{{ request.ms_job_id }}</span></div>
+        }
+        @if (request.failed_at) {
+          <div class="text-sm text-red-600">Failed at: {{ request.failed_at | date:'medium' }}</div>
+        }
+        <pre class="text-xs bg-red-100 rounded-lg p-3 overflow-x-auto text-red-800">{{ jsonStr(request.ms_response) }}</pre>
+        @if (request.validation_errors) {
+          <div class="text-sm font-semibold text-red-700 mt-2">Validation Errors:</div>
+          <pre class="text-xs bg-red-100 rounded-lg p-3 overflow-x-auto text-red-800">{{ jsonStr(request.validation_errors) }}</pre>
+        }
+      </div>
+    }
+
+    <!-- ====== PRODUCT INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-box-3-line text-blue-500"></i> Product Information
+          <span class="text-xs font-normal text-slate-400 ml-1">— from NeoZaar</span>
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Product Name</div>
+          <div class="font-semibold text-slate-800">{{ request.product_name || '—' }}
+            <span *ngIf="!request.product_name" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Type</div>
+          <div class="text-slate-700">{{ request.product_type || '—' }}</div>
+        </div>
+        <div class="space-y-1 md:col-span-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Short Description</div>
+          @if (editingField === 'short_description') {
+            <div class="space-y-2">
+              <textarea [(ngModel)]="editValue" rows="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"></textarea>
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="text-slate-700 whitespace-pre-line">{{ request.short_description || '—' }}
+              <span *ngIf="!request.short_description" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+              @if (canEditProductFields) {
+            <button type="button" (click)="startEditField('short_description')" class="ml-2 text-blue-600 hover:underline text-xs font-semibold">{{ request.short_description ? 'Edit' : 'Add' }}</button>
+          }
+            </div>
+          }
+        </div>
+        <div class="space-y-1 md:col-span-2">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Long Description</div>
+          @if (editingField === 'long_description') {
+            <div class="space-y-2">
+              <textarea [(ngModel)]="editValue" rows="6" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"></textarea>
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+          @else {
+            <div class="text-slate-700 whitespace-pre-line">{{ request.long_description || '—' }}
+              <span *ngIf="!request.long_description" class="text-red-500 text-xs ml-1">⚠ Missing</span>
+              @if (canEditProductFields) {
+            <button type="button" (click)="startEditField('long_description')" class="ml-2 text-blue-600 hover:underline text-xs font-semibold">{{ request.long_description ? 'Edit' : 'Add' }}</button>
+          }
+            </div>
+          }
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Category</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.category && request.category.length > 0) {
+              @for (c of request.category; track $index) {
+                <span class="px-2 py-0.5 bg-purple-50 text-purple-700 rounded text-xs">{{ c }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Industry</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.industry && request.industry.length > 0) {
+              @for (ind of request.industry; track $index) {
+                <span class="px-2 py-0.5 bg-slate-100 text-slate-700 rounded text-xs">{{ ind }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Privacy Policy URL</div>
+          <div>
+            @if (editingField === 'privacy_policy_url') {
+            <div class="space-y-2">
+              <input type="url" [(ngModel)]="editValue" placeholder="https://" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+            @else {
+              @if (request.privacy_policy_url) {
+                <a [href]="request.privacy_policy_url" target="_blank" class="text-blue-600 hover:underline text-xs">{{ request.privacy_policy_url }}</a>
+              } @else {
+                <span class="text-red-500 text-xs">⚠ Missing — required</span>
+              }
+              @if (canEditProductFields) {
+            <button type="button" (click)="startEditField('privacy_policy_url')" class="ml-2 text-blue-600 hover:underline text-xs font-semibold">{{ request.privacy_policy_url ? 'Edit' : 'Add' }}</button>
+          }
+            }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Terms of Use URL</div>
+          <div>
+            @if (editingField === 'terms_of_use_url') {
+            <div class="space-y-2">
+              <input type="url" [(ngModel)]="editValue" placeholder="https://" class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200" />
+              @if (fieldError) { <div class="text-red-500 text-xs">{{ fieldError }}</div> }
+              <div class="flex gap-2">
+                <button type="button" (click)="saveField()" [disabled]="isSavingField || !editValue.trim()" class="px-3 py-1 bg-blue-600 text-white rounded-lg text-xs font-semibold disabled:opacity-50">{{ isSavingField ? 'Saving…' : 'Save' }}</button>
+                <button type="button" (click)="cancelEditField()" [disabled]="isSavingField" class="px-3 py-1 border border-slate-300 text-slate-600 rounded-lg text-xs">Cancel</button>
+              </div>
+            </div>
+          }
+            @else {
+              @if (request.terms_of_use_url) {
+                <a [href]="request.terms_of_use_url" target="_blank" class="text-blue-600 hover:underline text-xs">{{ request.terms_of_use_url }}</a>
+              } @else { <span class="text-slate-400">—</span> }
+              @if (canEditProductFields) {
+            <button type="button" (click)="startEditField('terms_of_use_url')" class="ml-2 text-blue-600 hover:underline text-xs font-semibold">{{ request.terms_of_use_url ? 'Edit' : 'Add' }}</button>
+          }
+            }
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">SKU ID</div>
+          <div class="font-mono text-slate-600 text-xs">{{ request.sku_id || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Brand</div>
+          <div class="text-slate-700">{{ request.brand_name || '—' }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== ISV INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-user-star-line text-indigo-500"></i> ISV / Vendor Information
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">ISV Name</div>
+          <div class="font-semibold text-slate-800">{{ request.isv_name || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">ISV Email</div>
+          <div class="text-slate-700">{{ request.isv_email || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Requested By</div>
+          <div class="text-slate-700">{{ request.requested_by_name || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Request Date</div>
+          <div class="text-slate-700">{{ request.created_at | date:'medium' }}</div>
+        </div>
+        @if (request.reviewed_by_name) {
+          <div class="space-y-1">
+            <div class="text-xs text-slate-400 uppercase tracking-wide">Reviewed By</div>
+            <div class="text-slate-700">{{ request.reviewed_by_name }}</div>
+          </div>
+        }
+      </div>
+    </div>
+
+    <!-- ====== COMMERCIAL INFORMATION ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-money-dollar-circle-line text-green-500"></i> Commercial Information
+        </h2>
+      </div>
+      <div class="p-6 grid grid-cols-1 md:grid-cols-3 gap-4 text-sm">
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Pricing Model</div>
+          <div class="text-slate-700">{{ request.pricing_model || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">License Model</div>
+          <div class="text-slate-700">{{ request.license_model || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Billing Dimension</div>
+          <div class="text-slate-700">{{ request.billing_dimension || '—' }}</div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Free Trial</div>
+          <div [class]="request.free_trial_available ? 'text-green-600 font-semibold' : 'text-slate-500'">
+            {{ request.free_trial_available ? 'Available' : 'Not available' }}
+          </div>
+        </div>
+        <div class="space-y-1">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Starting Price</div>
+          <div class="text-slate-700">{{ request.starting_price ? ('$' + request.starting_price) : '—' }}</div>
+        </div>
+        <div class="space-y-1 md:col-span-3">
+          <div class="text-xs text-slate-400 uppercase tracking-wide">Regions Supported</div>
+          <div class="flex flex-wrap gap-1">
+            @if (request.regions_supported && request.regions_supported.length > 0) {
+              @for (r of request.regions_supported; track $index) {
+                <span class="px-2 py-0.5 bg-blue-50 text-blue-700 rounded text-xs">{{ r }}</span>
+              }
+            } @else { <span class="text-slate-400">—</span> }
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ====== AZURE MARKETPLACE CONFIGURATION FORM ====== -->
+    <div class="bg-white rounded-2xl border border-blue-200 overflow-hidden">
+      <div class="px-6 py-4 bg-blue-50 border-b border-blue-100 flex items-center justify-between flex-wrap gap-3">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-cloud-line text-blue-600"></i> Azure Marketplace Configuration
+          <span class="text-xs font-normal text-blue-500 ml-1">— fill in before submitting to Microsoft</span>
+        </h2>
+        @if (request.ms_job_id) {
+          <div class="text-xs text-slate-500">
+            MS Job ID: <span class="font-mono text-slate-700">{{ request.ms_job_id }}</span>
+          </div>
+        }
+      </div>
+
+      <!-- NeoZaar missing fields / warnings banner -->
+      @if (request.azure_payload?._missingFields?.length > 0 || request.azure_payload?._warnings?.length > 0) {
+        <div class="px-6 pt-5 space-y-3">
+          @if (request.azure_payload._missingFields?.length > 0) {
+            <div class="bg-amber-50 border border-amber-200 rounded-xl p-4">
+              <div class="font-semibold text-amber-700 mb-1 flex items-center gap-1 text-sm">
+                <i class="ri-alert-line"></i> NeoZaar fields missing (pulled from product)
+              </div>
+              <ul class="list-disc pl-5 text-amber-700 text-xs space-y-0.5">
+                @for (f of request.azure_payload._missingFields; track $index) { <li>{{ f }}</li> }
+              </ul>
+            </div>
+          }
+          @if (request.azure_payload._warnings?.length > 0) {
+            <div class="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+              <div class="font-semibold text-yellow-700 mb-1 flex items-center gap-1 text-sm">
+                <i class="ri-information-line"></i> Warnings
+              </div>
+              <ul class="list-disc pl-5 text-yellow-700 text-xs space-y-0.5">
+                @for (w of request.azure_payload._warnings; track $index) { <li>{{ w }}</li> }
+              </ul>
+            </div>
+          }
+        </div>
+      }
+
+      <!-- ── THE FORM ── -->
+      <div class="p-6 space-y-7">
+
+        <!-- Save success / error -->
+        @if (configSaved) {
+          <div class="bg-green-50 border border-green-200 rounded-xl p-3 text-green-700 text-sm flex items-center gap-2">
+            <i class="ri-checkbox-circle-fill"></i> Azure configuration saved successfully.
+          </div>
+        }
+        @if (configError) {
+          <div class="bg-red-50 border border-red-200 rounded-xl p-3 text-red-700 text-sm">{{ configError }}</div>
+        }
+
+        <!-- SECTION 1: Offer Identity -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Offer Identity</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">
+                Offer Type <span class="text-red-500">*</span>
+                @if (isServiceListing) { <span class="badge badge-info badge-sm ml-1 align-middle">Service</span> }
+              </label>
+              <select [(ngModel)]="azureConfig.offerType" [disabled]="!canEditIdentifiers()"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white disabled:bg-slate-50 disabled:text-slate-400">
+                @for (t of offerTypes; track t) { <option [value]="t">{{ t }}</option> }
+              </select>
+              <p class="text-[11px] text-slate-400 mt-1">
+                @if (isServiceListing) {
+                  This is a NeoZaar service and is listed as a professional-service (consulting) offer only.
+                } @else {
+                  SaaS is standard for cloud software. Choose VirtualMachine / Container / AzureApplication for other types.
+                }
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">
+                Offer ID <span class="text-red-500">*</span>
+              </label>
+              <input type="text" [(ngModel)]="azureConfig.offerId" [disabled]="!canEditIdentifiers()"
+                placeholder="e.g. neozaar-erp-suite"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-slate-50 disabled:text-slate-400" />
+              <p class="text-[11px] text-slate-400 mt-1">
+                Unique ID in Partner Center. Lowercase letters, numbers, hyphens.
+                <span [class.text-amber-600]="!canEditIdentifiers() && canEditConfig()">Cannot be changed after first submission.</span>
+              </p>
+            </div>
+
+          </div>
+        </fieldset>
+
+        <!-- SECTION 2: Plan -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Plan (at least one required)</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Plan ID <span class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="azureConfig.planId" [disabled]="!canEditIdentifiers()"
+                placeholder="e.g. standard-monthly"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 disabled:bg-slate-50 disabled:text-slate-400" />
+              <p class="text-[11px] text-slate-400 mt-1">
+                Unique within this offer. Lowercase, hyphens allowed.
+                <span [class.text-amber-600]="!canEditIdentifiers() && canEditConfig()">Locked once the offer is submitted — Plan ID is immutable in Partner Center.</span>
+              </p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Plan Name <span class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="azureConfig.planName" [disabled]="!canEditConfig()"
+                placeholder="e.g. Standard Monthly"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+
+            <div class="md:col-span-2">
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Plan Description</label>
+              <textarea [(ngModel)]="azureConfig.planDescription" [disabled]="!canEditConfig()" rows="2"
+                placeholder="Brief description of what this plan includes..."
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300 resize-none"></textarea>
+            </div>
+
+          </div>
+        </fieldset>
+
+        <!-- SECTION 3: SaaS Technical Config (shown for SaaS type) -->
+        @if (azureConfig.offerType === 'SaaS') {
+          <fieldset class="border border-blue-200 rounded-xl p-5 space-y-4 bg-blue-50/30">
+            <legend class="text-xs font-bold text-blue-600 uppercase tracking-widest px-2">SaaS Technical Configuration</legend>
+            <p class="text-xs text-slate-500">Required for SaaS offers so Microsoft can redirect customers and send subscription webhook events.</p>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Landing Page URL <span class="text-red-500">*</span></label>
+                <input type="url" [(ngModel)]="azureConfig.saasLandingPageUrl" [disabled]="!canEditConfig()"
+                  placeholder="https://yourapp.com/azure-landing"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                <p class="text-[11px] text-slate-400 mt-1">Microsoft redirects customers here after purchasing. Must be HTTPS.</p>
+              </div>
+
+              <div class="md:col-span-2">
+                <label class="block text-xs font-semibold text-slate-600 mb-1">Webhook URL <span class="text-red-500">*</span></label>
+                <input type="url" [(ngModel)]="azureConfig.saasWebhookUrl" [disabled]="!canEditConfig()"
+                  placeholder="https://yourapp.com/webhooks/azure"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                <p class="text-[11px] text-slate-400 mt-1">Microsoft posts subscription events (activate, suspend, unsubscribe) to this endpoint.</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">AAD Tenant ID <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="azureConfig.saasAadTenantId" [disabled]="!canEditConfig()"
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                <p class="text-[11px] text-slate-400 mt-1">Your Azure AD tenant ID (from Azure Portal → Entra ID → Overview).</p>
+              </div>
+
+              <div>
+                <label class="block text-xs font-semibold text-slate-600 mb-1">AAD App ID <span class="text-red-500">*</span></label>
+                <input type="text" [(ngModel)]="azureConfig.saasAadAppId" [disabled]="!canEditConfig()"
+                  placeholder="xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx"
+                  class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm font-mono focus:outline-none focus:ring-2 focus:ring-blue-300" />
+                <p class="text-[11px] text-slate-400 mt-1">The App Registration client ID used to authenticate the SaaS fulfillment APIs.</p>
+              </div>
+
+            </div>
+          </fieldset>
+        }
+
+        <!-- SECTION 4: Support & Engineering Contacts -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Support Contact</legend>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Name <span class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="azureConfig.supportContactName" [disabled]="!canEditConfig()"
+                placeholder="Support Team"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Email <span class="text-red-500">*</span></label>
+              <input type="email" [(ngModel)]="azureConfig.supportContactEmail" [disabled]="!canEditConfig()"
+                placeholder="support@yourcompany.com"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Phone</label>
+              <input type="tel" [(ngModel)]="azureConfig.supportContactPhone" [disabled]="!canEditConfig()"
+                placeholder="+1-800-000-0000"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+          </div>
+        </fieldset>
+
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Engineering Contact</legend>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Name <span class="text-red-500">*</span></label>
+              <input type="text" [(ngModel)]="azureConfig.engineeringContactName" [disabled]="!canEditConfig()"
+                placeholder="Engineering Lead"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-600 mb-1">Email <span class="text-red-500">*</span></label>
+              <input type="email" [(ngModel)]="azureConfig.engineeringContactEmail" [disabled]="!canEditConfig()"
+                placeholder="engineering@yourcompany.com"
+                class="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-300" />
+            </div>
+          </div>
+        </fieldset>
+
+        <!-- SECTION 5: Business Options -->
+        <fieldset class="border border-slate-200 rounded-xl p-5 space-y-4">
+          <legend class="text-xs font-bold text-slate-500 uppercase tracking-widest px-2">Business Options</legend>
+
+          <label class="flex items-center gap-3 cursor-pointer">
+            <input type="checkbox" [(ngModel)]="azureConfig.cspOptIn" [disabled]="!canEditConfig()"
+              class="checkbox checkbox-sm checkbox-primary" />
+            <div>
+              <span class="text-sm font-medium text-slate-700">Opt into Cloud Solution Provider (CSP) program</span>
+              <p class="text-[11px] text-slate-400">Allows Microsoft CSP partners to resell this offer.</p>
+            </div>
+          </label>
+
+        </fieldset>
+
+        <!-- Save / update controls -->
+        @if (canEditConfig()) {
+          <div class="flex flex-wrap justify-end gap-3 items-center">
+            @if (updateListingError) {
+              <div class="text-sm text-red-600 flex-1">{{ updateListingError }}</div>
+            }
+            <button
+              (click)="saveConfig()"
+              [disabled]="isSavingConfig"
+              class="btn btn-primary rounded-xl gap-2 px-6"
+            >
+              <i [class]="isSavingConfig ? 'ri-loader-4-line animate-spin' : 'ri-save-line'"></i>
+              {{ isSavingConfig ? 'Saving...' : 'Save Azure Configuration' }}
+            </button>
+            @if (request.status === 'PUBLISHED') {
+              <button
+                (click)="submitListingUpdate()"
+                [disabled]="isUpdatingListing || isSavingConfig"
+                class="btn btn-success text-white rounded-xl gap-2 px-6"
+              >
+                <i [class]="isUpdatingListing ? 'ri-loader-4-line animate-spin' : 'ri-upload-cloud-2-line'"></i>
+                {{ isUpdatingListing ? 'Pushing...' : 'Push update to Azure' }}
+              </button>
+            }
+          </div>
+        } @else if (request.status === 'PUBLISHED') {
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-600 flex items-center justify-between gap-3 flex-wrap">
+            <span class="flex items-center gap-2">
+              <i class="ri-checkbox-circle-line text-green-500"></i>
+              Offer is live on Azure. Edit the fields above, then push the changes to Partner Center.
+            </span>
+            <button (click)="startEditListing()" class="btn btn-sm btn-outline btn-primary rounded-xl gap-1">
+              <i class="ri-edit-line"></i> Edit listing details
+            </button>
+          </div>
+        } @else {
+          <div class="bg-slate-50 border border-slate-200 rounded-xl p-3 text-sm text-slate-500 flex items-center gap-2">
+            <i class="ri-lock-line"></i> Configuration is locked while the request is <strong>{{ request.status | titlecase }}</strong>.
+          </div>
+        }
+
+      </div>
+    </div>
+
+    <!-- ====== AUDIT HISTORY ====== -->
+    <div class="bg-white rounded-2xl border border-slate-200 overflow-hidden">
+      <div class="px-6 py-4 bg-slate-50 border-b border-slate-100">
+        <h2 class="font-bold text-slate-800 flex items-center gap-2">
+          <i class="ri-history-line text-slate-500"></i> Audit History
+        </h2>
+      </div>
+      <div class="divide-y divide-slate-100">
+        @if (!request.audit || request.audit.length === 0) {
+          <div class="p-6 text-center text-slate-400 text-sm">No audit entries yet.</div>
+        } @else {
+          @for (entry of request.audit; track entry.id) {
+            <div class="px-6 py-4 flex items-start gap-4">
+              <div class="w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center text-slate-500 text-xs shrink-0">
+                <i class="ri-shield-check-line"></i>
+              </div>
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 flex-wrap">
+                  <span class="font-semibold text-slate-800 text-sm">{{ entry.action | titlecase }}</span>
+                  @if (entry.previous_status) {
+                    <span class="text-xs text-slate-400">{{ entry.previous_status }}</span>
+                    <i class="ri-arrow-right-line text-slate-300 text-xs"></i>
+                  }
+                  @if (entry.new_status) {
+                    <span class="text-xs font-semibold text-blue-600">{{ entry.new_status }}</span>
+                  }
+                </div>
+                <div class="text-xs text-slate-500 mt-0.5">
+                  {{ entry.actor_name || 'System' }} &bull; {{ entry.created_at | date:'medium' }}
+                </div>
+                @if (entry.error_info) {
+                  <pre class="text-xs bg-red-50 text-red-700 rounded p-2 mt-2 overflow-x-auto">{{ jsonStr(entry.error_info) }}</pre>
+                }
+              </div>
+            </div>
+          }
+        }
+      </div>
+    </div>
+
+  </div>
+</section>
+
+<!-- Loading skeleton -->
+<ng-template #loading>
+  <div class="p-12 flex justify-center items-center min-h-screen">
+    @if (isFetching) {
+      <span class="loading loading-spinner text-blue-500"></span>
+    } @else {
+      <div class="text-slate-400">Request not found.</div>
+    }
+  </div>
+</ng-template>
+
+<!-- ====== REJECT MODAL ====== -->
+@if (showRejectModal) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md p-6 space-y-4">
+      <h3 class="text-lg font-bold text-slate-800">Reject Request</h3>
+      <p class="text-sm text-slate-500">Optionally provide a rejection reason for the ISV.</p>
+      <textarea
+        [(ngModel)]="rejectionReason"
+        rows="3"
+        placeholder="Rejection reason (optional)..."
+        class="w-full border border-slate-200 rounded-xl p-3 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-red-400"
+      ></textarea>
+      <div class="flex gap-3 justify-end">
+        <button (click)="closeRejectModal()" class="btn btn-ghost rounded-xl">Cancel</button>
+        <button (click)="confirmReject()" [disabled]="isSubmitting" class="btn btn-error text-white rounded-xl">
+          {{ isSubmitting ? 'Rejecting...' : 'Reject Request' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}
+
+<!-- ====== APPROVE & SUBMIT CONFIRM MODAL ====== -->
+@if (showSubmitConfirm) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
+    <div class="bg-white rounded-2xl shadow-2xl w-full max-w-lg p-6 space-y-4">
+      <h3 class="text-lg font-bold text-slate-800 flex items-center gap-2">
+        <i class="ri-microsoft-fill text-blue-600 text-2xl"></i>
+        Confirm Azure Submission
+      </h3>
+      <p class="text-sm text-slate-600">
+        This will approve the request and submit the product to <strong>Microsoft Azure Marketplace</strong> using the Partner Center API.
+      </p>
+      <div class="bg-amber-50 border border-amber-200 rounded-xl p-3 text-xs text-amber-700">
+        <strong>Note:</strong> NeoZaar product data will not be modified. Azure-specific fields that are not populated will need to be set before a successful submission.
+      </div>
+
+      @if (submitError) {
+        <div class="bg-red-50 border border-red-200 rounded-xl p-4 text-sm">
+          <div class="font-bold text-red-700">{{ submitError.message }}</div>
+          @if (submitError.missingFields && submitError.missingFields.length > 0) {
+            <ul class="mt-2 list-disc pl-5 text-red-600 text-xs space-y-1">
+              @for (f of submitError.missingFields; track $index) {
+                <li>{{ f }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <div class="flex gap-3 justify-end">
+        <button (click)="closeSubmitConfirm()" [disabled]="isSubmitting" class="btn btn-ghost rounded-xl">Cancel</button>
+        <button (click)="confirmApproveSubmit()" [disabled]="isSubmitting" class="btn btn-success text-white rounded-xl gap-2">
+          <i class="ri-send-plane-line"></i>
+          {{ isSubmitting ? 'Submitting...' : 'Approve & Submit' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

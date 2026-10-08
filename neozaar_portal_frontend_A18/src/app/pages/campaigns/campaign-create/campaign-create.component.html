@@ -1,0 +1,276 @@
+<div class="p-6 max-w-4xl mx-auto pb-24">
+
+  <div class="flex items-center justify-between mb-6">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-800">{{ isEditMode ? 'Edit Campaign' : 'Compose Campaign' }}</h1>
+      <p class="text-sm text-gray-500 mt-1">Combine several listings into one email, then push it to Zoho as a draft.</p>
+    </div>
+    @if(isEditMode){
+      <span class="px-3 py-1.5 text-xs font-semibold rounded-full"
+        [ngClass]="status === 'pushed' ? 'bg-green-50 text-green-700' : 'bg-gray-100 text-gray-600'">
+        {{ status === 'pushed' ? 'Pushed' : 'Draft' }}
+      </span>
+    }
+  </div>
+
+  @if(isLoading){
+    <p class="text-center text-gray-400 py-12">Loading…</p>
+  } @else {
+
+  <!-- Title / Description -->
+  <div class="bg-white border border-gray-100 rounded-xl p-5 mb-5 space-y-4">
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">Title <span class="text-red-500">*</span></label>
+      <input [(ngModel)]="title" type="text" placeholder="e.g. Neozaar Digest — Identity & Security"
+        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+    </div>
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">Description <span class="text-gray-400 font-normal">(optional — shown above the listings)</span></label>
+      <textarea [(ngModel)]="description" rows="2" placeholder="A short intro for this email…"
+        class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400"></textarea>
+    </div>
+
+    <!-- Header image — optional banner shown below the title/description, above the listings -->
+    <div>
+      <label class="block text-sm font-medium text-gray-700 mb-1.5">Header image <span class="text-gray-400 font-normal">(optional — shown below the title &amp; description, above the listings)</span></label>
+
+      <div class="flex items-start gap-4">
+        <div class="relative w-40 h-20 rounded-lg overflow-hidden bg-gray-50 border border-dashed border-gray-200 flex-shrink-0">
+          @if(headerImage){
+            <img [src]="headerImage" alt="" class="w-full h-full object-cover" />
+          } @else {
+            <div class="w-full h-full flex items-center justify-center text-gray-300">
+              <i class="ri-image-add-line text-xl"></i>
+            </div>
+          }
+          @if(headerImageUploading){
+            <div class="absolute inset-0 bg-white/70 flex items-center justify-center">
+              <i class="ri-loader-4-line animate-spin text-orange-600"></i>
+            </div>
+          }
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="flex items-center gap-2">
+            <label class="px-3 py-1.5 text-xs font-semibold text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+              {{ headerImage ? 'Change' : 'Upload' }} photo
+              <input type="file" accept="image/*" class="hidden" (change)="onHeaderImageSelected($event)" />
+            </label>
+            @if(headerImage){
+              <button (click)="removeHeaderImage()" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg">Remove</button>
+            }
+          </div>
+          <p class="text-[11px] text-gray-400 mt-1">Wide banner, ~1200 × 560px recommended. Same framed style as a single listing's image. <span class="text-amber-600">Max 1 MB</span> — Zoho flags larger images.</p>
+        </div>
+      </div>
+
+      <!-- Target URL — only relevant once an image exists -->
+      @if(headerImage){
+        <div class="mt-3">
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Target URL <span class="text-gray-400 font-normal">(optional — where the header image links to)</span></label>
+          <input [(ngModel)]="headerLink" type="url" placeholder="https://…"
+            class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+        </div>
+      }
+    </div>
+  </div>
+
+  <div class="bg-white border border-gray-100 rounded-xl p-5 mb-5">
+    <h2 class="text-base font-bold text-gray-800">Marketing delivery</h2>
+    <p class="text-xs text-gray-500 mt-1 mb-4">Connect this campaign's content, audience, automation and success goal in one place.</p>
+    <div class="grid md:grid-cols-2 gap-4">
+      <label class="text-sm font-medium text-gray-700">Audience segment<select [(ngModel)]="segmentId" class="block w-full mt-1 px-3 py-2 border rounded-lg"><option [ngValue]="null">Not selected</option><option *ngFor="let x of segments" [ngValue]="x.id">{{x.name}}</option></select></label>
+      <label class="text-sm font-medium text-gray-700">Email template<select [(ngModel)]="emailTemplateId" class="block w-full mt-1 px-3 py-2 border rounded-lg"><option [ngValue]="null">Not selected</option><option *ngFor="let x of emailTemplates" [ngValue]="x.id">{{x.name}}</option></select></label>
+      <label class="text-sm font-medium text-gray-700">Automation journey<select [(ngModel)]="automationId" class="block w-full mt-1 px-3 py-2 border rounded-lg"><option [ngValue]="null">Not selected</option><option *ngFor="let x of automations" [ngValue]="x.id">{{x.name}}</option></select></label>
+      <label class="text-sm font-medium text-gray-700">Schedule<input type="datetime-local" [(ngModel)]="scheduledAt" class="block w-full mt-1 px-3 py-2 border rounded-lg"></label>
+      <label class="text-sm font-medium text-gray-700 md:col-span-2">Conversion goal<select [(ngModel)]="goalEvent" class="block w-full mt-1 px-3 py-2 border rounded-lg"><option value="">No goal selected</option><option value="EMAIL_CLICK">Email click</option><option value="FORM_SUBMITTED">Form submission</option><option value="ASSET_DOWNLOADED">Asset download</option><option value="CRM_HANDOFF">CRM handoff</option></select></label>
+    </div>
+  </div>
+
+  <!-- Blocks -->
+  <div class="mb-5">
+    <div class="flex items-center justify-between mb-3">
+      <h2 class="text-base font-bold text-gray-800">Listings ({{ blocks.length }})</h2>
+      <button (click)="openPicker()" class="flex items-center gap-1.5 px-3.5 py-2 text-sm font-semibold text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 transition-colors">
+        <i class="ri-add-line"></i> Add listing
+      </button>
+    </div>
+
+    @if(!blocks.length){
+      <div class="bg-white border border-dashed border-gray-200 rounded-xl p-10 text-center text-gray-400">
+        No listings added yet.
+      </div>
+    } @else {
+      <div cdkDropList (cdkDropListDropped)="drop($event)" class="space-y-3">
+        @for(block of blocks; track block.listingId; let i = $index){
+          <div cdkDrag class="bg-white border border-gray-100 rounded-xl p-4">
+
+            <!-- Block header -->
+            <div class="flex items-center gap-3 mb-4">
+              <span cdkDragHandle class="cursor-move text-gray-300 hover:text-gray-500 flex-shrink-0"><i class="ri-drag-move-2-line text-lg"></i></span>
+              <img [src]="block.image || block.screenshots[0]" alt="" class="w-10 h-10 rounded-lg object-cover bg-gray-100 flex-shrink-0" />
+              <div class="min-w-0 flex-1">
+                <p class="text-sm font-semibold text-gray-800 truncate">{{ block.name }}</p>
+                <p class="text-xs text-gray-400 capitalize">{{ block.actionType }}</p>
+              </div>
+              <button (click)="removeBlock(i)" class="p-2 rounded-lg bg-red-50 text-red-500 hover:bg-red-100 flex-shrink-0" title="Remove"><i class="ri-delete-bin-line"></i></button>
+            </div>
+
+            <!-- Image upload -->
+            <div class="flex items-center gap-4">
+              <div class="relative w-20 h-20 rounded-lg overflow-hidden bg-gray-50 border border-dashed border-gray-200 flex-shrink-0">
+                @if(block.image){
+                  <img [src]="block.image" alt="" class="w-full h-full object-cover" />
+                } @else {
+                  <div class="w-full h-full flex items-center justify-center text-gray-300">
+                    <i class="ri-image-add-line text-xl"></i>
+                  </div>
+                }
+                @if(block.uploading){
+                  <div class="absolute inset-0 bg-white/70 flex items-center justify-center">
+                    <i class="ri-loader-4-line animate-spin text-orange-600"></i>
+                  </div>
+                }
+              </div>
+              <div class="flex-1 min-w-0">
+                <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1">Image</p>
+                <div class="flex items-center gap-2">
+                  <label class="px-3 py-1.5 text-xs font-semibold text-orange-600 bg-orange-50 rounded-lg hover:bg-orange-100 cursor-pointer transition-colors">
+                    {{ block.image ? 'Change' : 'Upload' }} photo
+                    <input type="file" accept="image/*" class="hidden" (change)="onImageSelected(block, $event)" />
+                  </label>
+                  @if(block.image){
+                    <button (click)="removeImage(block)" class="px-3 py-1.5 text-xs font-medium text-gray-500 hover:bg-gray-100 rounded-lg">Remove</button>
+                  }
+                </div>
+                <p class="text-[11px] text-gray-400 mt-1">Square photo, 600 × 600px recommended. <span class="text-amber-600">Max 1 MB</span> — Zoho flags larger images.</p>
+              </div>
+            </div>
+
+            <p class="text-[11px] text-gray-400 mt-3">Also shows name{{ block.actionType === 'product' ? ', vendor logo,' : '' }}, short description, and a "View More" button.</p>
+
+          </div>
+        }
+      </div>
+    }
+  </div>
+
+  <!-- Push section — only meaningful once saved -->
+  @if(isEditMode){
+    <div class="bg-white border border-gray-100 rounded-xl p-5 mb-5 space-y-4">
+      <h2 class="text-base font-bold text-gray-800">Push to Zoho</h2>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Campaign name</label>
+          <input [(ngModel)]="campaignNameForPush" type="text" class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+        </div>
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject line</label>
+          <input [(ngModel)]="subjectForPush" type="text" class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+        </div>
+      </div>
+      <p class="text-xs text-gray-400">Both are editable inside Zoho too — recipient list, scheduling, and the actual send always happen there, by hand.</p>
+    </div>
+  }
+
+  } <!-- /isLoading -->
+
+  <!-- Sticky action bar -->
+  <div class="fixed bottom-0 left-0 right-0 bg-white border-t border-gray-100 px-6 py-4 flex justify-end gap-3">
+    <button [routerLink]="['/campaigns']" class="px-4 py-2.5 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg">Cancel</button>
+    @if(isEditMode){
+      <button (click)="preview()" [disabled]="isPreviewing" class="px-4 py-2.5 text-sm font-semibold text-gray-700 border border-gray-200 rounded-lg hover:bg-gray-50 disabled:opacity-50">
+        {{ isPreviewing ? 'Rendering…' : 'Preview' }}
+      </button>
+    }
+    <button (click)="save()" [disabled]="isSaving" class="px-4 py-2.5 text-sm font-semibold text-white bg-gray-800 rounded-lg hover:bg-gray-900 disabled:opacity-50">
+      {{ isSaving ? 'Saving…' : 'Save' }}
+    </button>
+    @if(isEditMode){
+      <button (click)="openEmailModal()" [disabled]="isSendingEmail" class="px-4 py-2.5 text-sm font-semibold text-orange-700 border border-orange-300 rounded-lg hover:bg-orange-50 disabled:opacity-50">
+        {{ isSendingEmail ? 'Sending…' : 'Send as Email' }}
+      </button>
+      <button (click)="pushToZoho()" [disabled]="isPushing" class="px-4 py-2.5 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-50">
+        {{ isPushing ? 'Pushing…' : (status === 'pushed' ? 'Push again' : 'Push to Zoho') }}
+      </button>
+    }
+  </div>
+
+  <app-campaign-listing-picker [isOpen]="isPickerOpen" [excludeIds]="excludeIds" (closed)="onPickerClosed($event)"></app-campaign-listing-picker>
+
+  <!-- "For which list?" push modal — mandatory answer, stored on the campaign and
+       emailed to tech-support@neozaar.com for tracking. -->
+  @if(isPushModalOpen){
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-md flex flex-col overflow-hidden">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-800">Push to Zoho</h2>
+          <button (click)="closePushModal()" [disabled]="isPushing" class="text-gray-400 hover:text-gray-600 disabled:opacity-40"><i class="ri-close-line text-xl"></i></button>
+        </div>
+
+        <div class="px-5 py-4 space-y-3">
+          @if(status === 'pushed'){
+            <p class="text-xs text-amber-700 bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+              Already pushed{{ zohoCampaignPushedAt ? ' on ' + (zohoCampaignPushedAt | date:'mediumDate') : '' }}. Sending again creates a new Zoho draft.
+            </p>
+          }
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">For which list? <span class="text-red-500">*</span></label>
+            <input [(ngModel)]="pushListLabel" type="text" placeholder="e.g. Azure Marketplace subscribers"
+              (keyup.enter)="confirmPush()"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+            <p class="text-[11px] text-gray-400 mt-1">Recorded on the campaign and emailed to tech-support for tracking.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+          <button (click)="closePushModal()" [disabled]="isPushing" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40">Cancel</button>
+          <button (click)="confirmPush()" [disabled]="isPushing || !pushListLabel.trim()"
+            class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ isPushing ? 'Sending…' : 'Send' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+  <!-- "Send as Email" modal — renders the saved campaign and emails it straight to the
+       given addresses with a custom subject, bypassing Zoho. -->
+  @if(isEmailModalOpen){
+    <div class="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
+      <div class="bg-white rounded-xl w-full max-w-md flex flex-col overflow-hidden">
+
+        <div class="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <h2 class="text-lg font-bold text-gray-800">Send campaign as email</h2>
+          <button (click)="closeEmailModal()" [disabled]="isSendingEmail" class="text-gray-400 hover:text-gray-600 disabled:opacity-40"><i class="ri-close-line text-xl"></i></button>
+        </div>
+
+        <div class="px-5 py-4 space-y-3">
+          <p class="text-xs text-gray-500">Sends the current <span class="font-medium">saved</span> version of this campaign straight to the addresses below — bypasses Zoho. Unsaved edits aren't included, so Save first.</p>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Subject <span class="text-red-500">*</span></label>
+            <input [(ngModel)]="emailSubject" type="text" placeholder="Email subject line"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400" />
+          </div>
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-1.5">Recipients <span class="text-red-500">*</span></label>
+            <textarea [(ngModel)]="emailRecipients" rows="3" placeholder="one per line, or comma-separated"
+              class="w-full px-3.5 py-2.5 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-orange-400"></textarea>
+            <p class="text-[11px] text-gray-400 mt-1">Each address gets its own copy. Max 25 per send.</p>
+          </div>
+        </div>
+
+        <div class="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+          <button (click)="closeEmailModal()" [disabled]="isSendingEmail" class="px-4 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 rounded-lg disabled:opacity-40">Cancel</button>
+          <button (click)="confirmSendEmail()" [disabled]="isSendingEmail || !emailSubject.trim() || !emailRecipients.trim()"
+            class="px-4 py-2 text-sm font-semibold text-white bg-orange-600 rounded-lg hover:bg-orange-700 disabled:opacity-40 disabled:cursor-not-allowed">
+            {{ isSendingEmail ? 'Sending…' : 'Send' }}
+          </button>
+        </div>
+
+      </div>
+    </div>
+  }
+
+</div>

@@ -1,0 +1,245 @@
+<div class="max-w-6xl mx-auto py-10 px-4">
+
+  <div class="bg-white shadow-xl rounded-2xl p-10 border border-gray-200">
+
+    <h2 class="text-2xl font-semibold text-gray-900 mb-10"> <span>{{ pageHeader}}</span>@if(productnametitle !== undefined ){{{"Seo for "  +productnametitle}}} </h2>
+
+    <form [formGroup]="seoForm" (ngSubmit)="submitSEO()" class="space-y-10">
+
+      <!-- Page Name & URL -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+    <input type="hidden" formControlName="id"
+                 class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                 placeholder="Example: About Us">
+ <div>
+  <label class="block text-gray-700 font-semibold mb-1">
+    Page Name <span class="text-red-500">*</span>
+  </label>
+
+  <!-- Dropdown (only when not number) -->
+  <input formControlName="page_name"
+               class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white" >
+
+
+
+  <p class="text-red-600 text-sm mt-1" *ngIf="f('page_name').touched && f('page_name').invalid">
+    Page name is required.
+  </p>
+</div>
+
+
+        <!-- PAGE URL -->
+       <div>
+        <label class="block text-gray-700 font-semibold mb-1">Meta Title <span class="text-red-500">*</span></label>
+        <input formControlName="meta_title"
+               class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+
+        <p class="text-red-600 text-sm mt-1"
+           *ngIf="f('meta_title').touched && f('meta_title').invalid">
+          Meta title must be 30–60 characters.
+        </p>
+      </div>
+  <div>
+        <label class="block text-gray-700 font-semibold mb-1">Meta Description <span class="text-red-500">*</span></label>
+        <textarea rows="3" formControlName="meta_description"
+                class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white"></textarea>
+
+        <p class="text-red-600 text-sm mt-1"
+           *ngIf="f('meta_description').touched && f('meta_description').invalid">
+          Meta description must be between 50–160 characters.
+        </p>
+      </div>
+       <div>
+        <label class="block text-gray-700 font-semibold mb-1">Meta Keywords <span class="text-red-500">*</span></label>
+        <textarea rows="3" formControlName="meta_keywords"
+                  class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                  placeholder="keyword1, keyword2"></textarea>
+
+        <p class="text-red-600 text-sm mt-1"
+           *ngIf="f('meta_keywords').touched && f('meta_keywords').invalid">
+          Provide at least 2 comma-separated keywords.
+        </p>
+      </div>
+      </div>
+
+      <!-- META TITLE -->
+ 
+
+      <!-- META DESCRIPTION -->
+    
+
+      <!-- META KEYWORDS -->
+     
+
+      <!-- H1 & CANONICAL -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-1">H1 Title <span class="text-red-500">*</span></label>
+          <input formControlName="h1_title"
+                 class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+
+          <p class="text-red-600 text-sm mt-1"
+             *ngIf="f('h1_title').touched && f('h1_title').invalid">
+            H1 title is required.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-1">Canonical URL <span class="text-red-500">*</span></label>
+          <input formControlName="canonical_url"
+                 class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+
+          <p class="text-red-600 text-sm mt-1"
+             *ngIf="f('canonical_url').touched && f('canonical_url').invalid">
+            Enter a valid URL (Example: https://example.com/about).
+          </p>
+        </div>
+
+      </div>
+
+      <!-- SCHEMA MARKUP -->
+      <!-- <div>
+        <label class="block text-gray-700 font-semibold mb-1">Schema Markup </label>
+        <textarea rows="4" formControlName="schema_markup"
+                  class="w-full p-3 border rounded-lg bg-gray-50 font-mono focus:ring-2 focus:ring-indigo-500 focus:bg-white"
+                  placeholder='{"@context": "https://schema.org"}'></textarea>
+
+        <p class="text-red-600 text-sm mt-1"
+           *ngIf="f('schema_markup').touched && f('schema_markup').invalid">
+          Schema markup is required.
+        </p>
+      </div> -->
+
+      <!-- OG SECTION TITLE -->
+      <h3 class="text-xl font-bold text-gray-900 border-b pb-2">Open Graph (Facebook / Instagram)</h3>
+
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-1">OG Title </label>
+          <input formControlName="og_title"
+                 class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
+                     <p class="text-red-600 text-sm mt-1" *ngIf="f('og_title').touched && f('og_title').invalid">
+      Title must be 30–70 characters.
+    </p>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-1">OG Description </label>
+          <textarea formControlName="og_description" rows="2"
+                    class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white"></textarea>
+                        <p class="text-red-600 text-sm mt-1" *ngIf="f('og_description').touched && f('og_description').invalid">
+      Description must be 40–100 characters.
+    </p>
+        </div>
+
+        <!-- <div>
+          <label class="block text-gray-700 font-semibold mb-1">OG Image URL </label>
+          <input formControlName="og_image"
+                 class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white" />
+                     <p class="text-red-600 text-sm mt-1" *ngIf="f('og_image').touched && f('og_image').invalid">
+      Must be a valid image URL (.png, .jpg, .jpeg, .webp, .gif)
+    </p>
+        </div> -->
+
+      </div>
+
+      <!--  LinkedIn SECTION -->
+     <!-- <h3 class="text-xl font-bold text-gray-900 border-b pb-2"> LinkedIn Card</h3> -->
+
+<div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+
+  <!--  LinkedIn Title -->
+  <!-- <div>
+    <label class="block text-gray-700 font-semibold mb-1">LinkedIn Title </label>
+    <input formControlName="linkedIn_title"
+           class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500">
+
+    <p class="text-red-600 text-sm mt-1" *ngIf="f('linkedIn_title').touched && f('linkedIn_title').invalid">
+      Title must be 30–70 characters.
+    </p>
+  </div> -->
+
+  <!-- Twitter Description -->
+  <!-- <div>
+    <label class="block text-gray-700 font-semibold mb-1">LinkedIn Description </label>
+    <textarea formControlName="linkedIn_description" rows="2"
+              class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500"></textarea>
+
+    <p class="text-red-600 text-sm mt-1" *ngIf="f('linkedIn_description').touched && f('twitter_description').invalid">
+      Description must be 40–100 characters.
+    </p>
+  </div> -->
+
+  <!-- Twitter Image -->
+  <!-- <div>
+    <label class="block text-gray-700 font-semibold mb-1">linkedIn Image URL</label>
+    <input formControlName="twitter_image"
+           class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500"
+           placeholder="https://example.com/linkedIn.jpg">
+
+    <p class="text-red-600 text-sm mt-1" *ngIf="f('linkedIn_image').touched && f('linkedIn_image').invalid">
+      Must be a valid image URL (.png, .jpg, .jpeg, .webp, .gif)
+    </p>
+  </div> -->
+
+</div>
+
+
+      <!-- INDEX FOLLOW -->
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+
+        <!-- <div>
+          <label class="block text-gray-700 font-semibold mb-1">Allow Index <span class="text-red-500">*</span></label>
+          <select formControlName="is_index"
+                  class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+            <option value="1">Index</option>
+            <option value="0">Noindex</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-gray-700 font-semibold mb-1">Allow Follow <span class="text-red-500">*</span></label>
+          <select formControlName="is_follow"
+                  class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+            <option value="1">Follow</option>
+            <option value="0">Nofollow</option>
+          </select>
+        </div> -->
+ <!-- <div>
+        <label class="block text-gray-700 font-semibold mb-1">Status <span class="text-red-500">*</span></label>
+        <select formControlName="status"
+                class="w-full p-3 border rounded-lg bg-gray-50 focus:ring-2 focus:ring-indigo-500 focus:bg-white">
+          <option value="active">Active</option>
+          <option value="inactive">Inactive</option>
+        </select>
+      </div> -->
+      <button
+        type="submit"
+        [disabled]="seoForm.invalid"
+        class="w-full py-3 rounded-lg bg-orange-600 inline-block text-white font-semibold shadow-lg
+               hover:bg-orange-700 disabled:opacity-50 transition">
+      
+        {{ f('page_id').value > 0 ? 'Update SEO Page' : 'Save SEO Page' }}
+      
+      </button>
+      </div>
+
+      <!-- STATUS -->
+     
+
+      <!-- SUBMIT BUTTON -->
+
+
+    </form>
+
+  </div>
+</div>
+<div 
+  *ngIf="loading"
+  class="fixed inset-0 top-0 flex items-center justify-center bg-black/40 backdrop-blur-sm z-50"
+>
+  <img src="assets/loaderlogo-neozaar.gif" alt="" width="50" height="50" class="">
+</div>

@@ -1,0 +1,78 @@
+<div class="crm-page">
+  @if (linkError) { <p role="alert" style="overflow-wrap:anywhere">{{ linkError }}</p> }
+  <div class="crm-header">
+    <div>
+      <h1 class="crm-title">{{ isAffiliate ? 'Assigned Products' : 'Catalog' }}</h1>
+      <p class="crm-subtitle">{{ isAffiliate ? 'Your assigned products, services, and solutions with shareable UTM links' : 'All NeoZaar products, services, and solutions with shareable UTM links' }}</p>
+    </div>
+    <button class="neo-btn" [disabled]="loading" (click)="load()">Refresh</button>
+  </div>
+
+  <!-- Tabs -->
+  <div style="display:flex;gap:0.5rem;margin-bottom:1.5rem">
+    <button class="neo-btn" [class.neo-btn-primary]="activeTab==='products'" (click)="switchTab('products')" style="padding:0.5rem 1.2rem;font-size:0.8rem">Products</button>
+    <button class="neo-btn" [class.neo-btn-primary]="activeTab==='services'" (click)="switchTab('services')" style="padding:0.5rem 1.2rem;font-size:0.8rem">Services</button>
+    <button class="neo-btn" [class.neo-btn-primary]="activeTab==='solutions'" (click)="switchTab('solutions')" style="padding:0.5rem 1.2rem;font-size:0.8rem">Solutions</button>
+  </div>
+
+  <!-- Search -->
+  <div class="neo-card-sm" style="margin-bottom:1.5rem">
+    <input class="neo-input" [(ngModel)]="searchQuery" (input)="applyFilter()" placeholder="Search by name, brand, or category..." />
+  </div>
+
+  <!-- Loading -->
+  @if (loading) {
+    <div class="neo-card" style="text-align:center;padding:3rem;color:var(--crm-text-secondary)">Loading...</div>
+  }
+
+  <!-- 2-Column List -->
+  @if (loadError) {
+    <div class="neo-card" role="alert">{{ loadError }} <button class="neo-btn" (click)="load()">Retry</button></div>
+  }
+  @if (!loading && !loadError) {
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem">
+      @for (item of pagedItems; track item.id) {
+        <div class="neo-card" style="padding:0.85rem 1rem;display:flex;align-items:center;gap:0.75rem;overflow:hidden">
+          <!-- Logo -->
+          @if (getItemImage(item); as imageUrl) {
+            <img [src]="imageUrl" [alt]="(item.name || item.title || 'Catalog item') + ' logo'" (error)="onImageError(item)" loading="lazy" style="width:36px;height:36px;border-radius:8px;object-fit:contain;flex-shrink:0;background:#fff" />
+          } @else {
+            <div role="img" [attr.aria-label]="(item.name || item.title || 'Catalog item') + ': image unavailable'" style="width:36px;height:36px;border-radius:8px;background:var(--crm-accent-bg);display:flex;align-items:center;justify-content:center;flex-shrink:0;color:var(--crm-text-secondary)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="m21 15-5-5L5 21"/>
+              </svg>
+            </div>
+          }
+
+          <!-- Info -->
+          <div style="flex:1;min-width:0;overflow:hidden">
+            <h4 style="font-weight:600;color:var(--crm-text);font-size:0.8rem;margin:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">{{ item.name || item.title }}</h4>
+            <p style="font-size:0.68rem;color:var(--crm-text-secondary);margin:0.1rem 0 0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">
+              {{ item.brand_name || item.company_name || item.vendor_name || 'NeoZaar' }}
+            </p>
+          </div>
+
+          <!-- Copy UTM Button -->
+          <button class="neo-btn" style="padding:0.3rem 0.6rem;font-size:0.68rem;white-space:nowrap;flex-shrink:0" (click)="copyLink(item)">
+            {{ copiedId === item.id ? '✓' : 'Copy' }}
+          </button>
+        </div>
+      }
+    </div>
+
+    @if (!filteredItems.length) {
+      <div class="neo-card" style="text-align:center;padding:3rem;color:var(--crm-text-secondary)">
+        {{ isAffiliate ? 'No assigned ' + activeTab + ' found. Contact your manager to assign items.' : 'No ' + activeTab + ' found' }}
+      </div>
+    }
+
+    <!-- Pagination -->
+    @if (totalPages > 1) {
+      <div class="pagination">
+        <button class="neo-btn" (click)="prevPage()" [disabled]="page===1">← Prev</button>
+        <span class="pagination-info">Page {{ page }} of {{ totalPages }} ({{ filteredItems.length }} items)</span>
+        <button class="neo-btn" (click)="nextPage()" [disabled]="page===totalPages">Next →</button>
+      </div>
+    }
+  }
+</div>
